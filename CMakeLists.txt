@@ -8,6 +8,22 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  message_generation
+)
+
+add_service_files(
+  FILES
+  Torres16.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
+
+catkin_package(
+  CATKIN_DEPENDS message_runtime std_msgs geometry_msgs
 )
 
 include_directories(
@@ -16,5 +32,7 @@ include_directories(
 )
 
 add_executable(torres_etal_2016 src/torres_etal_2016.cpp)
+
+add_dependencies(torres_etal_2016 ${PROJECT_NAME}_generate_messages_cpp)
 
 target_link_libraries(torres_etal_2016 ${catkin_LIBRARIES})
