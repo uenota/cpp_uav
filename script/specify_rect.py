@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-This module offers GUI to specify a polygon for coverage path planning.
-"""
+## @package cpp_uav
+#  This module offers GUI to specify a polygon for coverage path planning.
+
 
 from __future__ import print_function
 
@@ -26,52 +26,87 @@ from std_msgs.msg import Float64
 # service
 from cpp_uav.srv import Torres16
 
-
+## GUI class to specify a polygon
 class PolygonBuilder(object):
-    """
-    GUI class to specify a polygon.
-    """
+
+    ## Constructor
+    #  @param axis Axis objcect where polygon is shown
     def __init__(self, axis):
-        # Axis where polygon etc. are shown
+        ## @var axis
+        #  Axis object where polygon is shown
         self.axis = axis
 
-        # Edges and vertices of polygon
-        self.line, = axis.plot([], [], "-")
-        self.dot, = axis.plot([], [], "o")
+        ## @var line
+        #  Line2D object representing edges of a polygon
+        self.line = axis.plot([], [], "-")[0]
 
-        # Coverage path
-        self.path, = axis.plot([], [], "-")
+        ## @var dot
+        #  Line2D object representing  vertices of a polygon
+        self.dot = axis.plot([], [], "o")[0]
 
-        # coordinates of vertices
+        ## @var path
+        #  Line2D object representing coverage path
+        self.path = axis.plot([], [], "-")[0]
+
+        ## @var vertices_x
+        #  List of x coordinates of vertices
         self.vertices_x = list()
+        ## @var vertices_y
+        #  List of y coordinates of vertices
         self.vertices_y = list()
 
-        # True if polygon is illustrated on GUI
+        ## @var is_polygon_drawn
+        #  True if polygon is illustrated on window
         self.is_polygon_drawn = False
 
-        # Start and end point of trajectory
+        ## @var start
+        #  Start point of trajectory
         self.start = None
+        ## @var end
+        #  End point of trajectory
         self.end = None
 
-        # Text for start point and goal
+        ## @var text_start
+        #  Label for start point
         self.text_start = ""
+        ## @var text_end
+        #  Label for end point
         self.text_end = ""
 
-        # Waypoints of coverage path
+        ## @var waypoints
+        #  List of waypoints in coverage path
         self.waypoints = list()
 
+        ## @var image_resolution_h
+        #  Vertical resolution of image
         self.image_resolution_h = 640
+        ## @var image_resolution_w
+        #  Horizontal resolution of image
         self.image_resolution_w = 320
+        ## @var angle_of_view
+        #  Camera's angle of view
         self.angle_of_view = 45.0
+        ## @var height
+        #  Flight height of UAV
         self.height = 30.0
 
         # Coverage specification
         # cf. torres et, al. 2016
+        ## @var aspect_ratio
+        #  Image's aspect ratio
         self.aspect_ratio = float(self.image_resolution_w) / self.image_resolution_h
 
+        ## @var footprint_width
+        #  Width of camera footprint
         self.footprint_width = Float64(2*self.height*math.tan(self.angle_of_view/2))
+        ## @var footprint_length
+        #  Length of camera footprint
         self.footprint_length = Float64(self.footprint_width.data / self.aspect_ratio)
+        ## @var horizontal_overwrap
+        #  Horizontal overwrap of image
         self.horizontal_overwrap = Float64(0.3)
+        ## @var vertical_overwrap
+        #  Vertical overwrap of image
         self.vertical_overwrap = Float64(0.2)
 
         # Register __call__ as callback function for line and dot
@@ -79,10 +114,16 @@ class PolygonBuilder(object):
         self.dot.figure.canvas.mpl_connect('button_press_event', self)
 
         # Create buttons
+        ## @var draw_button
+        #  Button object for "Draw Polygon" button
         self.draw_button = Button(plt.axes([0.8, 0.80, 0.15, 0.075]),
                                   'Draw Polygon')
+        ## @var calc_button
+        #  Button object for "Calculate CP" button
         self.calc_button = Button(plt.axes([0.8, 0.69, 0.15, 0.075]),
                                   'Calculate CP')
+        ## @var clear_button
+        #  Button object for "Clear" button
         self.clear_button = Button(plt.axes([0.8, 0.58, 0.15, 0.075]),
                                    'Clear')
 
@@ -92,21 +133,33 @@ class PolygonBuilder(object):
         self.clear_button.on_clicked(self.clear_figure)
 
         # Create textboxes
+        ## @var image_resolution_h_box
+        #  TextBox object for variable image_resolution_h
         self.image_resolution_h_box = TextBox(plt.axes([0.4, 0.2, 0.1, 0.075]),
                                               "Image Height [px]",
                                               initial=str(self.image_resolution_h))
+        ## @var image_resolution_w_box
+        #  TextBox object for variable image_resolution_w
         self.image_resolution_w_box = TextBox(plt.axes([0.8, 0.2, 0.1, 0.075]),
                                               "Image Width [px]",
                                               initial=str(self.image_resolution_w))
+        ## @var angle_of_view_box
+        #  TextBox object for variable angle_of_view
         self.angle_of_view_box = TextBox(plt.axes([0.4, 0.1, 0.1, 0.075]),
                                          "Angle of view [rad]",
                                          initial=str(self.angle_of_view))
+        ## @var height_box
+        #  TextBox object for variable height
         self.height_box = TextBox(plt.axes([0.8, 0.1, 0.1, 0.075]),
                                   "Height [m]",
                                   initial=str(self.height))
+        ## @var horizontal_overwrap_box
+        #  TextBox object for variable horizontal_overwrap
         self.horizontal_overwrap_box = TextBox(plt.axes([0.4, 0.01, 0.1, 0.075]),
                                                "Horizontal Overwrap [%]",
                                                initial=str(self.horizontal_overwrap.data))
+        ## @var vertical_overwrap_box
+        #  TextBox object for variable vertical_overwrap
         self.vertical_overwrap_box = TextBox(plt.axes([0.8, 0.01, 0.1, 0.075]),
                                              "Vertical Overwrap [%]",
                                              initial=str(self.vertical_overwrap.data))
@@ -120,15 +173,23 @@ class PolygonBuilder(object):
         self.vertical_overwrap_box.on_submit(self.vertical_overwrap_update)
 
         # Texts about coverage specification
+        ## @var aspect_ratio_text
+        #  Label for displaying aspect ratio of image
         self.aspect_ratio_text = plt.text(0.05, 6.5, "Aspect ratio:\n    "+str(self.aspect_ratio))
+        ## @var footprint_length_text
+        #  Label for displaying length of camera footprint
         self.footprint_length_text = plt.text(0.05, 5.5,
                                               "Footprint Length [m]:\n    "
                                               +str(round(self.footprint_length.data, 2)))
+        ## @var footprint_width_text
+        #  Label for displaying width of camera footprint
         self.footprint_width_text = plt.text(0.05, 4.5,
                                              "Footprint Width [m]:\n    "
                                              +str(round(self.footprint_width.data, 2)))
 
 
+    ## Callback function for button_press_event
+    # @param event MouseEvent object
     def __call__(self, event):
         # Return if click event doesn't happen in same axis as which a line lies on
         if event.inaxes != self.line.axes:
@@ -164,19 +225,15 @@ class PolygonBuilder(object):
             print("Unable to register points anymore.")
 
 
+    ## Update values of coverage parameters
     def update_params(self):
-        """
-        Update coverage parameters.
-        """
         self.aspect_ratio = float(self.image_resolution_w) / self.image_resolution_h
         self.footprint_width = Float64(2*self.height*math.tan(self.angle_of_view/2))
         self.footprint_length = Float64(self.footprint_width.data / self.aspect_ratio)
 
-    
+
+    ## Update texts of coverage parameters
     def update_param_texts(self):
-        """
-        Update texts of coverage parameters.
-        """
         self.aspect_ratio_text.set_text("Aspect ratio:\n    "+str(self.aspect_ratio))
         self.footprint_length_text.set_text("Footprint Length [m]:\n    "
                                             +str(round(self.footprint_length.data, 2)))
@@ -185,10 +242,9 @@ class PolygonBuilder(object):
         self.footprint_length_text.figure.canvas.draw()
 
 
+    ## Callback function for "Draw Polygon" button
+    #  @param event MouseEvent object
     def draw_polygon(self, event):
-        """
-        Callback function for "Draw Polygon" button.
-        """
         # Return if vertices is less than 3
         if len(self.vertices_x) < 3:
             print("Unable to make a polygon.")
@@ -201,14 +257,13 @@ class PolygonBuilder(object):
         self.is_polygon_drawn = True
 
 
+    ## Callback function for "Calculate CP" button
+    #  @param event MouseEvent object
     def calculate_path(self, event):
-        """
-        Callback function for "Calculate Path" button.
-        """
         if not self.is_polygon_drawn:
             return
         rospy.wait_for_service("cpp_torres16")
-        # Set end point as same as start point 
+        # Set end point as same as start point
         # if start point is set and not end point is set
         if self.start and not self.end:
             self.end = self.start
@@ -238,10 +293,9 @@ class PolygonBuilder(object):
             print(str(e))
 
 
+    ## Callback function for "Clear" button
+    #  @param event MouseEvent object
     def clear_figure(self, event):
-        """
-        Callback function for "Clear" button.
-        """
         # Clear lists of vertices' coordinates
         self.vertices_x = []
         self.vertices_y = []
@@ -266,11 +320,9 @@ class PolygonBuilder(object):
         self.text_end.remove()
 
 
+    ## Called when content of "Image Height" is submitted
+    #  @param event Content of TextBox
     def image_resolution_h_update(self, event):
-        """
-        This callback function is called
-        when content of "Image Height" is changed.
-        """
         # Update parameter if input is digit
         if event.isdigit():
             self.image_resolution_h = int(event)
@@ -280,11 +332,9 @@ class PolygonBuilder(object):
             self.image_resolution_h_box.set_val(str(self.image_resolution_h))
 
 
+    ## Called when content of "Image Width" is submitted
+    #  @param event Content of TextBox
     def image_resolution_w_update(self, event):
-        """
-        This callback function is called
-        when content of "Image Width" is changed.
-        """
         # Update parameter if input is digit
         if event.isdigit():
             self.image_resolution_w = int(event)
@@ -294,11 +344,9 @@ class PolygonBuilder(object):
             self.image_resolution_w_box.set_val(str(self.image_resolution_w))
 
 
+    ## Called when content of "Angle of view" is submitted
+    #  @param event Content of TextBox
     def angle_of_view_update(self, event):
-        """
-        This callback function is called
-        when content of "Angle of view" is changed.
-        """
         # Update parameter if input is digit
         if event.isdigit():
             self.angle_of_view = float(event)
@@ -308,11 +356,9 @@ class PolygonBuilder(object):
             self.angle_of_view_box.set_val(str(self.angle_of_view))
 
 
+    ## Called when content of "Height" is submitted
+    #  @param event Content of TextBox
     def height_update(self, event):
-        """
-        This callback function is called
-        when content of "Height" is changed.
-        """
         # Update parameter if input is digit
         if event.isdigit():
             self.height = float(event)
@@ -322,11 +368,9 @@ class PolygonBuilder(object):
             self.height_box.set_val(str(self.height))
 
 
+    ## Called when content of "Horizontal overwrap" is submitted
+    #  @param event Content of TextBox
     def horizontal_overwrap_update(self, event):
-        """
-        This callback function is called
-        when content of "Horizontal overwrap" is changed.
-        """
         # Update parameter if input is digit
         if event.isdigit():
             if 0 < float(event) < 1.0:
@@ -334,12 +378,9 @@ class PolygonBuilder(object):
         else:
             self.horizontal_overwrap_box.set_val(str(self.horizontal_overwrap))
 
-
+    ## Called when content of "Vertical overwrap" is submitted
+    #  @param event Content of TextBox
     def vertical_overwrap_update(self, event):
-        """
-        This callback function is called
-        when content of "Vertical overwrap" is changed.
-        """
         # Update parameter if input is digit
         if event.isdigit():
             if 0 < float(event) < 1.0:
@@ -348,6 +389,7 @@ class PolygonBuilder(object):
             self.vertical_overwrap_box.set_val(str(self.vertical_overwrap))
 
 
+## Initialize a ros node
 def init_node():
     """
     Initialize a node
