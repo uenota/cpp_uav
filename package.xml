@@ -22,7 +22,7 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
 
-  <run_depend>matplotlib</run_depend>
+  <run_depend>python-matplotlib</run_depend>
 
   <export>
   </export>
