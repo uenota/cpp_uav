@@ -4,11 +4,19 @@
 ## @package cpp_uav
 #  This module offers GUI to specify a polygon for coverage path planning.
 
-
+# Import python3's print to suppress pylint's warning
 from __future__ import print_function
 
 # math
 import math
+
+# Check maplotlib's version
+# Exit if older than 2.1.0
+import matplotlib
+if matplotlib.__version__ < "2.1.0":
+    print("Matplotlib 2.1.0 or newer is required to run this node.")
+    print("Please update or install Matplotlib.")
+    exit(1)
 
 # matplotlib
 # matplotlib 2.1.0 or newer is required to import TextBox
@@ -30,7 +38,7 @@ from cpp_uav.srv import Torres16
 class PolygonBuilder(object):
 
     ## Constructor
-    #  @param axis Axis objcect where polygon is shown
+    #  @param axis Axis object where polygon is shown
     def __init__(self, axis):
         ## @var axis
         #  Axis object where polygon is shown
