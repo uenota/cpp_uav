@@ -4,18 +4,23 @@
 ## @package cpp_uav
 #  This module offers GUI to specify a polygon for coverage path planning.
 
-# Import python3's print to suppress pylint's warning
+
+
+# Import python3's print to suppress warning raised by pylint
 from __future__ import print_function
 
 # math
 import math
 
+# rospy
+import rospy
+
 # Check maplotlib's version
 # Exit if older than 2.1.0
 import matplotlib
 if matplotlib.__version__ < "2.1.0":
-    print("Matplotlib 2.1.0 or newer is required to run this node.")
-    print("Please update or install Matplotlib.")
+    rospy.logerr("Matplotlib 2.1.0 or newer is required to run this node.")
+    rospy.logerr("Please update or install Matplotlib.")
     exit(1)
 
 # matplotlib
@@ -23,9 +28,7 @@ if matplotlib.__version__ < "2.1.0":
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Button
 from matplotlib.widgets import TextBox
-
-# rospy
-import rospy
+from matplotlib.widgets import RadioButtons
 
 # messages
 from geometry_msgs.msg import Point
@@ -33,6 +36,7 @@ from std_msgs.msg import Float64
 
 # service
 from cpp_uav.srv import Torres16
+
 
 ## GUI class to specify a polygon
 class PolygonBuilder(object):
@@ -98,6 +102,18 @@ class PolygonBuilder(object):
         #  Flight height of UAV
         self.height = 30.0
 
+        ## @var server_node
+        #  Instance of server
+        self.server_node = None
+
+        ## @var algorithm_names
+        #  Dictionary of algorithm names and corresponding server names
+        self.algorithm_names = {"Torres et, al. 2016": {"name":"cpp_torres16", "message":Torres16}}
+
+        ## @var algorithm_name
+        #  An algorithm name used to calculate path
+        self.algorithm_name = self.algorithm_names.keys()[0]
+
         # Coverage specification
         # cf. torres et, al. 2016
         ## @var aspect_ratio
@@ -121,6 +137,12 @@ class PolygonBuilder(object):
         self.line.figure.canvas.mpl_connect('button_press_event', self)
         self.dot.figure.canvas.mpl_connect('button_press_event', self)
 
+        ## @var algorithm_name_rdbutton
+        #  Radio button to choose an algorithm
+        self.algorithm_name_rdbutton = RadioButtons(plt.axes([0.75, 0.01, 0.22, 0.21]), 
+                                                    self.algorithm_names.keys())
+        self.algorithm_name_rdbutton.on_clicked(self.algorithm_name_update)
+
         # Create buttons
         ## @var draw_button
         #  Button object for "Draw Polygon" button
@@ -143,32 +165,32 @@ class PolygonBuilder(object):
         # Create textboxes
         ## @var image_resolution_h_box
         #  TextBox object for variable image_resolution_h
-        self.image_resolution_h_box = TextBox(plt.axes([0.4, 0.2, 0.1, 0.075]),
+        self.image_resolution_h_box = TextBox(plt.axes([0.25, 0.2, 0.1, 0.075]),
                                               "Image Height [px]",
                                               initial=str(self.image_resolution_h))
         ## @var image_resolution_w_box
         #  TextBox object for variable image_resolution_w
-        self.image_resolution_w_box = TextBox(plt.axes([0.8, 0.2, 0.1, 0.075]),
+        self.image_resolution_w_box = TextBox(plt.axes([0.6, 0.2, 0.1, 0.075]),
                                               "Image Width [px]",
                                               initial=str(self.image_resolution_w))
         ## @var angle_of_view_box
         #  TextBox object for variable angle_of_view
-        self.angle_of_view_box = TextBox(plt.axes([0.4, 0.1, 0.1, 0.075]),
+        self.angle_of_view_box = TextBox(plt.axes([0.25, 0.1, 0.1, 0.075]),
                                          "Angle of view [rad]",
                                          initial=str(self.angle_of_view))
         ## @var height_box
         #  TextBox object for variable height
-        self.height_box = TextBox(plt.axes([0.8, 0.1, 0.1, 0.075]),
+        self.height_box = TextBox(plt.axes([0.6, 0.1, 0.1, 0.075]),
                                   "Height [m]",
                                   initial=str(self.height))
         ## @var horizontal_overwrap_box
         #  TextBox object for variable horizontal_overwrap
-        self.horizontal_overwrap_box = TextBox(plt.axes([0.4, 0.01, 0.1, 0.075]),
+        self.horizontal_overwrap_box = TextBox(plt.axes([0.25, 0.01, 0.1, 0.075]),
                                                "Horizontal Overwrap [%]",
                                                initial=str(self.horizontal_overwrap.data))
         ## @var vertical_overwrap_box
         #  TextBox object for variable vertical_overwrap
-        self.vertical_overwrap_box = TextBox(plt.axes([0.8, 0.01, 0.1, 0.075]),
+        self.vertical_overwrap_box = TextBox(plt.axes([0.6, 0.01, 0.1, 0.075]),
                                              "Vertical Overwrap [%]",
                                              initial=str(self.vertical_overwrap.data))
 
@@ -183,17 +205,22 @@ class PolygonBuilder(object):
         # Texts about coverage specification
         ## @var aspect_ratio_text
         #  Label for displaying aspect ratio of image
-        self.aspect_ratio_text = plt.text(0.05, 6.5, "Aspect ratio:\n    "+str(self.aspect_ratio))
+        self.aspect_ratio_text = plt.text(2, 6.5, "Aspect ratio:\n    "+str(self.aspect_ratio))
         ## @var footprint_length_text
         #  Label for displaying length of camera footprint
-        self.footprint_length_text = plt.text(0.05, 5.5,
+        self.footprint_length_text = plt.text(2, 5.5,
                                               "Footprint Length [m]:\n    "
                                               +str(round(self.footprint_length.data, 2)))
         ## @var footprint_width_text
         #  Label for displaying width of camera footprint
-        self.footprint_width_text = plt.text(0.05, 4.5,
+        self.footprint_width_text = plt.text(2, 4.5,
                                              "Footprint Width [m]:\n    "
                                              +str(round(self.footprint_width.data, 2)))
+
+        ## @var algorithm_name_text
+        #  Label for displaying an algorithm name
+        self.algorithm_name_text = plt.text(1.5, 3,
+                                            "Algorithm:\n    "+self.algorithm_name)
 
 
     ## Callback function for button_press_event
@@ -230,7 +257,7 @@ class PolygonBuilder(object):
                               self.vertices_y+[self.start.y, event.ydata])
             self.dot.figure.canvas.draw()
         else:
-            print("Unable to register points anymore.")
+            rospy.logwarn("Unable to register points anymore.")
 
 
     ## Update values of coverage parameters
@@ -255,7 +282,7 @@ class PolygonBuilder(object):
     def draw_polygon(self, event):
         # Return if vertices is less than 3
         if len(self.vertices_x) < 3:
-            print("Unable to make a polygon.")
+            rospy.logerr("Unable to make a polygon.")
             return
         # Draw a polygon
         self.line.set_data(self.vertices_x+self.vertices_x[0:1],
@@ -270,7 +297,24 @@ class PolygonBuilder(object):
     def calculate_path(self, event):
         if not self.is_polygon_drawn:
             return
-        rospy.wait_for_service("cpp_torres16")
+
+        # assign server node if server node is None
+        if not self.server_node:
+            rospy.loginfo("Waiting for %s.", self.algorithm_name)
+            try:
+                rospy.wait_for_service(self.algorithm_names[self.algorithm_name]["name"],
+                                       timeout=5.0)
+            except rospy.ROSException:
+                rospy.logerr("%s not found.", self.algorithm_name)
+                return
+            try:
+                self.server_node = rospy.ServiceProxy(
+                    self.algorithm_names[self.algorithm_name]["name"],
+                    self.algorithm_names[self.algorithm_name]["message"])
+            except rospy.ServiceException as ex:
+                rospy.logerr(str(ex))
+                return
+
         # Set end point as same as start point
         # if start point is set and not end point is set
         if self.start and not self.end:
@@ -286,19 +330,19 @@ class PolygonBuilder(object):
             vertices.append(point)
         # Call service
         try:
-            calc_path_srv = rospy.ServiceProxy("cpp_torres16", Torres16)
-            self.waypoints = calc_path_srv(vertices, self.start, self.end,
-                                           self.footprint_length,
-                                           self.footprint_width,
-                                           self.horizontal_overwrap,
-                                           self.vertical_overwrap).waypoints
+            self.waypoints = self.server_node(vertices, self.start, self.end,
+                                              self.footprint_length,
+                                              self.footprint_width,
+                                              self.horizontal_overwrap,
+                                              self.vertical_overwrap).waypoints
             for point in self.waypoints:
                 xs.append(point.x)
                 ys.append(point.y)
             self.path.set_data(xs, ys)
             self.path.figure.canvas.draw()
-        except rospy.ServiceException, e:
-            print(str(e))
+        except rospy.ServiceException as ex:
+            rospy.logerr(str(ex))
+            return
 
 
     ## Callback function for "Clear" button
@@ -316,7 +360,7 @@ class PolygonBuilder(object):
         # Clear waypoints
         self.waypoints = []
 
-        # Reflesh a canvas
+        # Refresh a canvas
         self.dot.set_data(self.vertices_x, self.vertices_y)
         self.line.set_data(self.vertices_x, self.vertices_y)
         self.path.set_data([], [])
@@ -397,6 +441,25 @@ class PolygonBuilder(object):
             self.vertical_overwrap_box.set_val(str(self.vertical_overwrap))
 
 
+    ## Callback function for algorithm_name_rdbutton
+    #  @param label Label of a chosen item
+    def algorithm_name_update(self, label):
+        self.algorithm_name = label
+        rospy.loginfo("Waiting for %s.", self.algorithm_name)
+        try:
+            rospy.wait_for_service(self.algorithm_names[self.algorithm_name]["name"], timeout=5.0)
+        except rospy.ROSException:
+            rospy.logerr("%s not found.", self.algorithm_name)
+            return
+        try:
+            self.server_node = rospy.ServiceProxy(
+                self.algorithm_names[self.algorithm_name]["name"],
+                self.algorithm_names[self.algorithm_name]["message"])
+        except rospy.ServiceException as ex:
+            rospy.logerr(str(ex))
+            return
+
+
 ## Initialize a ros node
 def init_node():
     """
@@ -404,7 +467,7 @@ def init_node():
     """
     rospy.init_node('specify_node', anonymous=True)
 
-    fig = plt.figure(figsize=(8,6))
+    fig = plt.figure(figsize=(8, 6))
     axis = fig.add_subplot(111)
 
     fig.subplots_adjust(top=0.95, bottom=0.35, right=0.79)
