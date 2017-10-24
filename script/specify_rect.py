@@ -42,14 +42,20 @@ class PolygonBuilder(object):
     GUI class to specify a polygon
     """
 
-    def __init__(self, axis):
+    def __init__(self):
         """! Constructor
         @param axis Axis object where polygon is shown
         """
 
+        ## @var fig
+        #  Figure instance
+        self.fig = plt.figure(figsize=(8, 6))
+
         ## @var axis
         #  Axis object where polygon is shown
-        self.axis = axis
+        self.axis = self.fig.add_subplot(111)
+
+        self.fig.subplots_adjust(top=0.95, bottom=0.35, right=0.79)
 
         ## @var is_polygon_drawn
         #  True if polygon is illustrated on window
@@ -64,9 +70,9 @@ class PolygonBuilder(object):
         #  - line: Line2D object representing edges of a polygon
         #  - dot: Line2D object representing  vertices of a polygon
         #  - path: Line2D object representing coverage path
-        self.lines = {"line": axis.plot([], [], "-")[0],
-                      "dot": axis.plot([], [], "o")[0],
-                      "path": axis.plot([], [], "-")[0]}
+        self.lines = {"line": self.axis.plot([], [], "-")[0],
+                      "dot": self.axis.plot([], [], "o")[0],
+                      "path": self.axis.plot([], [], "-")[0]}
 
         # Register __call__ as callback function for line and dot
         self.lines["line"].figure.canvas.mpl_connect('button_press_event', self)
@@ -229,6 +235,9 @@ class PolygonBuilder(object):
                        "end_point":
                            None
                       }
+
+        # plot a figure
+        plt.show()
 
 
     def __call__(self, event):
@@ -522,14 +531,8 @@ def init_node():
     """
     rospy.init_node('specify_node', anonymous=True)
 
-    fig = plt.figure(figsize=(8, 6))
-    axis = fig.add_subplot(111)
-
-    fig.subplots_adjust(top=0.95, bottom=0.35, right=0.79)
-
-    PolygonBuilder(axis)
-
-    plt.show()
+    # Call PolygonBuilder's constructor
+    PolygonBuilder()
 
 
 if __name__ == '__main__':
