@@ -98,8 +98,8 @@ class PolygonBuilder(object):
 
         footprint_width = Float64(2*self.shooting_cond["height"]*
                                   math.tan(self.shooting_cond["angle_of_view"]/2))
-        aspect_ratio = float(self.shooting_cond["image_resolution_w"]/
-                             self.shooting_cond["image_resolution_h"])
+        aspect_ratio = \
+            float(self.shooting_cond["image_resolution_w"])/self.shooting_cond["image_resolution_h"]
 
         ## @var coverage_params
         #  Dictionary of coverage params
@@ -184,7 +184,8 @@ class PolygonBuilder(object):
                            "horizontal_overwrap_box":
                                TextBox(plt.axes([0.25, 0.01, 0.1, 0.075]),
                                        "Horizontal Overwrap [%]",
-                                       initial=str(self.coverage_params["horizontal_overwrap"].data)),
+                                       initial=\
+                                           str(self.coverage_params["horizontal_overwrap"].data)),
                            "vertical_overwrap_box":
                                TextBox(plt.axes([0.6, 0.01, 0.1, 0.075]),
                                        "Vertical Overwrap [%]",
@@ -280,7 +281,7 @@ class PolygonBuilder(object):
             Float64(2*self.shooting_cond["height"]*
                     math.tan(self.shooting_cond["angle_of_view"]/2))
         self.coverage_params["footprint_length"] = \
-            Float64(self.coverage_params["footprint_width.data"]/
+            Float64(self.coverage_params["footprint_width"].data/
                     self.coverage_params["aspect_ratio"])
 
 
