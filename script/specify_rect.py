@@ -391,7 +391,7 @@ class PolygonBuilder(object):
 
         if self.points["start"]:
             self.labels["start_point"].remove()
-        if self.points["end"]:
+        if self.points["end"] and self.points["start"] != self.points["end"]:
             self.labels["end_point"].remove()
 
         # Clear lists of vertices' coordinates
