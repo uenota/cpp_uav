@@ -31,6 +31,7 @@ catkin_package()
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 add_executable(torres_etal_2016 src/torres_etal_2016.cpp)
