@@ -29,13 +29,24 @@ catkin_package(
 catkin_package()
 
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )
 
+# Executables
 add_executable(torres_etal_2016 src/torres_etal_2016.cpp)
 
 add_dependencies(torres_etal_2016 ${PROJECT_NAME}_generate_messages_cpp)
 
 target_link_libraries(torres_etal_2016 ${catkin_LIBRARIES})
+
+# Tests
+catkin_add_gtest(test_torres_etal_2016 test/test_torres_etal_2016.cpp)
+target_link_libraries(test_torres_etal_2016 ${catkin_LIBRARIES})
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  #add_rostest_gtest(tests_mynode test/mynode.test src/test/test_mynode.cpp [more cpp files])
+  #target_link_libraries(tests_mynode ${catkin_LIBRARIES})
+endif()
