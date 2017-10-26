@@ -44,7 +44,6 @@ class PolygonBuilder(object):
 
     def __init__(self):
         """! Constructor
-        @param axis Axis object where polygon is shown
         """
 
         ## @var fig
