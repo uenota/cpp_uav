@@ -27,7 +27,7 @@
 * @return bool
 * @details For details of this service, cf. srv/Torres16.srv
 */
-bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
+bool plan(cpp_uav::Torres16::Request &req, cpp_uav::Torres16::Response &res)
 {
     // Initialization
     std::vector<geometry_msgs::Point> polygon_vertices, waypoints;
@@ -35,7 +35,7 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
     std_msgs::Float64 footprint_length, footprint_width, horizontal_overwrap, vertical_overwrap;
 
     polygon_vertices = req.polygon_vertices;
-    
+
     start = req.start;
     end = req.end;
 
@@ -71,12 +71,7 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
     return true;
 }
 
-/**
-* @brief main function
-* @param argc Number of arguments
-* @param argv Array of arguments
-*/
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     ros::init(argc, argv, "torres_etal_2016");
     ros::NodeHandle nh;
