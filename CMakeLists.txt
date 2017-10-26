@@ -43,10 +43,7 @@ target_link_libraries(torres_etal_2016 ${catkin_LIBRARIES})
 
 # Tests
 catkin_add_gtest(test_torres_etal_2016 test/test_torres_etal_2016.cpp)
-target_link_libraries(test_torres_etal_2016 ${catkin_LIBRARIES})
+catkin_add_gtest(test_cgutil test/test_cgutil.cpp)
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  #add_rostest_gtest(tests_mynode test/mynode.test src/test/test_mynode.cpp [more cpp files])
-  #target_link_libraries(tests_mynode ${catkin_LIBRARIES})
-endif()
+target_link_libraries(test_torres_etal_2016 ${catkin_LIBRARIES})
+target_link_libraries(test_cgutil ${catkin_LIBRARIES})
