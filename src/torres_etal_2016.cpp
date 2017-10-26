@@ -44,7 +44,7 @@ bool plan(cpp_uav::Torres16::Request &req, cpp_uav::Torres16::Response &res)
     horizontal_overwrap = req.horizontal_overwrap;
     vertical_overwrap = req.vertical_overwrap;
 
-    direction dir = sweep_direction(polygon_vertices);
+    Direction dir = calc_sweep_direction(polygon_vertices);
 
     geometry_msgs::Point start_pt, mid_pt, end_pt;
 
