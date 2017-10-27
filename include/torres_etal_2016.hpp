@@ -48,25 +48,27 @@ Direction calc_sweep_direction(std::vector<geometry_msgs::Point> &polygon)
 {
     Direction line_sweep;
 
+    std::vector<geometry_msgs::Point> convex_hull = graham_scan(polygon);
+
     // Edges of polygon
     std::vector<std::array<geometry_msgs::Point, 2>> edges;
 
     // Make a list of edges of polygon
-    for (std::size_t i = 0; i < polygon.size(); ++i)
+    for (std::size_t i = 0; i < convex_hull.size(); ++i)
     {
         std::array<geometry_msgs::Point, 2> ar;
 
-        ar.at(0) = polygon.at(i);
+        ar.at(0) = convex_hull.at(i);
 
         // if vertex is the last one,
         // that vertex makes an edge whose end is the first vertex
-        if (i == polygon.size() - 1)
+        if (i == convex_hull.size() - 1)
         {
-            ar.at(1) = polygon.at(0);
+            ar.at(1) = convex_hull.at(0);
         }
         else
         {
-            ar.at(1) = polygon.at(i + 1);
+            ar.at(1) = convex_hull.at(i + 1);
         }
         edges.push_back(ar);
     }
@@ -85,7 +87,7 @@ Direction calc_sweep_direction(std::vector<geometry_msgs::Point> &polygon)
         ROS_DEBUG("e2.x: %f", edge.value().back().x);
         ROS_DEBUG("e2.y: %f", edge.value().back().y);
 
-        for (const geometry_msgs::Point &vertex : polygon)
+        for (const geometry_msgs::Point &vertex : convex_hull)
         {
             // calc_distance() function returns distance
             // between given edge and vertex
