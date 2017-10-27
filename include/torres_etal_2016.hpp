@@ -82,26 +82,16 @@ Direction calc_sweep_direction(std::vector<geometry_msgs::Point> &polygon)
         double max_dist_edge = 0;
         geometry_msgs::Point opposed_vertex;
 
-        ROS_DEBUG("e1.x: %f", edge.value().front().x);
-        ROS_DEBUG("e1.y: %f", edge.value().front().y);
-        ROS_DEBUG("e2.x: %f", edge.value().back().x);
-        ROS_DEBUG("e2.y: %f", edge.value().back().y);
-
         for (const geometry_msgs::Point &vertex : convex_hull)
         {
             // calc_distance() function returns distance
             // between given edge and vertex
             double dist = calc_distance(edge.value(), vertex);
 
-            ROS_DEBUG("vertex.x: %f", vertex.x);
-            ROS_DEBUG("vertex.y: %f", vertex.y);
-            ROS_DEBUG("distance: %f", dist);
-
             if (dist > max_dist_edge)
             {
                 max_dist_edge = dist;
                 opposed_vertex = vertex;
-                ROS_DEBUG("max_dist_edge: %f", max_dist_edge);
             }
         }
 
@@ -110,12 +100,8 @@ Direction calc_sweep_direction(std::vector<geometry_msgs::Point> &polygon)
             optimal_dist = max_dist_edge;
             line_sweep.base_edge = edge.value();
             line_sweep.opposed_vertex = opposed_vertex;
-            ROS_DEBUG("index: %ld", edge.index());
-            ROS_DEBUG("optimal dist: %f", optimal_dist);
         }
     }
-
-    ROS_DEBUG("End");
 
     return line_sweep;
 }
