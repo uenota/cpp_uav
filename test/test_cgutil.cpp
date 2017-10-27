@@ -1,3 +1,9 @@
+/**
+* @file test_cgutil.cpp
+* @brief Test program for cgutil.hpp
+* @author Takaki Ueno
+*/
+
 #include <cgutil.hpp>
 
 // gtest
@@ -10,6 +16,9 @@
 // geometry_msgs
 #include <geometry_msgs/Point.h>
 
+/**
+* @brief Test for calc_distance()
+*/
 TEST(CGUtilTest, CalcDistanceTest)
 {
     // TestCase1
@@ -135,6 +144,9 @@ TEST(CGUtilTest, CalcDistanceTest)
     EXPECT_NEAR(1.5, calc_distance(edge, vertex), 1.0e-5);
 }
 
+/**
+* @brief Test for calc_vertex_angle()
+*/
 TEST(CGUtilTest, CalcVertexAngleTest)
 {
     geometry_msgs::Point p1, p2, p3;
@@ -231,6 +243,9 @@ TEST(CGUtilTest, CalcVertexAngleTest)
     EXPECT_DOUBLE_EQ(0.0, calc_vertex_angle(p1, p2, p3));
 }
 
+/**
+* @brief Test for calc_horizontal_angle()
+*/
 TEST(CGUtilTest, CalcHorizontalAngleTest)
 {
     geometry_msgs::Point p1, p2;
@@ -286,6 +301,9 @@ TEST(CGUtilTest, CalcHorizontalAngleTest)
     EXPECT_DOUBLE_EQ(0.0, calc_horizontal_angle(p1, p2));
 }
 
+/**
+* @brief Test for calc_signed_area_triangle()
+*/
 TEST(CGUtilTest, CalcSignedAreaTriangleTest)
 {
     geometry_msgs::Point p1, p2, p3;
@@ -343,6 +361,9 @@ TEST(CGUtilTest, CalcSignedAreaTriangleTest)
     EXPECT_DOUBLE_EQ(0.0, calc_signed_area_triangle(p1, p2, p3));
 }
 
+/**
+* @brief Test for graham_scan()
+*/
 TEST(CGUtilTest, GrahamScanTest)
 {
     geometry_msgs::Point p1, p2, p3, p4, p5, p6, p7;

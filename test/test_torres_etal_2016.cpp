@@ -1,3 +1,9 @@
+/**
+* @file test_torres_etal_2016.cpp
+* @brief Test program for torres_etal_2016.hpp
+* @author Takaki Ueno
+*/
+
 #include <torres_etal_2016.hpp>
 
 // gtest
@@ -9,6 +15,9 @@
 // geometry_msgs
 #include <geometry_msgs/Point.h>
 
+/**
+* @brief Test for calc_sweep_direction()
+*/
 TEST(Torres16Test, CalcSweepDirectionTest)
 {
     std::vector<geometry_msgs::Point> polygon;
