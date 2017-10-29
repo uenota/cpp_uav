@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Copyright (c) 2017 Takaki Ueno
+# Released under the MIT license
 
 """! @package cpp_uav
 This module offers GUI to specify a polygon for coverage path planning.
@@ -46,25 +48,25 @@ class PolygonBuilder(object):
         """! Constructor
         """
 
-        ## @var fig
+        # @var fig
         #  Figure instance
         self.fig = plt.figure(figsize=(8, 6))
 
-        ## @var axis
+        # @var axis
         #  Axis object where polygon is shown
         self.axis = self.fig.add_subplot(111)
 
         self.fig.subplots_adjust(top=0.95, bottom=0.35, right=0.79)
 
-        ## @var is_polygon_drawn
+        # @var is_polygon_drawn
         #  True if polygon is illustrated on window
         self.is_polygon_drawn = False
 
-        ## @var server_node
+        # @var server_node
         #  Instance of server
         self.server_node = None
 
-        ## @var lines
+        # @var lines
         #  Dictionary to store Line2D objects
         #  - line: Line2D object representing edges of a polygon
         #  - dot: Line2D object representing  vertices of a polygon
@@ -74,10 +76,11 @@ class PolygonBuilder(object):
                       "path": self.axis.plot([], [], "-")[0]}
 
         # Register __call__ as callback function for line and dot
-        self.lines["line"].figure.canvas.mpl_connect('button_press_event', self)
+        self.lines["line"].figure.canvas.mpl_connect(
+            'button_press_event', self)
         self.lines["dot"].figure.canvas.mpl_connect('button_press_event', self)
 
-        ## @var points
+        # @var points
         #  Dictionary to store points
         #  - vertices_x: List of x coordinates of vertices
         #  - vertices_y: List of y coordinates of vertices
@@ -90,7 +93,7 @@ class PolygonBuilder(object):
                        "end": None,
                        "waypoints": list()}
 
-        ## @var shooting_cond
+        # @var shooting_cond
         #  Dictionary of shooting condition
         #  - image_resolution_h [px]: Vertical resolution of image
         #  - image_resolution_w [px]: Horizontal resolution of image
@@ -101,12 +104,13 @@ class PolygonBuilder(object):
                               "angle_of_view": 45.0,
                               "height": 30.0}
 
-        footprint_width = Float64(2*self.shooting_cond["height"]*
-                                  math.tan(self.shooting_cond["angle_of_view"]/2))
+        footprint_width = Float64(2 * self.shooting_cond["height"] *
+                                  math.tan(self.shooting_cond["angle_of_view"] / 2))
         aspect_ratio = \
-            float(self.shooting_cond["image_resolution_w"])/self.shooting_cond["image_resolution_h"]
+            float(self.shooting_cond["image_resolution_w"]
+                  ) / self.shooting_cond["image_resolution_h"]
 
-        ## @var coverage_params
+        # @var coverage_params
         #  Dictionary of coverage params
         #  - footprint_width [m]: Width of footprint
         #  - footprint_length [m]: Length of footprint
@@ -115,24 +119,25 @@ class PolygonBuilder(object):
         #  - vertical_overwrap [%]: Vertical overwrap of footprint
         #  cf. torres et, al. 2016
         self.coverage_params = {"footprint_width":
-                                    footprint_width,
+                                footprint_width,
                                 "footprint_length":
-                                    Float64(footprint_width.data * aspect_ratio),
+                                    Float64(footprint_width.data *
+                                            aspect_ratio),
                                 "aspect_ratio":
                                     aspect_ratio,
                                 "horizontal_overwrap": Float64(0.3),
                                 "vertical_overwrap": Float64(0.2)}
 
-        ## @var algorithm_names
+        # @var algorithm_names
         #  Dictionary of algorithm names and corresponding server names
         self.algorithm_names = {"Torres et, al. 2016":
-                                    {"name":"cpp_torres16", "message":Torres16}}
+                                {"name": "cpp_torres16", "message": Torres16}}
 
-        ## @var algorithm_name
+        # @var algorithm_name
         #  An algorithm name used to calculate path
         self.algorithm_name = self.algorithm_names.keys()[0]
 
-        ## @var algorithm_name_rdbutton
+        # @var algorithm_name_rdbutton
         #  Radio button to choose an algorithm
         self.algorithm_name_rdbutton = RadioButtons(plt.axes([0.75, 0.01, 0.22, 0.21]),
                                                     self.algorithm_names.keys())
@@ -140,21 +145,21 @@ class PolygonBuilder(object):
         # Register a callback function for a radio button
         self.algorithm_name_rdbutton.on_clicked(self.algorithm_name_update)
 
-        ## @var buttons
+        # @var buttons
         #  Dictionary of buttons
         #  - draw_button: Button object to evoke draw_polygon method
         #  - calc_button: Button object to evoke calculate_path method
         #  - clear_button: Button object to evoke clear_figure method
         self.buttons = {"draw_button":
-                            Button(plt.axes([0.8, 0.80, 0.15, 0.075]),
-                                   'Draw Polygon'),
+                        Button(plt.axes([0.8, 0.80, 0.15, 0.075]),
+                               'Draw Polygon'),
                         "calc_button":
                             Button(plt.axes([0.8, 0.69, 0.15, 0.075]),
                                    'Calculate CP'),
                         "clear_button":
                             Button(plt.axes([0.8, 0.58, 0.15, 0.075]),
                                    'Clear')
-                       }
+                        }
 
         # Register callback functions for buttons
         self.buttons["draw_button"].on_clicked(self.draw_polygon)
@@ -162,7 +167,7 @@ class PolygonBuilder(object):
         self.buttons["clear_button"].on_clicked(self.clear_figure)
 
         # Create textboxes
-        ## @var text_boxes
+        # @var text_boxes
         #  Dictionary of text boxes
         #  - image_resolution_h_box: TextBox object to get input for image_resolution_h
         #  - image_resolution_w_box: TextBox object to get input for image_resolution_w
@@ -171,9 +176,9 @@ class PolygonBuilder(object):
         #  - horizontal_overwrap_box: TextBox object to get input for horizontal_overwrap
         #  - vertical_overwrap_box: TextBox object to get input for vertical_overwrap
         self.text_boxes = {"image_resolution_h_box":
-                               TextBox(plt.axes([0.25, 0.2, 0.1, 0.075]),
-                                       "Image Height [px]",
-                                       initial=str(self.shooting_cond["image_resolution_h"])),
+                           TextBox(plt.axes([0.25, 0.2, 0.1, 0.075]),
+                                   "Image Height [px]",
+                                   initial=str(self.shooting_cond["image_resolution_h"])),
                            "image_resolution_w_box":
                                TextBox(plt.axes([0.6, 0.2, 0.1, 0.075]),
                                        "Image Width [px]",
@@ -189,23 +194,27 @@ class PolygonBuilder(object):
                            "horizontal_overwrap_box":
                                TextBox(plt.axes([0.25, 0.01, 0.1, 0.075]),
                                        "Horizontal Overwrap [%]",
-                                       initial=\
-                                           str(self.coverage_params["horizontal_overwrap"].data)),
+                                       initial=str(self.coverage_params["horizontal_overwrap"].data)),
                            "vertical_overwrap_box":
                                TextBox(plt.axes([0.6, 0.01, 0.1, 0.075]),
                                        "Vertical Overwrap [%]",
                                        initial=str(self.coverage_params["vertical_overwrap"].data))
-                          }
+                           }
 
         # Register callback functions for textboxes
-        self.text_boxes["image_resolution_h_box"].on_submit(self.image_resolution_h_update)
-        self.text_boxes["image_resolution_w_box"].on_submit(self.image_resolution_w_update)
-        self.text_boxes["angle_of_view_box"].on_submit(self.angle_of_view_update)
+        self.text_boxes["image_resolution_h_box"].on_submit(
+            self.image_resolution_h_update)
+        self.text_boxes["image_resolution_w_box"].on_submit(
+            self.image_resolution_w_update)
+        self.text_boxes["angle_of_view_box"].on_submit(
+            self.angle_of_view_update)
         self.text_boxes["height_box"].on_submit(self.height_update)
-        self.text_boxes["horizontal_overwrap_box"].on_submit(self.horizontal_overwrap_update)
-        self.text_boxes["vertical_overwrap_box"].on_submit(self.vertical_overwrap_update)
+        self.text_boxes["horizontal_overwrap_box"].on_submit(
+            self.horizontal_overwrap_update)
+        self.text_boxes["vertical_overwrap_box"].on_submit(
+            self.vertical_overwrap_update)
 
-        ## @var labels
+        # @var labels
         #  Dictionary of labels on figure
         #  - aspect_ratio_text: Text object to display aspect_ratio
         #  - footprint_length_text: Text object to display footprint_length
@@ -214,30 +223,27 @@ class PolygonBuilder(object):
         #  - start_point: Text object to display start point
         #  - end_point: Text object to display end point
         self.labels = {"aspect_ratio_text":
-                           plt.text(2, 6.5,
-                                    "Aspect ratio:\n    "
-                                    +str(self.coverage_params["aspect_ratio"])),
+                       plt.text(2, 6.5,
+                                "Aspect ratio:\n    " + str(self.coverage_params["aspect_ratio"])),
                        "footprint_length_text":
                            plt.text(2, 5.5,
-                                    "Footprint Length [m]:\n    "
-                                    +str(round(self.coverage_params["footprint_length"].data, 2))),
+                                    "Footprint Length [m]:\n    " +
+                                    str(round(self.coverage_params["footprint_length"].data, 2))),
                        "footprint_width_text":
                            plt.text(2, 4.5,
-                                    "Footprint Width [m]:\n    "
-                                    +str(round(self.coverage_params["footprint_width"].data, 2))),
+                                    "Footprint Width [m]:\n    " +
+                                    str(round(self.coverage_params["footprint_width"].data, 2))),
                        "algorithm_name_text":
                            plt.text(1.5, 3,
-                                    "Algorithm:\n    "
-                                    +self.algorithm_name),
+                                    "Algorithm:\n    " + self.algorithm_name),
                        "start_point":
                            None,
                        "end_point":
                            None
-                      }
+                       }
 
         # plot a figure
         plt.show()
-
 
     def __call__(self, event):
         """!
@@ -261,9 +267,10 @@ class PolygonBuilder(object):
             self.points["start"].x = event.xdata
             self.points["start"].y = event.ydata
 
-            self.labels["start_point"] = self.axis.text(event.xdata, event.ydata, "Start")
-            self.lines["dot"].set_data(self.points["vertices_x"]+[event.xdata],
-                                       self.points["vertices_y"]+[event.ydata])
+            self.labels["start_point"] = self.axis.text(
+                event.xdata, event.ydata, "Start")
+            self.lines["dot"].set_data(self.points["vertices_x"] + [event.xdata],
+                                       self.points["vertices_y"] + [event.ydata])
             self.lines["dot"].figure.canvas.draw()
         # true if end point is not set
         elif not self.points["end"]:
@@ -271,40 +278,39 @@ class PolygonBuilder(object):
             self.points["end"].x = event.xdata
             self.points["end"].y = event.ydata
 
-            self.labels["end_point"] = self.axis.text(event.xdata, event.ydata, "Goal")
-            self.lines["dot"].set_data(self.points["vertices_x"]+[self.points["start"].x, event.xdata],
-                                       self.points["vertices_y"]+[self.points["start"].y, event.ydata])
+            self.labels["end_point"] = self.axis.text(
+                event.xdata, event.ydata, "Goal")
+            self.lines["dot"].set_data(self.points["vertices_x"] + [self.points["start"].x, event.xdata],
+                                       self.points["vertices_y"] + [self.points["start"].y, event.ydata])
             self.lines["dot"].figure.canvas.draw()
         else:
             rospy.logwarn("Unable to register points anymore.")
-
 
     def update_params(self):
         """!
         Update values of coverage parameters
         """
         self.coverage_params["aspect_ratio"] = \
-            float(self.shooting_cond["image_resolution_w"])/self.shooting_cond["image_resolution_h"]
+            float(self.shooting_cond["image_resolution_w"]
+                  ) / self.shooting_cond["image_resolution_h"]
         self.coverage_params["footprint_width"] = \
-            Float64(2*self.shooting_cond["height"]*
-                    math.tan(self.shooting_cond["angle_of_view"]/2))
+            Float64(2 * self.shooting_cond["height"] *
+                    math.tan(self.shooting_cond["angle_of_view"] / 2))
         self.coverage_params["footprint_length"] = \
-            Float64(self.coverage_params["footprint_width"].data/
+            Float64(self.coverage_params["footprint_width"].data /
                     self.coverage_params["aspect_ratio"])
-
 
     def update_param_texts(self):
         """!
         Update texts of coverage parameters
         """
-        self.labels["aspect_ratio_text"].set_text("Aspect ratio:\n    "+
+        self.labels["aspect_ratio_text"].set_text("Aspect ratio:\n    " +
                                                   str(self.coverage_params["aspect_ratio"]))
-        self.labels["footprint_length_text"].set_text("Footprint Length [m]:\n    "+
+        self.labels["footprint_length_text"].set_text("Footprint Length [m]:\n    " +
                                                       str(round(self.coverage_params["footprint_length"].data, 2)))
-        self.labels["footprint_width_text"].set_text("Footprint Width [m]:\n    "+
+        self.labels["footprint_width_text"].set_text("Footprint Width [m]:\n    " +
                                                      str(round(self.coverage_params["footprint_width"].data, 2)))
         self.labels["footprint_length_text"].figure.canvas.draw()
-
 
     def draw_polygon(self, event):
         """!
@@ -316,12 +322,11 @@ class PolygonBuilder(object):
             rospy.logerr("Unable to make a polygon.")
             return
         # Draw a polygon
-        self.lines["line"].set_data(self.points["vertices_x"]+self.points["vertices_x"][0:1],
-                                    self.points["vertices_y"]+self.points["vertices_y"][0:1])
+        self.lines["line"].set_data(self.points["vertices_x"] + self.points["vertices_x"][0:1],
+                                    self.points["vertices_y"] + self.points["vertices_y"][0:1])
         self.lines["line"].figure.canvas.draw()
         # Set flag as True
         self.is_polygon_drawn = True
-
 
     def calculate_path(self, event):
         """!
@@ -381,7 +386,6 @@ class PolygonBuilder(object):
             rospy.logerr(str(ex))
             return
 
-
     def clear_figure(self, event):
         """!
         Callback function for "Clear" button
@@ -406,14 +410,15 @@ class PolygonBuilder(object):
         self.points["waypoints"] = []
 
         # Refresh a canvas
-        self.lines["dot"].set_data(self.points["vertices_x"], self.points["vertices_y"])
-        self.lines["line"].set_data(self.points["vertices_x"], self.points["vertices_y"])
+        self.lines["dot"].set_data(
+            self.points["vertices_x"], self.points["vertices_y"])
+        self.lines["line"].set_data(
+            self.points["vertices_x"], self.points["vertices_y"])
         self.lines["path"].set_data([], [])
 
         self.lines["dot"].figure.canvas.draw()
         self.lines["line"].figure.canvas.draw()
         self.lines["path"].figure.canvas.draw()
-
 
     def image_resolution_h_update(self, event):
         """!
@@ -429,7 +434,6 @@ class PolygonBuilder(object):
             self.text_boxes["image_resolution_h_box"].\
                 set_val(str(self.shooting_cond["image_resolution_h"]))
 
-
     def image_resolution_w_update(self, event):
         """!
         Called when content of "Image Width" is submitted
@@ -443,7 +447,6 @@ class PolygonBuilder(object):
         else:
             self.text_boxes["image_resolution_w_box"].\
                 set_val(str(self.shooting_cond["image_resolution_w"]))
-
 
     def angle_of_view_update(self, event):
         """!
@@ -459,7 +462,6 @@ class PolygonBuilder(object):
             self.text_boxes["angle_of_view_box"]\
                 .set_val(str(self.shooting_cond["angle_of_view"]))
 
-
     def height_update(self, event):
         """!
         Called when content of "Height" is submitted
@@ -474,7 +476,6 @@ class PolygonBuilder(object):
             self.text_boxes["height_box"].\
                 set_val(str(self.shooting_cond["height"]))
 
-
     def horizontal_overwrap_update(self, event):
         """!
         Called when content of "Horizontal overwrap" is submitted
@@ -487,7 +488,6 @@ class PolygonBuilder(object):
         else:
             self.text_boxes["horizontal_overwrap_box"].\
                 set_val(str(self.coverage_params["horizontal_overwrap"]))
-
 
     def vertical_overwrap_update(self, event):
         """!
@@ -502,7 +502,6 @@ class PolygonBuilder(object):
             self.text_boxes["vertical_overwrap_box"].\
                 set_val(str(self.coverage_params["vertical_overwrap"]))
 
-
     def algorithm_name_update(self, label):
         """!
         Callback function for algorithm_name_rdbutton
@@ -511,7 +510,8 @@ class PolygonBuilder(object):
         self.algorithm_name = label
         rospy.loginfo("Waiting for %s.", self.algorithm_name)
         try:
-            rospy.wait_for_service(self.algorithm_names[self.algorithm_name]["name"], timeout=5.0)
+            rospy.wait_for_service(
+                self.algorithm_names[self.algorithm_name]["name"], timeout=5.0)
         except rospy.ROSException:
             rospy.logerr("%s not found.", self.algorithm_name)
             return
