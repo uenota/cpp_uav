@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  roslint
 )
 
 add_service_files(
@@ -33,6 +34,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )
+
+# lint
+roslint_cpp()
+roslint_python()
 
 # Executables
 add_executable(torres_etal_2016 src/torres_etal_2016.cpp)
