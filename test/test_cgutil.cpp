@@ -22,6 +22,171 @@
 // geometry_msgs
 #include <geometry_msgs/Point.h>
 
+TEST(CGUtilTest, IntersectTest1)
+{
+  geometry_msgs::Point p1, p2, p3, p4, p5, p6, p7, p8;
+  std::array<geometry_msgs::Point, 2> e1, e2, e3, e4;
+  std::vector<std::array<geometry_msgs::Point, 2> > segments;
+
+  p1.x = 0.0;
+  p1.y = 0.0;
+  p2.x = 5.0;
+  p2.y = 1.0;
+  p3.x = 2.0;
+  p3.y = 5.0;
+  p4.x = 6.0;
+  p4.y = 3.0;
+  p5.x = 7.0;
+  p5.y = 1.0;
+  p6.x = 8.0;
+  p6.y = 5.0;
+  p7.x = 3.0;
+  p7.y = 3.0;
+  p8.x = 5.0;
+  p8.y = 5.0;
+
+  e1.at(0) = p1;
+  e1.at(1) = p2;
+  e2.at(0) = p3;
+  e2.at(1) = p4;
+  e3.at(0) = p5;
+  e3.at(1) = p6;
+  e4.at(0) = p7;
+  e4.at(1) = p8;
+
+  segments.push_back(e1);
+  segments.push_back(e2);
+  segments.push_back(e3);
+  segments.push_back(e4);
+
+  std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> > intersecting_segments = intersect(segments);
+  EXPECT_EQ(1, intersecting_segments.size());
+  EXPECT_DOUBLE_EQ(p3.x, intersecting_segments.at(0).at(0).at(0).x);
+  EXPECT_DOUBLE_EQ(p3.y, intersecting_segments.at(0).at(0).at(0).y);
+  EXPECT_DOUBLE_EQ(p4.x, intersecting_segments.at(0).at(0).at(1).x);
+  EXPECT_DOUBLE_EQ(p4.y, intersecting_segments.at(0).at(0).at(1).y);
+  EXPECT_DOUBLE_EQ(p7.x, intersecting_segments.at(0).at(1).at(0).x);
+  EXPECT_DOUBLE_EQ(p7.y, intersecting_segments.at(0).at(1).at(0).y);
+  EXPECT_DOUBLE_EQ(p8.x, intersecting_segments.at(0).at(1).at(1).x);
+  EXPECT_DOUBLE_EQ(p8.y, intersecting_segments.at(0).at(1).at(1).y);
+}
+
+TEST(CGUtilTest, IntersectTest2)
+{
+  geometry_msgs::Point p1, p2, p3, p4;
+  std::array<geometry_msgs::Point, 2> e1, e2;
+
+  // TestCase1
+  // p1: (0, 0)
+  // p2: (3, 2)
+  // p3: (2, 0)
+  // p4: (0, 2)
+  // Expected value: true
+  p1.x = 0.0;
+  p1.y = 0.0;
+  p2.x = 3.0;
+  p2.y = 2.0;
+  p3.x = 2.0;
+  p3.y = 0.0;
+  p4.x = 0.0;
+  p4.y = 2.0;
+
+  e1.at(0) = p1;
+  e1.at(1) = p2;
+  e2.at(0) = p3;
+  e2.at(1) = p4;
+
+  EXPECT_TRUE(intersect(e1, e2));
+
+  // TestCase2
+  // p1: (0, 0)
+  // p2: (4, 2)
+  // p3: (2, 1)
+  // p4: (0, 2)
+  // Expected value: true
+  p1.x = 0.0;
+  p1.y = 0.0;
+  p2.x = 4.0;
+  p2.y = 2.0;
+  p3.x = 2.0;
+  p3.y = 1.0;
+  p4.x = 0.0;
+  p4.y = 2.0;
+
+  e1.at(0) = p1;
+  e1.at(1) = p2;
+  e2.at(0) = p3;
+  e2.at(1) = p4;
+
+  EXPECT_TRUE(intersect(e1, e2));
+
+  // TestCase3
+  // p1: (0, 0)
+  // p2: (4, 2)
+  // p3: (1, 1)
+  // p4: (0, 2)
+  // Expected value: false
+  p1.x = 0.0;
+  p1.y = 0.0;
+  p2.x = 4.0;
+  p2.y = 2.0;
+  p3.x = 1.0;
+  p3.y = 1.0;
+  p4.x = 0.0;
+  p4.y = 2.0;
+
+  e1.at(0) = p1;
+  e1.at(1) = p2;
+  e2.at(0) = p3;
+  e2.at(1) = p4;
+
+  EXPECT_FALSE(intersect(e1, e2));
+}
+
+TEST(CGUtilTest, InBetweenTest)
+{
+  geometry_msgs::Point p1, p2, p3;
+
+  // TestCase1
+  // p1: (0, 0)
+  // p2: (2, 2)
+  // p3: (1, 1)
+  // Expected value: true
+  p1.x = 0.0;
+  p1.y = 0.0;
+  p2.x = 2.0;
+  p2.y = 2.0;
+  p3.x = 1.0;
+  p3.y = 1.0;
+  EXPECT_TRUE(inBetween(p1, p2, p3));
+
+  // TestCase2
+  // p1: (0, 0)
+  // p2: (2, 2)
+  // p3: (1, 0)
+  // Expected value: false
+  p1.x = 0.0;
+  p1.y = 0.0;
+  p2.x = 2.0;
+  p2.y = 2.0;
+  p3.x = 1.0;
+  p3.y = 0.0;
+  EXPECT_FALSE(inBetween(p1, p2, p3));
+
+  // TestCase3
+  // p1: (0, 0)
+  // p2: (0, 0)
+  // p3: (0, 0)
+  // Expected value: true
+  p1.x = 0.0;
+  p1.y = 0.0;
+  p2.x = 0.0;
+  p2.y = 0.0;
+  p3.x = 0.0;
+  p3.y = 0.0;
+  EXPECT_TRUE(inBetween(p1, p2, p3));
+}
+
 /**
 * @brief Test for distance()
 */
@@ -308,9 +473,9 @@ TEST(CGUtilTest, CalcHorizontalAngleTest)
 }
 
 /**
-* @brief Test for signedAreaTriangle()
+* @brief Test for signedArea()
 */
-TEST(CGUtilTest, CalcSignedAreaTriangleTest)
+TEST(CGUtilTest, CalcsignedAreaTest)
 {
   geometry_msgs::Point p1, p2, p3;
 
@@ -325,7 +490,7 @@ TEST(CGUtilTest, CalcSignedAreaTriangleTest)
   p2.y = 0.0;
   p3.x = 0.0;
   p3.y = 1.0;
-  EXPECT_DOUBLE_EQ(1.0, signedAreaTriangle(p1, p2, p3));
+  EXPECT_DOUBLE_EQ(1.0, signedArea(p1, p2, p3));
 
   // TestCase2
   // p1: (0, 0)
@@ -338,7 +503,7 @@ TEST(CGUtilTest, CalcSignedAreaTriangleTest)
   p2.y = 0.0;
   p3.x = 0.0;
   p3.y = 1.0;
-  EXPECT_DOUBLE_EQ(-1.0, signedAreaTriangle(p1, p2, p3));
+  EXPECT_DOUBLE_EQ(-1.0, signedArea(p1, p2, p3));
 
   // TestCase3
   // p1: (-1, 0)
@@ -351,7 +516,7 @@ TEST(CGUtilTest, CalcSignedAreaTriangleTest)
   p2.y = 1.0;
   p3.x = 2.0;
   p3.y = -1.0;
-  EXPECT_DOUBLE_EQ(-5.0, signedAreaTriangle(p1, p2, p3));
+  EXPECT_DOUBLE_EQ(-5.0, signedArea(p1, p2, p3));
 
   // TestCase3
   // p1: (-1, 0)
@@ -364,7 +529,7 @@ TEST(CGUtilTest, CalcSignedAreaTriangleTest)
   p2.y = 1.0;
   p3.x = 1.0;
   p3.y = 1.0;
-  EXPECT_DOUBLE_EQ(0.0, signedAreaTriangle(p1, p2, p3));
+  EXPECT_DOUBLE_EQ(0.0, signedArea(p1, p2, p3));
 }
 
 /**

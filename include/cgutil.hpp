@@ -47,8 +47,7 @@
 * p_3.y - p_2.y\times p_3.x)
 *   \f}
 */
-inline double signedAreaTriangle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2,
-                                 const geometry_msgs::Point& p3)
+inline double signedArea(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3)
 {
   return p1.x * (p2.y - p3.y) - p1.y * (p2.x - p3.x) + (p2.x * p3.y - p2.y * p3.x);
 }
@@ -187,7 +186,7 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
   {
     for (size_t i = convex_hull.size() - 1; i > 1; --i)
     {
-      if (signedAreaTriangle(convex_hull.at(i - 1), convex_hull.at(i), point) >= 0)
+      if (signedArea(convex_hull.at(i - 1), convex_hull.at(i), point) >= 0)
       {
         break;
       }
@@ -198,6 +197,64 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
   }
 
   return convex_hull;
+}
+
+bool inBetween(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3,
+               double epsilon = 1e-5)
+{
+  if (p1.x < p2.x)
+  {
+    if (p3.x < p1.x or p2.x < p3.x)
+    {
+      return false;
+    }
+  }
+  else if (p2.x < p1.x)
+  {
+    if (p3.x < p2.x or p1.x < p3.x)
+    {
+      return false;
+    }
+  }
+  else
+  {
+    if (p3.x < p1.x)
+    {
+      return false;
+    }
+  }
+  return std::abs(vertexAngle(p1, p2, p3)) < epsilon;
+}
+
+bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::array<geometry_msgs::Point, 2>& edge2)
+{
+  if (inBetween(edge1.at(0), edge1.at(1), edge2.at(0)) or inBetween(edge1.at(0), edge1.at(1), edge2.at(1)) or
+      inBetween(edge2.at(0), edge2.at(1), edge1.at(0)) or inBetween(edge2.at(0), edge2.at(1), edge1.at(0)))
+  {
+    return true;
+  }
+  return (signedArea(edge1.at(0), edge1.at(1), edge2.at(0)) * signedArea(edge1.at(0), edge1.at(1), edge2.at(1)) < 0 and
+          signedArea(edge2.at(0), edge2.at(1), edge1.at(0)) * signedArea(edge2.at(0), edge2.at(1), edge1.at(1)) < 0);
+}
+
+std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> >
+intersect(const std::vector<std::array<geometry_msgs::Point, 2> >& segments)
+{
+  std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> > intersecting_segments;
+  for (size_t i = 0; i < segments.size() - 1; ++i)
+  {
+    for (size_t j = i + 1; j < segments.size(); ++j)
+    {
+      if (intersect(segments.at(i), segments.at(j)))
+      {
+        std::array<std::array<geometry_msgs::Point, 2>, 2> segment;
+        segment.at(0) = segments.at(i);
+        segment.at(1) = segments.at(j);
+        intersecting_segments.push_back(segment);
+      }
+    }
+  }
+  return intersecting_segments;
 }
 
 #endif
