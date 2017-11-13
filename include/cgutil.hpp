@@ -47,8 +47,7 @@
 * p_3.y - p_2.y\times p_3.x)
 *   \f}
 */
-inline double signedAreaTriangle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2,
-                                 const geometry_msgs::Point& p3)
+inline double signedArea(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3)
 {
   return p1.x * (p2.y - p3.y) - p1.y * (p2.x - p3.x) + (p2.x * p3.y - p2.y * p3.x);
 }
@@ -187,7 +186,7 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
   {
     for (size_t i = convex_hull.size() - 1; i > 1; --i)
     {
-      if (signedAreaTriangle(convex_hull.at(i - 1), convex_hull.at(i), point) >= 0)
+      if (signedArea(convex_hull.at(i - 1), convex_hull.at(i), point) >= 0)
       {
         break;
       }
@@ -198,6 +197,91 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
   }
 
   return convex_hull;
+}
+
+/**
+* @brief Checks if given point p3 is in between p1 and p2
+* @param p1 A vertex of an edge(p1, p2)
+* @param p2 A vertex of an edge(p1, p2)
+* @param p3 A point checked if beeing in between p1 and p2
+* @param epsilon Threshold for a vertex angle
+* @return True if p3 is in between p1 and p2 else returns False
+*/
+bool inBetween(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3,
+               double epsilon = 1e-5)
+{
+  // if p1 is located on the left of p2
+  if (p1.x < p2.x)
+  {
+    // false if p3 is not in between p1 and p2
+    if (p3.x < p1.x or p2.x < p3.x)
+    {
+      return false;
+    }
+  }
+  // if p2 is located on the left of p1
+  else if (p2.x < p1.x)
+  {
+    // false if p3 is not in between p1 and p2
+    if (p3.x < p2.x or p1.x < p3.x)
+    {
+      return false;
+    }
+  }
+  // if p1 and p2 are located on the same point
+  else
+  {
+    // false if p1, p2 and p3 are not the same point
+    if (p3.x < p1.x)
+    {
+      return false;
+    }
+  }
+  // true if vertex angle of p3 is smaller than threshold
+  return std::abs(vertexAngle(p1, p2, p3)) < epsilon;
+}
+
+/**
+* @brief Checks if given edges intersect each other
+* @param edge1 An edge
+* @param edge2 An edge
+* @return True if two edges intersect
+*/
+bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::array<geometry_msgs::Point, 2>& edge2)
+{
+  // true if a vertex on an edge is in between the other edge
+  if (inBetween(edge1.at(0), edge1.at(1), edge2.at(0)) or inBetween(edge1.at(0), edge1.at(1), edge2.at(1)) or
+      inBetween(edge2.at(0), edge2.at(1), edge1.at(0)) or inBetween(edge2.at(0), edge2.at(1), edge1.at(0)))
+  {
+    return true;
+  }
+  return (signedArea(edge1.at(0), edge1.at(1), edge2.at(0)) * signedArea(edge1.at(0), edge1.at(1), edge2.at(1)) < 0 and
+          signedArea(edge2.at(0), edge2.at(1), edge1.at(0)) * signedArea(edge2.at(0), edge2.at(1), edge1.at(1)) < 0);
+}
+
+/**
+* @brief Returns intersecting edges using brute force method
+* @param segments Line segments are to be checked if it is in intersection
+* @return Pairs of intersecting segments
+*/
+std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> >
+intersect(const std::vector<std::array<geometry_msgs::Point, 2> >& segments)
+{
+  std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> > intersecting_segments;
+  for (size_t i = 0; i < segments.size() - 1; ++i)
+  {
+    for (size_t j = i + 1; j < segments.size(); ++j)
+    {
+      if (intersect(segments.at(i), segments.at(j)))
+      {
+        std::array<std::array<geometry_msgs::Point, 2>, 2> segment;
+        segment.at(0) = segments.at(i);
+        segment.at(1) = segments.at(j);
+        intersecting_segments.push_back(segment);
+      }
+    }
+  }
+  return intersecting_segments;
 }
 
 #endif
