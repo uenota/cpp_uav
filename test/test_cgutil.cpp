@@ -1,13 +1,13 @@
 /**
-* @file test_cgutil.cpp
-* @brief Test program for cgutil.hpp
-* @author Takaki Ueno
-*/
+ * @file test_cgutil.cpp
+ * @brief Test program for cgutil.hpp
+ * @author Takaki Ueno
+ */
 
 /*
-* Copyright (c) 2017 Takaki Ueno
-* Released under the MIT license
-*/
+ * Copyright (c) 2017 Takaki Ueno
+ * Released under the MIT license
+ */
 
 #include <cgutil.hpp>
 
@@ -188,8 +188,8 @@ TEST(CGUtilTest, InBetweenTest)
 }
 
 /**
-* @brief Test for distance()
-*/
+ * @brief Test for distance()
+ */
 TEST(CGUtilTest, CalcDistanceTest)
 {
   // TestCase1
@@ -316,8 +316,8 @@ TEST(CGUtilTest, CalcDistanceTest)
 }
 
 /**
-* @brief Test for vertexAngle()
-*/
+ * @brief Test for vertexAngle()
+ */
 TEST(CGUtilTest, CalcVertexAngleTest)
 {
   geometry_msgs::Point p1, p2, p3;
@@ -415,8 +415,8 @@ TEST(CGUtilTest, CalcVertexAngleTest)
 }
 
 /**
-* @brief Test for horizontalAngle()
-*/
+ * @brief Test for horizontalAngle()
+ */
 TEST(CGUtilTest, CalcHorizontalAngleTest)
 {
   geometry_msgs::Point p1, p2;
@@ -473,8 +473,8 @@ TEST(CGUtilTest, CalcHorizontalAngleTest)
 }
 
 /**
-* @brief Test for signedArea()
-*/
+ * @brief Test for signedArea()
+ */
 TEST(CGUtilTest, CalcsignedAreaTest)
 {
   geometry_msgs::Point p1, p2, p3;
@@ -533,8 +533,8 @@ TEST(CGUtilTest, CalcsignedAreaTest)
 }
 
 /**
-* @brief Test for grahamScan()
-*/
+ * @brief Test for grahamScan()
+ */
 TEST(CGUtilTest, GrahamScanTest)
 {
   geometry_msgs::Point p1, p2, p3, p4, p5, p6, p7;
@@ -762,6 +762,66 @@ TEST(CGUtilTest, GrahamScanTest)
   EXPECT_DOUBLE_EQ(p4.y, convex_hull.at(2).y);
 
   points.clear();
+}
+
+TEST(CGUtilTest, IsConvexTest1)
+{
+  geometry_msgs::Point p1, p2, p3, p4, p5;
+  std::vector<geometry_msgs::Point> points;
+
+  // TestCase1
+  // p1: (0, 0)
+  // p2: (4, 1)
+  // p3: (6, 4)
+  // p4: (3, 5)
+  // p5: (0, 3)
+  // Expected value: True
+  p1.x = 0.0;
+  p1.y = 0.0;
+  p2.x = 4.0;
+  p2.y = 1.0;
+  p3.x = 6.0;
+  p3.y = 4.0;
+  p4.x = 3.0;
+  p4.y = 5.0;
+  p5.x = 0.0;
+  p5.y = 3.0;
+
+  points.push_back(p1);
+  points.push_back(p2);
+  points.push_back(p3);
+  points.push_back(p4);
+  points.push_back(p5);
+
+  EXPECT_TRUE(isConvex(points));
+}
+
+TEST(CGUtilTest, IsConvexTest2)
+{
+  geometry_msgs::Point p1, p2, p3, p4, p5;
+  std::vector<geometry_msgs::Point> points;
+
+  // TestCase2
+  // p1: (0, 0)
+  // p2: (1, 0)
+  // p3: (1, 0)
+  // p4: (1, 1)
+  // Expected points in convex hull: (p1, p3, p4)
+  p1.x = 0.0;
+  p1.y = 0.0;
+  p2.x = 1.0;
+  p2.y = 0.0;
+  p3.x = 1.0;
+  p3.y = 0.0;
+  p4.x = 1.0;
+  p4.y = 1.0;
+
+  points.push_back(p1);
+  points.push_back(p2);
+  points.push_back(p3);
+  points.push_back(p4);
+
+  EXPECT_FALSE(isConvex(points));
 }
 
 int main(int argc, char** argv)
