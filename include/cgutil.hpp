@@ -1,13 +1,13 @@
 /**
-* @file torres_etal_2016.hpp
-* @brief Utility for computational geometry
-* @author Takaki Ueno
-*/
+ * @file torres_etal_2016.hpp
+ * @brief Utility for computational geometry
+ * @author Takaki Ueno
+ */
 
 /*
-* Copyright (c) 2017 Takaki Ueno
-* Released under the MIT license
-*/
+ * Copyright (c) 2017 Takaki Ueno
+ * Released under the MIT license
+ */
 
 #ifndef INCLUDED_cgutil_hpp_
 #define INCLUDED_cgutil_hpp_
@@ -24,41 +24,41 @@
 #include <geometry_msgs/Point.h>
 
 /**
-* @brief Calculates signed area of given triangle
-* @param p1 The origin of vector \f$ \vec{p_1p_2} \f$ and \f$ \vec{p_1p_3} \f$
-* @param p2 The end point of vector \f$ \vec{p_1p_2} \f$
-* @param p3 The end point of vector \f$ \vec{p_1p_3} \f$
-* @return Signed area of given triangle
-*
-* Signed area of triangle \f$ S(p1, p2, p3) \f$ is
-* half of the outer product of vector \f$ \vec{p_1p_2} \f$ and \f$ \vec{p_1p_3}
-* \f$.\n
-* \f[ S(p_1, p_2, p_3) = \frac{1}{2} \vec{p_1p_2} \times \vec{p_1p_3}\f] \n
-* And that can be written as follows,\n
-*   \f{eqnarray*}{
-*       S(p_1, p_2, p_3) & = & \frac{1}{2} \left|
-*           \begin{array}{ccc}
-*               p_1.x & p_1.y & 1 \\
-*               p_2.x & p_2.y & 1 \\
-*               p_3.x & p_3.y & 1
-*           \end{array}
-*       \right| \\
-*           & = & p_1.x(p_2.y - p_3.y) - p_1.y(p_2.x - p_3.x) - (p_2.x\times
-* p_3.y - p_2.y\times p_3.x)
-*   \f}
-*/
+ * @brief Calculates signed area of given triangle
+ * @param p1 The origin of vector \f$ \vec{p_1p_2} \f$ and \f$ \vec{p_1p_3} \f$
+ * @param p2 The end point of vector \f$ \vec{p_1p_2} \f$
+ * @param p3 The end point of vector \f$ \vec{p_1p_3} \f$
+ * @return Signed area of given triangle
+ *
+ * Signed area of triangle \f$ S(p1, p2, p3) \f$ is
+ * half of the outer product of vector \f$ \vec{p_1p_2} \f$ and \f$ \vec{p_1p_3}
+ * \f$.\n
+ * \f[ S(p_1, p_2, p_3) = \frac{1}{2} \vec{p_1p_2} \times \vec{p_1p_3}\f] \n
+ * And that can be written as follows,\n
+ *   \f{eqnarray*}{
+ *       S(p_1, p_2, p_3) & = & \frac{1}{2} \left|
+ *           \begin{array}{ccc}
+ *               p_1.x & p_1.y & 1 \\
+ *               p_2.x & p_2.y & 1 \\
+ *               p_3.x & p_3.y & 1
+ *           \end{array}
+ *       \right| \\
+ *           & = & p_1.x(p_2.y - p_3.y) - p_1.y(p_2.x - p_3.x) - (p_2.x\times
+ * p_3.y - p_2.y\times p_3.x)
+ *   \f}
+ */
 inline double signedArea(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3)
 {
   return p1.x * (p2.y - p3.y) - p1.y * (p2.x - p3.x) + (p2.x * p3.y - p2.y * p3.x);
 }
 
 /**
-* @brief Calculates angle between segment p1p2 and p1p3
-* @param p1 A vertex which is the origin of segment p1p2 and p1p3
-* @param p2 The other point of segment p1p2
-* @param p3 The other point of segment p1p3
-* @return Angle between segment p1p2 and p1p3 in radian [0, pi)
-*/
+ * @brief Calculates angle between segment p1p2 and p1p3
+ * @param p1 A vertex which is the origin of segment p1p2 and p1p3
+ * @param p2 The other point of segment p1p2
+ * @param p3 The other point of segment p1p3
+ * @return Angle between segment p1p2 and p1p3 in radian [0, pi)
+ */
 double vertexAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3)
 {
   // Length of edges composed of vertices
@@ -85,11 +85,11 @@ double vertexAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p
 }
 
 /**
-* @brief Calculates angle between segment p1p2 and horizontal line
-* @param p1 A vertex which is the origin of segment p1p2
-* @param p2 The other vertex of segment p1p2
-* @return Vertex angle of p1 in radian [0, pi)
-*/
+ * @brief Calculates angle between segment p1p2 and horizontal line
+ * @param p1 A vertex which is the origin of segment p1p2
+ * @param p2 The other vertex of segment p1p2
+ * @return Vertex angle of p1 in radian [0, pi)
+ */
 double horizontalAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
 {
   geometry_msgs::Point p3;
@@ -99,11 +99,11 @@ double horizontalAngle(const geometry_msgs::Point& p1, const geometry_msgs::Poin
 }
 
 /**
-* @brief Calculates distance between given edge and vertex
-* @param edge An edge of given polygon
-* @param vertex A vertex of given polygon
-* @return double Distance between edge and vertex
-*/
+ * @brief Calculates distance between given edge and vertex
+ * @param edge An edge of given polygon
+ * @param vertex A vertex of given polygon
+ * @return double Distance between edge and vertex
+ */
 double distance(const std::array<geometry_msgs::Point, 2>& edge, const geometry_msgs::Point& vertex)
 {
   // Vertices of triangle
@@ -131,12 +131,12 @@ double distance(const std::array<geometry_msgs::Point, 2>& edge, const geometry_
 }
 
 /**
-* @brief Returns convex hull of given points
-* @param points A set of points in the plane
-* @return Convex hull of given points
-*
-* This function is based on graham scan algorithm
-*/
+ * @brief Returns convex hull of given points
+ * @param points A set of points in the plane
+ * @return Convex hull of given points
+ *
+ * This function is based on graham scan algorithm
+ */
 std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> points)
 {
   // convex hull
@@ -199,35 +199,67 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
   return convex_hull;
 }
 
+/**
+ * @brief Checks if given polygon is convex or not
+ * @param points Points consisting of polygon is to be checked
+ * @return True if given polygon is convex, false if it's not convex
+ */
+inline bool isConvex(std::vector<geometry_msgs::Point> points)
+{
+  return grahamScan(points).size() == points.size();
+}
+
+/**
+ * @brief Checks if given point p3 is in between p1 and p2
+ * @param p1 A vertex of an edge(p1, p2)
+ * @param p2 A vertex of an edge(p1, p2)
+ * @param p3 A point checked if beeing in between p1 and p2
+ * @param epsilon Threshold for a vertex angle
+ * @return True if p3 is in between p1 and p2 else returns False
+ */
 bool inBetween(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3,
                double epsilon = 1e-5)
 {
+  // if p1 is located on the left of p2
   if (p1.x < p2.x)
   {
+    // false if p3 is not in between p1 and p2
     if (p3.x < p1.x or p2.x < p3.x)
     {
       return false;
     }
   }
+  // if p2 is located on the left of p1
   else if (p2.x < p1.x)
   {
+    // false if p3 is not in between p1 and p2
     if (p3.x < p2.x or p1.x < p3.x)
     {
       return false;
     }
   }
+  // if p1 and p2 are located on the same point
   else
   {
+    // false if p1, p2 and p3 are not the same point
     if (p3.x < p1.x)
     {
       return false;
     }
   }
+  // true if vertex angle of p3 is smaller than threshold
   return std::abs(vertexAngle(p1, p2, p3)) < epsilon;
 }
 
+/**
+ * @brief Checks if given edges intersect each other
+ * @param edge1 An edge
+ * @param edge2 An edge
+ * @return True if two edges intersect
+ */
 bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::array<geometry_msgs::Point, 2>& edge2)
 {
+  // true if a vertex on an edge is in between the other edge
   if (inBetween(edge1.at(0), edge1.at(1), edge2.at(0)) or inBetween(edge1.at(0), edge1.at(1), edge2.at(1)) or
       inBetween(edge2.at(0), edge2.at(1), edge1.at(0)) or inBetween(edge2.at(0), edge2.at(1), edge1.at(0)))
   {
@@ -237,6 +269,11 @@ bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::arra
           signedArea(edge2.at(0), edge2.at(1), edge1.at(0)) * signedArea(edge2.at(0), edge2.at(1), edge1.at(1)) < 0);
 }
 
+/**
+ * @brief Returns intersecting edges using brute force method
+ * @param segments Line segments are to be checked if it is in intersection
+ * @return Pairs of intersecting segments
+ */
 std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> >
 intersect(const std::vector<std::array<geometry_msgs::Point, 2> >& segments)
 {
