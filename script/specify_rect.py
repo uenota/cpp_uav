@@ -380,6 +380,7 @@ class PolygonBuilder(object):
             for point in self.points["waypoints"]:
                 waypoint_xs.append(point.x)
                 waypoint_ys.append(point.y)
+                print(point)
             self.lines["path"].set_data(waypoint_xs, waypoint_ys)
             self.lines["path"].figure.canvas.draw()
         except rospy.ServiceException as ex:
