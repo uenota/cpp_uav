@@ -23,6 +23,25 @@
 // geometry_msgs
 #include <geometry_msgs/Point.h>
 
+// Function definitions
+inline double signedArea(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2,
+                         const geometry_msgs::Point& p3);
+double vertexAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3);
+double horizontalAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2);
+double distance(const std::array<geometry_msgs::Point, 2>& edge, const geometry_msgs::Point& vertex);
+std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> points);
+inline bool isConvex(std::vector<geometry_msgs::Point> points);
+bool inBetween(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3,
+               double epsilon = 1e-5);
+bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::array<geometry_msgs::Point, 2>& edge2);
+std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> >
+intersect(const std::vector<std::array<geometry_msgs::Point, 2> >& segments);
+std::vector<geometry_msgs::Point> rotatePolygon(const std::vector<geometry_msgs::Point>& polygon, double angle_rad);
+std::vector<geometry_msgs::Point> horizonBaseEdge(const std::vector<geometry_msgs::Point>& polygon,
+                                                  const std::array<geometry_msgs::Point, 2>& base_edge);
+std::array<geometry_msgs::Point, 2> intersection(std::array<geometry_msgs::Point, 2> edge1,
+                                                 std::array<geometry_msgs::Point, 2> edge2);
+
 /**
  * @brief Calculates signed area of given triangle
  * @param p1 The origin of vector \f$ \vec{p_1p_2} \f$ and \f$ \vec{p_1p_3} \f$
@@ -292,6 +311,47 @@ intersect(const std::vector<std::array<geometry_msgs::Point, 2> >& segments)
     }
   }
   return intersecting_segments;
+}
+
+std::vector<geometry_msgs::Point> rotatePolygon(const std::vector<geometry_msgs::Point>& polygon, double angle_rad)
+{
+  std::array<double, 4> rotation_matrix;
+  rotation_matrix.at(0) = std::cos(angle_rad);
+  rotation_matrix.at(1) = -std::sin(angle_rad);
+  rotation_matrix.at(2) = std::sin(angle_rad);
+  rotation_matrix.at(3) = std::cos(angle_rad);
+
+  std::vector<geometry_msgs::Point> rotated_polygon;
+
+  for (const auto& vertex : polygon)
+  {
+    geometry_msgs::Point pt;
+    pt.x = rotation_matrix.at(0) * vertex.x + rotation_martix.at(1) + vertex.y;
+    pt.y = rotation_matrix.at(2) * vertex.x + rotation_martix.at(3) + vertex.y;
+    rotated_polygon.push_back(pt);
+  }
+  return rotated_polygon;
+}
+
+std::vector<geometry_msgs::Point> horizonBaseEdge(const std::vector<geometry_msgs::Point>& polygon,
+                                                  const std::array<geometry_msgs::Point, 2>& base_edge)
+{
+  double horizontal_angle = horizontalAngle(base_edge.at(0), base_edge.at(1));
+  return rotatePolygon(polygon, horizontal_angle);
+}
+
+std::array<geometry_msgs::Point, 2> intersection(std::array<geometry_msgs::Point, 2> edge1,
+                                                 std::array<geometry_msgs::Point, 2> edge2)
+{
+  std::array<geometry_msgs::Point, 2> intersection;
+
+  if (not intersect(edge1, edge2))
+  {
+    return intersection;
+  }
+
+  ROS_INFO("Not implemented yet");
+  return intersection;
 }
 
 #endif
