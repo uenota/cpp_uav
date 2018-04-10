@@ -297,7 +297,6 @@ intersect(const std::vector<std::array<geometry_msgs::Point, 2> >& segments)
 geometry_msgs::Point localizeIntersection(const std::array<geometry_msgs::Point, 2>& edge1,
                                           const std::array<geometry_msgs::Point, 2>& edge2)
 {
-<<<<<<< HEAD
   geometry_msgs::Point p1, p2, p3, p4;
   p1 = edge1.at(0);
   p2 = edge1.at(1);
@@ -316,16 +315,6 @@ geometry_msgs::Point localizeIntersection(const std::array<geometry_msgs::Point,
   geometry_msgs::Point intersection;
   intersection.x = p1.x + lambda * (p2.x - p1.x);
   intersection.y = p1.y + lambda * (p2.y - p1.y);
-=======
-  double a1 = (edge1.at(1).y - edge1.at(0).y) / (edge1.at(1).x - edge1.at(0).x);
-  double b1 = edge1.at(1).y - a1 * edge1.at(1).x;
-  double a2 = (edge2.at(1).y - edge2.at(0).y) / (edge2.at(1).x - edge2.at(0).x);
-  double b2 = edge2.at(1).y - a1 * edge2.at(1).x;
-
-  geometry_msgs::Point intersection;
-  intersection.x = (b2 - b1) / (a1 - a2);
-  intersection.y = b1 * intersection.x;
->>>>>>> c14eb12... TEMP COMMIT (NEED REBASE)
 
   return intersection;
 }
@@ -348,16 +337,6 @@ std::vector<geometry_msgs::Point> rotatePoints(const std::vector<geometry_msgs::
     rotated_points.push_back(pt);
   }
   return rotated_points;
-<<<<<<< HEAD
-=======
-}
-
-std::vector<geometry_msgs::Point> horizonBaseEdge(const std::vector<geometry_msgs::Point>& polygon,
-                                                  const std::array<geometry_msgs::Point, 2>& base_edge)
-{
-  double horizontal_angle = horizontalAngle(base_edge.at(0), base_edge.at(1));
-  return rotatePoints(polygon, -horizontal_angle);
->>>>>>> c14eb12... TEMP COMMIT (NEED REBASE)
 }
 
 #endif
