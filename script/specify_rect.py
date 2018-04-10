@@ -33,6 +33,7 @@ if matplotlib.__version__ >= "2.1.0":
     from matplotlib.widgets import Button
     from matplotlib.widgets import TextBox
     from matplotlib.widgets import RadioButtons
+    from matplotlib.widgets import Slider
 else:
     print("Matplotlib 2.1.0 or newer is required to run this node.")
     print("Please update or install Matplotlib.")
@@ -176,27 +177,27 @@ class PolygonBuilder(object):
         #  - horizontal_overwrap_box: TextBox object to get input for horizontal_overwrap
         #  - vertical_overwrap_box: TextBox object to get input for vertical_overwrap
         self.text_boxes = {"image_resolution_h_box":
-                           TextBox(plt.axes([0.25, 0.2, 0.1, 0.075]),
+                           TextBox(plt.axes([0.25, 0.25, 0.1, 0.05]),
                                    "Image Height [px]",
                                    initial=str(self.shooting_cond["image_resolution_h"])),
                            "image_resolution_w_box":
-                               TextBox(plt.axes([0.6, 0.2, 0.1, 0.075]),
+                               TextBox(plt.axes([0.6, 0.25, 0.1, 0.05]),
                                        "Image Width [px]",
                                        initial=str(self.shooting_cond["image_resolution_w"])),
                            "angle_of_view_box":
-                               TextBox(plt.axes([0.25, 0.1, 0.1, 0.075]),
+                               TextBox(plt.axes([0.25, 0.175, 0.1, 0.05]),
                                        "Angle of view [deg]",
                                        initial=str(self.shooting_cond["angle_of_view"])),
                            "height_box":
-                               TextBox(plt.axes([0.6, 0.1, 0.1, 0.075]),
+                               TextBox(plt.axes([0.6, 0.175, 0.1, 0.05]),
                                        "Height [m]",
                                        initial=str(self.shooting_cond["height"])),
                            "horizontal_overwrap_box":
-                               TextBox(plt.axes([0.25, 0.01, 0.1, 0.075]),
+                               TextBox(plt.axes([0.25, 0.1, 0.1, 0.05]),
                                        "Horizontal Overwrap [%]",
                                        initial=str(self.coverage_params["horizontal_overwrap"].data)),
                            "vertical_overwrap_box":
-                               TextBox(plt.axes([0.6, 0.01, 0.1, 0.075]),
+                               TextBox(plt.axes([0.6, 0.1, 0.1, 0.05]),
                                        "Vertical Overwrap [%]",
                                        initial=str(self.coverage_params["vertical_overwrap"].data))
                            }
@@ -241,6 +242,11 @@ class PolygonBuilder(object):
                        "end_point":
                            None
                        }
+
+        self.slider = Slider(plt.axes([0.25, 0.01, 0.45, 0.02]),
+                             "Magnification", 0.1, 10, valinit=1)
+
+        self.slider.on_changed(self.update_magnification)
 
         # plot a figure
         plt.show()
@@ -523,6 +529,10 @@ class PolygonBuilder(object):
         except rospy.ServiceException as ex:
             rospy.logerr(str(ex))
             return
+
+    def update_magnification(self, val):
+        self.axis.set_ylim([-100 / val, 100 / val])
+        self.axis.set_xlim([-100 / val, 100 / val])
 
 
 def init_node():
