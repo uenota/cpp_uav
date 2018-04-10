@@ -339,11 +339,4 @@ std::vector<geometry_msgs::Point> rotatePoints(const std::vector<geometry_msgs::
   return rotated_points;
 }
 
-std::vector<geometry_msgs::Point> horizonBaseEdge(const std::vector<geometry_msgs::Point>& polygon,
-                                                  const std::array<geometry_msgs::Point, 2>& base_edge)
-{
-  double horizontal_angle = horizontalAngle(base_edge.at(0), base_edge.at(1));
-  return rotatePoints(polygon, -horizontal_angle);
-}
-
 #endif
