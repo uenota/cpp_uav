@@ -136,22 +136,22 @@ class PolygonBuilder(object):
                                 "horizontal_overwrap": Float64(0.3),
                                 "vertical_overwrap": Float64(0.2)}
 
-        # @var algorithm_names
+        # @var modes
         #  Dictionary of algorithm names and corresponding server names
-        self.algorithm_names = {"Torres et, al. 2016":
-                                {"name": "cpp_torres16", "message": Torres16}}
+        self.modes = {"Polygon Coverage": {
+            "name": "cpp_torres16", "message": Torres16}}
 
-        # @var algorithm_name
+        # @var mode
         #  An algorithm name used to calculate path
-        self.algorithm_name = self.algorithm_names.keys()[0]
+        self.mode = self.modes.keys()[0]
 
-        # @var algorithm_name_rdbutton
+        # @var mode_rdbutton
         #  Radio button to choose an algorithm
-        self.algorithm_name_rdbutton = RadioButtons(plt.axes([0.75, 0.01, 0.22, 0.21]),
-                                                    self.algorithm_names.keys())
+        self.mode_rdbutton = RadioButtons(plt.axes([0.75, 0.01, 0.22, 0.21]),
+                                          self.modes.keys())
 
         # Register a callback function for a radio button
-        self.algorithm_name_rdbutton.on_clicked(self.algorithm_name_update)
+        self.mode_rdbutton.on_clicked(self.mode_update)
 
         # @var buttons
         #  Dictionary of buttons
@@ -227,7 +227,7 @@ class PolygonBuilder(object):
         #  - aspect_ratio_text: Text object to display aspect_ratio
         #  - footprint_length_text: Text object to display footprint_length
         #  - footprint_width_text: Text object to display footprint_width
-        #  - algorithm_name_text: Text object to display algorithm_name
+        #  - mode_text: Text object to display mode
         #  - start_point: Text object to display start point
         #  - end_point: Text object to display end point
         self.labels = {"aspect_ratio_text":
@@ -241,9 +241,9 @@ class PolygonBuilder(object):
                            plt.text(2, 4.5,
                                     "Footprint Width [m]:\n    " +
                                     str(round(self.coverage_params["footprint_width"].data, 2))),
-                       "algorithm_name_text":
+                       "mode_text":
                            plt.text(1.5, 3,
-                                    "Algorithm:\n    " + self.algorithm_name),
+                                    "Algorithm:\n    " + self.mode),
                        "start_point":
                            None,
                        "end_point":
@@ -351,17 +351,17 @@ class PolygonBuilder(object):
 
         # assign server node if server node is None
         if not self.server_node:
-            rospy.loginfo("Waiting for %s.", self.algorithm_name)
+            rospy.loginfo("Waiting for %s.", self.mode)
             try:
-                rospy.wait_for_service(self.algorithm_names[self.algorithm_name]["name"],
+                rospy.wait_for_service(self.modes[self.mode]["name"],
                                        timeout=5.0)
             except rospy.ROSException:
-                rospy.logerr("%s not found.", self.algorithm_name)
+                rospy.logerr("%s not found.", self.mode)
                 return
             try:
                 self.server_node = rospy.ServiceProxy(
-                    self.algorithm_names[self.algorithm_name]["name"],
-                    self.algorithm_names[self.algorithm_name]["message"])
+                    self.modes[self.mode]["name"],
+                    self.modes[self.mode]["message"])
             except rospy.ServiceException as ex:
                 rospy.logerr(str(ex))
                 return
@@ -516,23 +516,23 @@ class PolygonBuilder(object):
             self.text_boxes["vertical_overwrap_box"].\
                 set_val(str(self.coverage_params["vertical_overwrap"]))
 
-    def algorithm_name_update(self, label):
+    def mode_update(self, label):
         """!
-        Callback function for algorithm_name_rdbutton
+        Callback function for mode_rdbutton
         @param label Label of a chosen item
         """
-        self.algorithm_name = label
-        rospy.loginfo("Waiting for %s.", self.algorithm_name)
+        self.mode = label
+        rospy.loginfo("Waiting for %s.", self.mode)
         try:
             rospy.wait_for_service(
-                self.algorithm_names[self.algorithm_name]["name"], timeout=5.0)
+                self.modes[self.mode]["name"], timeout=5.0)
         except rospy.ROSException:
-            rospy.logerr("%s not found.", self.algorithm_name)
+            rospy.logerr("%s not found.", self.mode)
             return
         try:
             self.server_node = rospy.ServiceProxy(
-                self.algorithm_names[self.algorithm_name]["name"],
-                self.algorithm_names[self.algorithm_name]["message"])
+                self.modes[self.mode]["name"],
+                self.modes[self.mode]["message"])
         except rospy.ServiceException as ex:
             rospy.logerr(str(ex))
             return
