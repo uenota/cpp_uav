@@ -51,11 +51,18 @@ class PolygonBuilder(object):
 
         # @var fig
         #  Figure instance
-        self.fig = plt.figure(figsize=(8, 6))
+        self.fig = plt.figure(figsize=(10, 8))
 
         # @var axis
         #  Axis object where polygon is shown
         self.axis = self.fig.add_subplot(111)
+
+        # adjust the size of graph
+        self.axis.set_ylim([-100, 100])
+        self.axis.set_xlim([-100, 100])
+
+        # set aspect ratio so that aspect ration of graph become 1
+        self.axis.set_aspect('equal', adjustable="box")
 
         self.fig.subplots_adjust(top=0.95, bottom=0.35, right=0.79)
 
