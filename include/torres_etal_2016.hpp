@@ -115,93 +115,87 @@ Direction sweepDirection(const std::vector<geometry_msgs::Point>& polygon)
 std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs::Point>& polygon,
                                                  double footprint_width, double horizontal_overwrap)
 {
-  std::vector<geometry_msgs::Point> waypoints;
-
   Direction dir = sweepDirection(polygon);
 
-  // Base edge vector and its norm
-  std::array<double, 2> base_edge_vector;
-  double base_edge_vector_x, base_edge_vector_y, base_edge_vector_norm;
-  base_edge_vector_x = dir.base_edge.at(1).x - dir.base_edge.at(0).x;
-  base_edge_vector_y = dir.base_edge.at(1).y - dir.base_edge.at(0).y;
-  base_edge_vector_norm = std::sqrt(std::pow(base_edge_vector_x, 2) + std::pow(base_edge_vector_y, 2));
+  double rotationAngle = horizontalAngle(dir.base_edge.front(), dir.base_edge.back());
 
-  // The vector whose origin is the same as base_edges' one
-  // and the end is opposed_vertex in Direction
-  std::array<double, 2> another_edge_vector;
-  double another_edge_vector_x, another_edge_vector_y, another_edge_vector_norm;
-  another_edge_vector_x = dir.opposed_vertex.x - dir.base_edge.at(0).x;
-  another_edge_vector_y = dir.opposed_vertex.y - dir.base_edge.at(0).y;
-  another_edge_vector_norm = std::sqrt(std::pow(another_edge_vector_x, 2) - std::pow(another_edge_vector_y, 2));
-
-  // inner product
-  double inner_product = base_edge_vector_x * another_edge_vector_x + base_edge_vector_y * another_edge_vector_y;
-
-  // the distance from base_edge's origin to the point where the perpendicular line and base_edge intersect
-  double distance_to_foot = inner_product / base_edge_vector_norm;
-
-  // the vector from the origin of base_edge_vector to foot of orthogonal
-  double orthogonal_vector_x, orthogonal_vector_y;
-  orthogonal_vector_x = (distance_to_foot / base_edge_vector_norm) * base_edge_vector_x;
-  orthogonal_vector_y = (distance_to_foot / base_edge_vector_norm) * base_edge_vector_y;
-
-  // convert orthogonal vector's origion into the global origin
-  orthogonal_vector_x += dir.base_edge.at(0).x;
-  orthogonal_vector_y += dir.base_edge.at(0).y;
-
-  geometry_msgs::Point orth_pt;
-  orth_pt.x = orthogonal_vector_x;
-  orth_pt.y = orthogonal_vector_y;
-
-  o_pt.x = dir.opposed_vertex.x;
-  o_pt.y = dir.opposed_vertex.y;
-
-  std::array<geometry_msgs::Point, 2> sweep_direction_vec;
-  sweep_direction_vec.at(0) = orth_pt;
-  sweep_direction_vec.at(1) = dir.opposed_vertex;
-
-  double sweep_direction_vec_norm = std::sqrt(std::pow(sweep_direction_vec.at(1).x - sweep_direction_vec.at(0).x, 2) +
-                                              std::pow(sweep_direction_vec.at(1).y - sweep_direction_vec.at(0).y, 2));
-
-  std::array<double, 2> sweep_dir_vec_normalized;
-  sweep_dir_vec_normalized.at(0) =
-      (sweep_direction_vec.at(1).x - sweep_direction_vec.at(0).x) / sweep_direction_vec_norm;
-  sweep_dir_vec_normalized.at(1) =
-      (sweep_direction_vec.at(1).y - sweep_direction_vec.at(0).y) / sweep_direction_vec_norm;
-
-  double smallest_y(0), largest_y(0);
-  for (const auto& vertex : polygon)
-  {
-    if (vertex.y < smallest_y)
-      smallest_y = vertex.y;
-    else if (vertex.y > largest.y)
-      largest_y = vertex.y;
-  }
+  std::vector<geometry_msgs::Point> rotatedPolygon = rotatePoints(polygon, -rotationAngle);
 
   double smallest_x(0), largest_x(0);
-  for (const auto& vertex : polygon)
+  for (const auto& vertex : rotatedPolygon)
   {
     if (vertex.x < smallest_x)
+    {
       smallest_x = vertex.x;
-    else if (vertex.x > largest.x)
+    }
+    else if (vertex.x > largest_x)
+    {
       largest_x = vertex.x;
+    }
   }
 
-  double base_edge_a, base_edge_b;
-  base_edge_a = (dir.base_edge.at(1).y - dir.base_edge.at(0).y) / (dir.base_edge.at(1).x - dir.base_edge.at(0).x);
-  base_edge_b = dir.base_edge.at(1).y - base_edge_a * dir.base_edge.at(1).x;
+  double stepWidth = footprint_width * (1 - horizontal_overwrap);
 
-  std::array<geometry_msgs::Point, 2> base_edge_extended;
-  geometry_msgs::Point base_vertex_1, base_vertex_2;
+  Direction rotatedDir = sweepDirection(rotatedPolygon);
 
-  // ROS_INFO("%f", 180 * horizontalAngle(orth_pt, o_pt) / M_PI);
-  // ROS_INFO("%f", 180 * horizontalAngle(dir.base_edge.at(1), dir.base_edge.at(0)) / M_PI);
+  int stepNum = std::round(distance(rotatedDir.base_edge, rotatedDir.opposed_vertex) / stepWidth);
 
-  // ROS_INFO("%f",
-  //         180 * std::abs(horizontalAngle(orth_pt, o_pt) - horizontalAngle(dir.base_edge.at(1),
-  //         dir.base_edge.at(0)))
-  //         /
-  //             M_PI);
+  std::vector<std::array<geometry_msgs::Point, 2>> sweepLines;
+
+  for (int i = 0; i < stepNum + 1; ++i)
+  {
+    std::array<geometry_msgs::Point, 2> ar;
+    geometry_msgs::Point p1, p2;
+    p1.x = smallest_x;
+    p1.y = rotatedDir.base_edge.at(0).y + (i * stepWidth);
+    p2.x = largest_x;
+    p2.y = rotatedDir.base_edge.at(1).y + (i * stepWidth);
+
+    ar.at(0) = p1;
+    ar.at(1) = p2;
+
+    sweepLines.push_back(ar);
+  }
+
+  std::vector<std::array<geometry_msgs::Point, 2>> rotatedEdges;
+  for (int i = 0; i < rotatedPolygon.size(); ++i)
+  {
+    std::array<geometry_msgs::Point, 2> edge;
+
+    edge.at(0) = rotatedPolygon.at(i);
+
+    if (i < rotatedPolygon.size() - 1)
+    {
+      edge.at(1) = rotatedPolygon.at(i + 1);
+    }
+    else
+    {
+      edge.at(1) = rotatedPolygon.at(0);
+    }
+
+    rotatedEdges.push_back(edge);
+  }
+
+  std::vector<geometry_msgs::Point> intersections;
+
+  intersections.push_back(rotatedDir.base_edge.at(0));
+  intersections.push_back(rotatedDir.base_edge.at(1));
+
+  for (const auto& edge : rotatedEdges)
+  {
+    for (int i = 0; i < sweepLines.size(); ++i)
+    {
+      if (intersect(edge, sweepLines.at(i)))
+      {
+        intersections.push_back(localizeIntersection(edge, sweepLines.at(i)));
+      }
+    }
+  }
+
+  std::stable_sort(intersections.begin(), intersections.end(),
+                   [](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) { return p1.y < p2.y; });
+
+  std::vector<geometry_msgs::Point> waypoints = rotatePoints(intersections, rotationAngle);
 
   return waypoints;
 }
