@@ -297,14 +297,24 @@ intersect(const std::vector<std::array<geometry_msgs::Point, 2> >& segments)
 geometry_msgs::Point localizeIntersection(const std::array<geometry_msgs::Point, 2>& edge1,
                                           const std::array<geometry_msgs::Point, 2>& edge2)
 {
-  double a1 = (edge1.at(1).y - edge1.at(0).y) / (edge1.at(1).x - edge1.at(0).x);
-  double b1 = edge1.at(1).y - a1 * edge1.at(1).x;
-  double a2 = (edge2.at(1).y - edge2.at(0).y) / (edge2.at(1).x - edge2.at(0).x);
-  double b2 = edge2.at(1).y - a1 * edge2.at(1).x;
+  geometry_msgs::Point p1, p2, p3, p4;
+  p1 = edge1.at(0);
+  p2 = edge1.at(1);
+  p3 = edge2.at(0);
+  p4 = edge2.at(1);
+
+  double xi, eta, delta;
+  xi = (p4.y - p3.y) * (p4.x - p1.x) - (p4.x - p3.x) * (p4.y - p1.y);
+  eta = -(p2.y - p1.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y);
+  delta = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
+
+  double lambda, mu;
+  lambda = xi / delta;
+  mu = eta / delta;
 
   geometry_msgs::Point intersection;
-  intersection.x = (b2 - b1) / (a1 - a2);
-  intersection.y = b1 * intersection.x;
+  intersection.x = p1.x + lambda * (p2.x - p1.x);
+  intersection.y = p1.y + lambda * (p2.y - p1.y);
 
   return intersection;
 }
