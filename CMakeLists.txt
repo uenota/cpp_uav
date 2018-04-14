@@ -12,6 +12,11 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
 )
 
+find_package(CGAL REQUIRED COMPONENTS Core)
+
+include( ${CGAL_USE_FILE} )
+include( CGAL_CreateSingleSourceCGALProgram )
+
 add_service_files(
   FILES
   Torres16.srv
