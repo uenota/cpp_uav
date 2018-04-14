@@ -17,11 +17,29 @@
 #include <cmath>
 #include <stack>
 #include <vector>
+#include <list>
+
+// CGAL
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Partition_traits_2.h>
+#include <CGAL/Partition_is_valid_traits_2.h>
+#include <CGAL/polygon_function_objects.h>
+#include <CGAL/partition_2.h>
+#include <CGAL/point_generators_2.h>
+#include <CGAL/random_polygon_2.h>
 
 // roscpp
 #include <ros/ros.h>
 // geometry_msgs
 #include <geometry_msgs/Point.h>
+
+// typedefs for cgal
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Partition_traits_2<K> Traits;
+typedef Traits::Polygon_2 Polygon_2;
+typedef Traits::Point_2 Point_2;
+typedef Polygon_2::Vertex_const_iterator Vertex_iterator;
+typedef std::list<Polygon_2> Polygon_list;
 
 /**
  * @brief Calculates signed area of given triangle
@@ -274,10 +292,10 @@ bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::arra
  * @param segments Line segments are to be checked if it is in intersection
  * @return Pairs of intersecting segments
  */
-std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> >
-intersect(const std::vector<std::array<geometry_msgs::Point, 2> >& segments)
+std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2>>
+intersect(const std::vector<std::array<geometry_msgs::Point, 2>>& segments)
 {
-  std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> > intersecting_segments;
+  std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2>> intersecting_segments;
   for (size_t i = 0; i < segments.size() - 1; ++i)
   {
     for (size_t j = i + 1; j < segments.size(); ++j)
@@ -337,6 +355,42 @@ std::vector<geometry_msgs::Point> rotatePoints(const std::vector<geometry_msgs::
     rotated_points.push_back(pt);
   }
   return rotated_points;
+}
+
+std::vector<std::vector<geometry_msgs::Point>> decomposePolygon(const std::vector<geometry_msgs::Point>& polygon)
+{
+  std::vector<std::vector<geometry_msgs::Point>> decomposedPolygons;
+
+  Polygon_2 cgal_polygon;
+
+  for (const auto& vertex : polygon)
+  {
+    cgal_polygon.push_back(Point_2(vertex.x, vertex.y));
+  }
+
+  Polygon_list partition_polygons;
+  Traits partition_traits;
+
+  // note that this function has O(n^4) time complexity and O(n^3) space complexity
+  // use approx_convex_partition_2 instead if the number of vertices are big because its time complexity is O(n)
+  // but apptox_convex_partition_2 generates more polygons
+  CGAL::optimal_convex_partition_2(cgal_polygon.vertices_begin(), cgal_polygon.vertices_end(),
+                                   std::back_inserter(partition_polygons), partition_traits);
+
+  for (const auto& partition_polygon : partition_polygons)
+  {
+    std::vector<geometry_msgs::Point> part_poly;
+    for (auto itr = partition_polygon.vertices_begin(); itr != partition_polygon.vertices_end(); ++itr)
+    {
+      geometry_msgs::Point pt;
+      pt.x = itr->x();
+      pt.y = itr->y();
+      part_poly.push_back(pt);
+    }
+    decomposedPolygons.push_back(part_poly);
+  }
+
+  return decomposedPolygons;
 }
 
 #endif
