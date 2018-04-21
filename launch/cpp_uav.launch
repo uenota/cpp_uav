@@ -1,6 +1,6 @@
 <launch>
 
-    <node name="specify_rect" pkg="cpp_uav" type="specify_rect.py" output="screen"/>
+    <node name="specify_rect" pkg="cpp_uav" type="specify_rect.py" output="screen" />
     <node name="torres_etal_2016" pkg="cpp_uav" type="torres_etal_2016" output="screen"/>
 
 </launch>

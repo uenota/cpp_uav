@@ -15,13 +15,31 @@
 // c++ libraries
 #include <algorithm>
 #include <cmath>
+#include <list>
 #include <stack>
 #include <vector>
+
+// CGAL
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Partition_is_valid_traits_2.h>
+#include <CGAL/Partition_traits_2.h>
+#include <CGAL/partition_2.h>
+#include <CGAL/point_generators_2.h>
+#include <CGAL/polygon_function_objects.h>
+#include <CGAL/random_polygon_2.h>
 
 // roscpp
 #include <ros/ros.h>
 // geometry_msgs
 #include <geometry_msgs/Point.h>
+
+// typedefs for cgal
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Partition_traits_2<K> Traits;
+typedef Traits::Polygon_2 Polygon_2;
+typedef Traits::Point_2 Point_2;
+typedef Polygon_2::Vertex_const_iterator Vertex_iterator;
+typedef std::list<Polygon_2> Polygon_list;
 
 /**
  * @brief Calculates signed area of given triangle
@@ -139,7 +157,6 @@ double distance(const std::array<geometry_msgs::Point, 2>& edge, const geometry_
  */
 std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> points)
 {
-  // convex hull
   std::vector<geometry_msgs::Point> convex_hull;
 
   if (points.empty())
@@ -147,6 +164,7 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
     return convex_hull;
   }
 
+  // remove points that have same coodinate with other points
   for (size_t i = 0; i < points.size() - 1; ++i)
   {
     if (points.at(i).x == points.at(i + 1).x and points.at(i).y == points.at(i + 1).y)
@@ -184,7 +202,7 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
 
   for (const auto& point : points)
   {
-    for (size_t i = convex_hull.size() - 1; i > 1; --i)
+    for (std::size_t i = convex_hull.size() - 1; i > 1; --i)
     {
       if (signedArea(convex_hull.at(i - 1), convex_hull.at(i), point) >= 0)
       {
@@ -195,6 +213,14 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
     }
     convex_hull.push_back(point);
   }
+
+  geometry_msgs::Point origin;
+  origin.x = 0;
+  origin.y = 0;
+  std::stable_sort(convex_hull.begin(), convex_hull.end(),
+                   [&](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) {
+                     return horizontalAngle(origin, p1) < horizontalAngle(origin, p2);
+                   });
 
   return convex_hull;
 }
@@ -259,6 +285,26 @@ bool inBetween(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, c
  */
 bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::array<geometry_msgs::Point, 2>& edge2)
 {
+  geometry_msgs::Point p1, p2, p3, p4;
+  p1 = edge1.at(0);
+  p2 = edge1.at(1);
+  p3 = edge2.at(0);
+  p4 = edge2.at(1);
+
+  if (((p1.x - p2.x) * (p3.y - p1.y) + (p1.y - p2.y) * (p1.x - p3.x)) *
+              ((p1.x - p2.x) * (p4.y - p1.y) + (p1.y - p2.y) * (p1.x - p4.x)) <
+          0 and
+      ((p3.x - p4.x) * (p1.y - p3.y) + (p3.y - p4.y) * (p3.x - p1.x)) *
+              ((p3.x - p4.x) * (p2.y - p3.y) + (p3.y - p4.y) * (p3.x - p2.x)) <
+          0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+  /*
   // true if a vertex on an edge is in between the other edge
   if (inBetween(edge1.at(0), edge1.at(1), edge2.at(0)) or inBetween(edge1.at(0), edge1.at(1), edge2.at(1)) or
       inBetween(edge2.at(0), edge2.at(1), edge1.at(0)) or inBetween(edge2.at(0), edge2.at(1), edge1.at(0)))
@@ -267,6 +313,7 @@ bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::arra
   }
   return (signedArea(edge1.at(0), edge1.at(1), edge2.at(0)) * signedArea(edge1.at(0), edge1.at(1), edge2.at(1)) < 0 and
           signedArea(edge2.at(0), edge2.at(1), edge1.at(0)) * signedArea(edge2.at(0), edge2.at(1), edge1.at(1)) < 0);
+          */
 }
 
 /**
@@ -274,10 +321,10 @@ bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::arra
  * @param segments Line segments are to be checked if it is in intersection
  * @return Pairs of intersecting segments
  */
-std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> >
-intersect(const std::vector<std::array<geometry_msgs::Point, 2> >& segments)
+std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2>>
+intersect(const std::vector<std::array<geometry_msgs::Point, 2>>& segments)
 {
-  std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2> > intersecting_segments;
+  std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2>> intersecting_segments;
   for (size_t i = 0; i < segments.size() - 1; ++i)
   {
     for (size_t j = i + 1; j < segments.size(); ++j)
@@ -313,6 +360,7 @@ geometry_msgs::Point localizeIntersection(const std::array<geometry_msgs::Point,
   mu = eta / delta;
 
   geometry_msgs::Point intersection;
+
   intersection.x = p1.x + lambda * (p2.x - p1.x);
   intersection.y = p1.y + lambda * (p2.y - p1.y);
 
@@ -337,6 +385,42 @@ std::vector<geometry_msgs::Point> rotatePoints(const std::vector<geometry_msgs::
     rotated_points.push_back(pt);
   }
   return rotated_points;
+}
+
+std::vector<std::vector<geometry_msgs::Point>> decomposePolygon(const std::vector<geometry_msgs::Point>& polygon)
+{
+  std::vector<std::vector<geometry_msgs::Point>> decomposedPolygons;
+
+  Polygon_2 cgal_polygon;
+
+  for (const auto& vertex : polygon)
+  {
+    cgal_polygon.push_back(Point_2(vertex.x, vertex.y));
+  }
+
+  Polygon_list partition_polygons;
+  Traits partition_traits;
+
+  // note that this function has O(n^4) time complexity and O(n^3) space complexity
+  // use approx_convex_partition_2 instead if the number of vertices are big because its time complexity is O(n)
+  // but apptox_convex_partition_2 generates more polygons
+  CGAL::optimal_convex_partition_2(cgal_polygon.vertices_begin(), cgal_polygon.vertices_end(),
+                                   std::back_inserter(partition_polygons), partition_traits);
+
+  for (const auto& partition_polygon : partition_polygons)
+  {
+    std::vector<geometry_msgs::Point> part_poly;
+    for (auto itr = partition_polygon.vertices_begin(); itr != partition_polygon.vertices_end(); ++itr)
+    {
+      geometry_msgs::Point pt;
+      pt.x = itr->x();
+      pt.y = itr->y();
+      part_poly.push_back(pt);
+    }
+    decomposedPolygons.push_back(part_poly);
+  }
+
+  return decomposedPolygons;
 }
 
 #endif

@@ -111,16 +111,26 @@ Direction sweepDirection(const std::vector<geometry_msgs::Point>& polygon)
   return line_sweep;
 }
 
-// compute coverage path for convex polygon
-std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs::Point>& polygon,
-                                                 double footprint_width, double horizontal_overwrap)
+/**
+ * @brief Calculates coverage path for convex polygon
+ * @param polygon Coverage path is calculated on this region
+ * @param footprint_width Width of the area taken by one sweep
+ * @param horizontal_overwrap Horizontal overwrap of each sweep
+ * @param waypoints Waypoints of coverage path
+ * @return bool True if path does not intersect with polygon
+ */
+bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double footprint_width,
+                    double horizontal_overwrap, std::vector<geometry_msgs::Point>& waypoints)
 {
+  const double padding = 5.0;
+
   Direction dir = sweepDirection(polygon);
 
+  // rotate input polygon so that base_edge become horizontal
   double rotationAngle = horizontalAngle(dir.base_edge.front(), dir.base_edge.back());
-
   std::vector<geometry_msgs::Point> rotatedPolygon = rotatePoints(polygon, -rotationAngle);
 
+  // find x coordinate of most left and most right point
   double smallest_x(0), largest_x(0);
   for (const auto& vertex : rotatedPolygon)
   {
@@ -136,20 +146,22 @@ std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs
 
   double stepWidth = footprint_width * (1 - horizontal_overwrap);
 
+  // calculate sweep direction of rotated polygon
   Direction rotatedDir = sweepDirection(rotatedPolygon);
 
-  int stepNum = std::round(distance(rotatedDir.base_edge, rotatedDir.opposed_vertex) / stepWidth);
+  int stepNum = std::ceil(distance(rotatedDir.base_edge, rotatedDir.opposed_vertex) / stepWidth);
 
   std::vector<std::array<geometry_msgs::Point, 2>> sweepLines;
 
-  for (int i = 0; i < stepNum + 1; ++i)
+  // generate list of sweep lines which is horizontal against the base edge
+  for (int i = 0; i < stepNum; ++i)
   {
     std::array<geometry_msgs::Point, 2> ar;
     geometry_msgs::Point p1, p2;
     p1.x = smallest_x;
-    p1.y = rotatedDir.base_edge.at(0).y + (i * stepWidth);
+    p1.y = rotatedDir.base_edge.at(0).y + (i * stepWidth) + padding;
     p2.x = largest_x;
-    p2.y = rotatedDir.base_edge.at(1).y + (i * stepWidth);
+    p2.y = rotatedDir.base_edge.at(1).y + (i * stepWidth) + padding;
 
     ar.at(0) = p1;
     ar.at(1) = p2;
@@ -157,6 +169,7 @@ std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs
     sweepLines.push_back(ar);
   }
 
+  // generate list of edge of rotated polygon
   std::vector<std::array<geometry_msgs::Point, 2>> rotatedEdges;
   for (int i = 0; i < rotatedPolygon.size(); ++i)
   {
@@ -178,16 +191,14 @@ std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs
 
   std::vector<geometry_msgs::Point> intersections;
 
-  intersections.push_back(rotatedDir.base_edge.at(0));
-  intersections.push_back(rotatedDir.base_edge.at(1));
-
-  for (const auto& edge : rotatedEdges)
+  for (const auto& sweepLine : sweepLines)
   {
-    for (int i = 0; i < sweepLines.size(); ++i)
+    int intersection_num = 0;
+    for (const auto& edge : rotatedEdges)
     {
-      if (intersect(edge, sweepLines.at(i)))
+      if (intersect(sweepLine, edge))
       {
-        intersections.push_back(localizeIntersection(edge, sweepLines.at(i)));
+        intersections.push_back(localizeIntersection(edge, sweepLine));
       }
     }
   }
@@ -195,9 +206,9 @@ std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs
   std::stable_sort(intersections.begin(), intersections.end(),
                    [](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) { return p1.y < p2.y; });
 
-  std::vector<geometry_msgs::Point> waypoints = rotatePoints(intersections, rotationAngle);
+  waypoints = rotatePoints(intersections, rotationAngle);
 
-  return waypoints;
+  return true;
 }
 
 #endif
