@@ -10,8 +10,9 @@ This module offers GUI to specify a polygon for coverage path planning.
 # Import python3's print to suppress warning raised by pylint
 from __future__ import print_function
 
-# math
+# python libraries
 import math
+import sys
 
 # rospy
 import rospy
@@ -45,9 +46,11 @@ class PolygonBuilder(object):
     GUI class to specify a polygon
     """
 
-    def __init__(self):
+    def __init__(self, debug):
         """! Constructor
         """
+
+        self.debug = debug
 
         # @var fig
         #  Figure instance
@@ -81,7 +84,9 @@ class PolygonBuilder(object):
         #  - path: Line2D object representing coverage path
         self.lines = {"line": self.axis.plot([], [], "-")[0],
                       "dot": self.axis.plot([], [], "o")[0],
-                      "path": self.axis.plot([], [], "-")[0]}
+                      "path": self.axis.plot([], [], "-")[0],
+                      "sweepDir": self.axis.plot([], [], "-")[0],
+                      "sweepLn": self.axis.plot([], [], "-")[0]}
 
         # Register __call__ as callback function for line and dot
         self.lines["line"].figure.canvas.mpl_connect(
@@ -115,8 +120,8 @@ class PolygonBuilder(object):
         footprint_width = Float64(2 * self.shooting_cond["height"] *
                                   math.tan(self.shooting_cond["angle_of_view"] / 2))
         aspect_ratio = \
-            float(self.shooting_cond["image_resolution_w"]
-                  ) / self.shooting_cond["image_resolution_h"]
+            float(self.shooting_cond["image_resolution_w"]) \
+            / self.shooting_cond["image_resolution_h"]
 
         # @var coverage_params
         #  Dictionary of coverage params
@@ -166,8 +171,7 @@ class PolygonBuilder(object):
                                    'Calculate CP'),
                         "clear_button":
                             Button(plt.axes([0.8, 0.58, 0.15, 0.075]),
-                                   'Clear')
-                        }
+                                   'Clear')}
 
         # Register callback functions for buttons
         self.buttons["draw_button"].on_clicked(self.draw_polygon)
@@ -206,8 +210,7 @@ class PolygonBuilder(object):
                            "vertical_overwrap_box":
                                TextBox(plt.axes([0.6, 0.1, 0.1, 0.05]),
                                        "Vertical Overwrap [%]",
-                                       initial=str(self.coverage_params["vertical_overwrap"].data))
-                           }
+                                       initial=str(self.coverage_params["vertical_overwrap"].data))}
 
         # Register callback functions for textboxes
         self.text_boxes["image_resolution_h_box"].on_submit(
@@ -244,11 +247,8 @@ class PolygonBuilder(object):
                        "mode_text":
                            plt.text(1.5, 3,
                                     "Algorithm:\n    " + self.mode),
-                       "start_point":
-                           None,
-                       "end_point":
-                           None
-                       }
+                       "start_point": None,
+                       "end_point": None}
 
         self.slider = Slider(plt.axes([0.25, 0.01, 0.45, 0.02]),
                              "Magnification", 0.1, 10, valinit=1)
@@ -304,8 +304,8 @@ class PolygonBuilder(object):
         Update values of coverage parameters
         """
         self.coverage_params["aspect_ratio"] = \
-            float(self.shooting_cond["image_resolution_w"]
-                  ) / self.shooting_cond["image_resolution_h"]
+            float(self.shooting_cond["image_resolution_w"]) \
+            / self.shooting_cond["image_resolution_h"]
         self.coverage_params["footprint_width"] = \
             Float64(2 * self.shooting_cond["height"] *
                     math.tan(self.shooting_cond["angle_of_view"] / 2))
@@ -375,6 +375,7 @@ class PolygonBuilder(object):
         vertices = []
         waypoint_xs = []
         waypoint_ys = []
+
         for x_coord, y_coord in zip(self.points["vertices_x"],
                                     self.points["vertices_y"]):
             point = Point()
@@ -383,18 +384,42 @@ class PolygonBuilder(object):
             vertices.append(point)
         # Call service
         try:
-            self.points["waypoints"] = self.server_node(vertices,
-                                                        self.points["start"],
-                                                        self.points["end"],
-                                                        self.coverage_params["footprint_length"],
-                                                        self.coverage_params["footprint_width"],
-                                                        self.coverage_params["horizontal_overwrap"],
-                                                        self.coverage_params["vertical_overwrap"]).waypoints
+            ret = self.server_node(vertices,
+                                   self.points["start"],
+                                   self.points["end"],
+                                   self.coverage_params["footprint_length"],
+                                   self.coverage_params["footprint_width"],
+                                   self.coverage_params["horizontal_overwrap"],
+                                   self.coverage_params["vertical_overwrap"])
+            self.points["waypoints"] = ret.waypoints
             for point in self.points["waypoints"]:
                 waypoint_xs.append(point.x)
                 waypoint_ys.append(point.y)
             self.lines["path"].set_data(waypoint_xs, waypoint_ys)
             self.lines["path"].figure.canvas.draw()
+
+            if self.debug == True:
+                self.points["sweepDir"] = ret.sweepDirection
+                self.points["sweepLns"] = ret.sweepLines
+                sweepLn_xs = []
+                sweepLn_ys = []
+                sweepDir_xs = []
+                sweepDir_ys = []
+                self.labels["sweepDir"] = []
+                for point in self.points["sweepLns"]:
+                    sweepLn_xs.append(point.x)
+                    sweepLn_ys.append(point.y)
+                for num, point in enumerate(self.points["sweepDir"]):
+                    sweepDir_xs.append(point.x)
+                    sweepDir_ys.append(point.y)
+                    self.labels["sweepDir"].append(
+                        self.axis.text(point.x, point.y, str(num)))
+                self.lines["sweepLn"].set_data(sweepLn_xs, sweepLn_ys)
+                self.lines["sweepLn"].figure.canvas.draw()
+                self.lines["sweepDir"].set_data(sweepDir_xs, sweepDir_ys)
+                # self.lines["sweepDir"].set_data([self.points["sweepDir"][0].x, self.points["sweepDir"][1].x],
+                #                                [self.points["sweepDir"][0].y, self.points["sweepDir"][1].y])
+                self.lines["sweepDir"].figure.canvas.draw()
         except rospy.ServiceException as ex:
             rospy.logerr(str(ex))
             return
@@ -432,6 +457,14 @@ class PolygonBuilder(object):
         self.lines["dot"].figure.canvas.draw()
         self.lines["line"].figure.canvas.draw()
         self.lines["path"].figure.canvas.draw()
+
+        if self.debug == True:
+            self.lines["sweepDir"].set_data([], [])
+            self.lines["sweepLn"].set_data([], [])
+            self.lines["sweepDir"].figure.canvas.draw()
+            self.lines["sweepLn"].figure.canvas.draw()
+            for lbl in self.labels["sweepDir"]:
+                lbl.remove()
 
     def image_resolution_h_update(self, event):
         """!
@@ -537,19 +570,23 @@ class PolygonBuilder(object):
             return
 
     def update_magnification(self, val):
+        """!
+        Callback function for slider
+        @param val Value of slider
+        """
         self.axis.set_ylim([-100 / val, 100 / val])
         self.axis.set_xlim([-100 / val, 100 / val])
 
 
-def init_node():
+def init_node(debug):
     """!
     Initialize a node
     """
     rospy.init_node('specify_node', anonymous=True)
 
     # Call PolygonBuilder's constructor
-    PolygonBuilder()
+    PolygonBuilder(debug)
 
 
 if __name__ == '__main__':
-    init_node()
+    init_node(True if sys.argv[1].lower() == "true" else False)

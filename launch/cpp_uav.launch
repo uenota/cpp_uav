@@ -1,6 +1,8 @@
 <launch>
 
-    <node name="specify_rect" pkg="cpp_uav" type="specify_rect.py" output="screen"/>
+    <arg name="debug" default="false"/>
+
+    <node name="specify_rect" pkg="cpp_uav" type="specify_rect.py" output="screen" args="$(arg debug)"/>
     <node name="torres_etal_2016" pkg="cpp_uav" type="torres_etal_2016" output="screen"/>
 
 </launch>

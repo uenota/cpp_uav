@@ -70,6 +70,7 @@ Direction sweepDirection(const std::vector<geometry_msgs::Point>& polygon)
     if (i == convex_hull.size() - 1)
     {
       ar.at(1) = convex_hull.at(0);
+      printf("Last One\n");
     }
     else
     {
@@ -77,6 +78,9 @@ Direction sweepDirection(const std::vector<geometry_msgs::Point>& polygon)
     }
     edges.push_back(ar);
   }
+
+  printf("%d edges\n", edges.size());
+  printf("%d vertices\n", convex_hull.size());
 
   double optimal_dist = 0;
 
@@ -87,11 +91,22 @@ Direction sweepDirection(const std::vector<geometry_msgs::Point>& polygon)
     double max_dist_edge = 0;
     geometry_msgs::Point opposed_vertex;
 
+    printf("\x1b[32m");
+    printf("Edge (%f, %f) to (%f, %f)\n", edge.value().at(0).x, edge.value().at(0).y, edge.value().at(1).x,
+           edge.value().at(1).y);
+    printf("\x1b[39m");
+
     for (const geometry_msgs::Point& vertex : convex_hull)
     {
+      printf("vertex: (%f, %f)\n", vertex.x, vertex.y);
+
       // distance() function returns distance
       // between given edge and vertex
       double dist = distance(edge.value(), vertex);
+
+      printf("\x1b[36m");
+      printf("dist %d: %f\n", edge.index(), dist);
+      printf("\x1b[39m");
 
       if (dist > max_dist_edge)
       {
@@ -100,27 +115,52 @@ Direction sweepDirection(const std::vector<geometry_msgs::Point>& polygon)
       }
     }
 
+    printf("\x1b[35m");
+    printf("Max dist edge %d: %f\n", edge.index(), max_dist_edge);
+    printf("\x1b[39m");
+
     if ((max_dist_edge < optimal_dist) or edge.index() == 0)
     {
       optimal_dist = max_dist_edge;
       line_sweep.base_edge = edge.value();
       line_sweep.opposed_vertex = opposed_vertex;
+      printf("\x1b[34m");
+      printf("Opt dist %d: %f\n", edge.index(), optimal_dist);
+      printf("\x1b[39m");
     }
   }
+
+  printf("end\n");
 
   return line_sweep;
 }
 
-// compute coverage path for convex polygon
-std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs::Point>& polygon,
-                                                 double footprint_width, double horizontal_overwrap)
+/**
+ * @brief Calculates coverage path for convex polygon
+ * @param polygon Coverage path is calculated on this region
+ * @param footprint_width Width of the area taken by one sweep
+ * @param horizontal_overwrap Horizontal overwrap of each sweep
+ * @param waypoints Waypoints of coverage path
+ * @return bool True if path does not intersect with polygon
+ */
+bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double footprint_width,
+                    double horizontal_overwrap, std::vector<geometry_msgs::Point>& waypoints,
+                    std::vector<geometry_msgs::Point>& sweepDir, std::vector<geometry_msgs::Point>& sweepLns)
 {
+  const double padding = 5.0;
+
   Direction dir = sweepDirection(polygon);
 
+  // rotate input polygon so that base_edge become horizontal
   double rotationAngle = horizontalAngle(dir.base_edge.front(), dir.base_edge.back());
+
+  printf("base_edge.front: (%f, %f)\n", dir.base_edge.front().x, dir.base_edge.front().y);
+  printf("base_edge.back: (%f, %f)\n", dir.base_edge.back().x, dir.base_edge.back().y);
+  ROS_INFO("Angle: %f\n", rotationAngle);
 
   std::vector<geometry_msgs::Point> rotatedPolygon = rotatePoints(polygon, -rotationAngle);
 
+  // find x coordinate of most left and most right point
   double smallest_x(0), largest_x(0);
   for (const auto& vertex : rotatedPolygon)
   {
@@ -132,31 +172,46 @@ std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs
     {
       largest_x = vertex.x;
     }
+
+    sweepDir.push_back(vertex);
   }
 
   double stepWidth = footprint_width * (1 - horizontal_overwrap);
 
+  // calculate sweep direction of rotated polygon
   Direction rotatedDir = sweepDirection(rotatedPolygon);
 
-  int stepNum = std::round(distance(rotatedDir.base_edge, rotatedDir.opposed_vertex) / stepWidth);
+  geometry_msgs::Point rtdbe;
+  rtdbe.x = (rotatedDir.base_edge.at(0).x + rotatedDir.base_edge.at(1).x) / 2;
+  rtdbe.y = (rotatedDir.base_edge.at(0).y + rotatedDir.base_edge.at(1).y) / 2;
+
+  sweepDir.push_back(rotatedDir.opposed_vertex);
+  sweepDir.push_back(rtdbe);
+
+  int stepNum = std::ceil(distance(rotatedDir.base_edge, rotatedDir.opposed_vertex) / stepWidth);
 
   std::vector<std::array<geometry_msgs::Point, 2>> sweepLines;
 
-  for (int i = 0; i < stepNum + 1; ++i)
+  // generate list of sweep lines which is horizontal against the base edge
+  for (int i = 0; i < stepNum; ++i)
   {
     std::array<geometry_msgs::Point, 2> ar;
     geometry_msgs::Point p1, p2;
     p1.x = smallest_x;
-    p1.y = rotatedDir.base_edge.at(0).y + (i * stepWidth);
+    p1.y = rotatedDir.base_edge.at(0).y + (i * stepWidth) + padding;
     p2.x = largest_x;
-    p2.y = rotatedDir.base_edge.at(1).y + (i * stepWidth);
+    p2.y = rotatedDir.base_edge.at(1).y + (i * stepWidth) + padding;
 
     ar.at(0) = p1;
     ar.at(1) = p2;
 
     sweepLines.push_back(ar);
+
+    sweepLns.push_back(p1);
+    sweepLns.push_back(p2);
   }
 
+  // generate list of edge of rotated polygon
   std::vector<std::array<geometry_msgs::Point, 2>> rotatedEdges;
   for (int i = 0; i < rotatedPolygon.size(); ++i)
   {
@@ -178,16 +233,14 @@ std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs
 
   std::vector<geometry_msgs::Point> intersections;
 
-  intersections.push_back(rotatedDir.base_edge.at(0));
-  intersections.push_back(rotatedDir.base_edge.at(1));
-
-  for (const auto& edge : rotatedEdges)
+  for (const auto& sweepLine : sweepLines)
   {
-    for (int i = 0; i < sweepLines.size(); ++i)
+    int intersection_num = 0;
+    for (const auto& edge : rotatedEdges)
     {
-      if (intersect(edge, sweepLines.at(i)))
+      if (intersect(sweepLine, edge))
       {
-        intersections.push_back(localizeIntersection(edge, sweepLines.at(i)));
+        intersections.push_back(localizeIntersection(edge, sweepLine));
       }
     }
   }
@@ -195,9 +248,34 @@ std::vector<geometry_msgs::Point> convexCoverage(const std::vector<geometry_msgs
   std::stable_sort(intersections.begin(), intersections.end(),
                    [](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) { return p1.y < p2.y; });
 
-  std::vector<geometry_msgs::Point> waypoints = rotatePoints(intersections, rotationAngle);
+  waypoints = rotatePoints(intersections, rotationAngle);
 
-  return waypoints;
+  /*
+    std::vector<geometry_msgs::Point> rotatedSwpLn;
+
+    for (const auto& swpln : sweepLines)
+    {
+      rotatedSwpLn.push_back(swpln.at(0));
+      rotatedSwpLn.push_back(swpln.at(1));
+    }
+
+    sweepLns = rotatePoints(rotatedSwpLn, rotationAngle);
+
+    for (const auto& vertex : rotatedPolygon)
+    {
+      sweepDir.push_back(vertex);
+    }
+
+    sweepDir.push_back(dir.opposed_vertex);
+
+    geometry_msgs::Point center_pt;
+    center_pt.x = (dir.base_edge.at(0).x + dir.base_edge.at(1).x) / 2;
+    center_pt.y = (dir.base_edge.at(0).y + dir.base_edge.at(1).y) / 2;
+
+    sweepDir.push_back(center_pt);
+  */
+
+  return true;
 }
 
 #endif

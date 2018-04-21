@@ -15,17 +15,17 @@
 // c++ libraries
 #include <algorithm>
 #include <cmath>
+#include <list>
 #include <stack>
 #include <vector>
-#include <list>
 
 // CGAL
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Partition_traits_2.h>
 #include <CGAL/Partition_is_valid_traits_2.h>
-#include <CGAL/polygon_function_objects.h>
+#include <CGAL/Partition_traits_2.h>
 #include <CGAL/partition_2.h>
 #include <CGAL/point_generators_2.h>
+#include <CGAL/polygon_function_objects.h>
 #include <CGAL/random_polygon_2.h>
 
 // roscpp
@@ -143,6 +143,11 @@ double distance(const std::array<geometry_msgs::Point, 2>& edge, const geometry_
   alpha = vertexAngle(point_a, point_b, vertex);
   beta = vertexAngle(point_b, point_a, vertex);
 
+  printf("len_edge_a: %f\n", len_edge_a);
+  printf("len_edge_b: %f\n", len_edge_b);
+  printf("alpha     : %f\n", alpha);
+  printf("beta      : %f\n", beta);
+
   double distance = alpha < M_PI_2 ? std::sin(alpha) * len_edge_b : std::sin(beta) * len_edge_a;
 
   return distance;
@@ -157,7 +162,6 @@ double distance(const std::array<geometry_msgs::Point, 2>& edge, const geometry_
  */
 std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> points)
 {
-  // convex hull
   std::vector<geometry_msgs::Point> convex_hull;
 
   if (points.empty())
@@ -165,6 +169,7 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
     return convex_hull;
   }
 
+  // remove points that have same coodinate with other points
   for (size_t i = 0; i < points.size() - 1; ++i)
   {
     if (points.at(i).x == points.at(i + 1).x and points.at(i).y == points.at(i + 1).y)
@@ -202,7 +207,7 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
 
   for (const auto& point : points)
   {
-    for (size_t i = convex_hull.size() - 1; i > 1; --i)
+    for (std::size_t i = convex_hull.size() - 1; i > 1; --i)
     {
       if (signedArea(convex_hull.at(i - 1), convex_hull.at(i), point) >= 0)
       {
@@ -213,6 +218,14 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
     }
     convex_hull.push_back(point);
   }
+
+  geometry_msgs::Point origin;
+  origin.x = 0;
+  origin.y = 0;
+  std::stable_sort(convex_hull.begin(), convex_hull.end(),
+                   [&](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) {
+                     return horizontalAngle(origin, p1) < horizontalAngle(origin, p2);
+                   });
 
   return convex_hull;
 }
@@ -277,6 +290,26 @@ bool inBetween(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, c
  */
 bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::array<geometry_msgs::Point, 2>& edge2)
 {
+  geometry_msgs::Point p1, p2, p3, p4;
+  p1 = edge1.at(0);
+  p2 = edge1.at(1);
+  p3 = edge2.at(0);
+  p4 = edge2.at(1);
+
+  if (((p1.x - p2.x) * (p3.y - p1.y) + (p1.y - p2.y) * (p1.x - p3.x)) *
+              ((p1.x - p2.x) * (p4.y - p1.y) + (p1.y - p2.y) * (p1.x - p4.x)) <
+          0 and
+      ((p3.x - p4.x) * (p1.y - p3.y) + (p3.y - p4.y) * (p3.x - p1.x)) *
+              ((p3.x - p4.x) * (p2.y - p3.y) + (p3.y - p4.y) * (p3.x - p2.x)) <
+          0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+  /*
   // true if a vertex on an edge is in between the other edge
   if (inBetween(edge1.at(0), edge1.at(1), edge2.at(0)) or inBetween(edge1.at(0), edge1.at(1), edge2.at(1)) or
       inBetween(edge2.at(0), edge2.at(1), edge1.at(0)) or inBetween(edge2.at(0), edge2.at(1), edge1.at(0)))
@@ -285,6 +318,7 @@ bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::arra
   }
   return (signedArea(edge1.at(0), edge1.at(1), edge2.at(0)) * signedArea(edge1.at(0), edge1.at(1), edge2.at(1)) < 0 and
           signedArea(edge2.at(0), edge2.at(1), edge1.at(0)) * signedArea(edge2.at(0), edge2.at(1), edge1.at(1)) < 0);
+          */
 }
 
 /**
@@ -331,6 +365,7 @@ geometry_msgs::Point localizeIntersection(const std::array<geometry_msgs::Point,
   mu = eta / delta;
 
   geometry_msgs::Point intersection;
+
   intersection.x = p1.x + lambda * (p2.x - p1.x);
   intersection.y = p1.y + lambda * (p2.y - p1.y);
 

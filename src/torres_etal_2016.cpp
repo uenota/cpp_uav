@@ -52,32 +52,38 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
   if (isConvex(polygon_vertices) == true)
   {
     ROS_INFO("This polygon is convex");
-    res.waypoints = convexCoverage(polygon_vertices, footprint_width.data, horizontal_overwrap.data);
+    std::vector<geometry_msgs::Point> waypoints, sweepDir, sweepLns;
+    convexCoverage(polygon_vertices, footprint_width.data, horizontal_overwrap.data, waypoints, sweepDir, sweepLns);
+    res.waypoints = waypoints;
+    res.sweepDirection = sweepDir;
+    res.sweepLines = sweepLns;
   }
   else
   {
     ROS_INFO("This polygon is concave");
 
-    Direction dir = sweepDirection(polygon_vertices);
+    std::vector<geometry_msgs::Point> convex_hull = grahamScan(polygon_vertices);
 
-    geometry_msgs::Point start_pt, mid_pt, end_pt;
+    Direction optimal_sweep_dir = sweepDirection(convex_hull);
 
-    start_pt = dir.base_edge.front();
-    mid_pt = dir.base_edge.back();
-    end_pt = dir.opposed_vertex;
+    /*
+      std::vector<std::vector<geometry_msgs::Point>> dec_poly = decomposePolygon(polygon_vertices);
 
-    waypoints.push_back(start_pt);
-    waypoints.push_back(mid_pt);
-    waypoints.push_back(end_pt);
+      std::vector<geometry_msgs::Point> waypoints;
 
-    ROS_INFO("Start x: %f", start_pt.x);
-    ROS_INFO("start y: %f", start_pt.y);
-    ROS_INFO("mid x: %f", mid_pt.x);
-    ROS_INFO("mid y: %f", mid_pt.y);
-    ROS_INFO("end x: %f", end_pt.x);
-    ROS_INFO("end y: %f", end_pt.y);
+      for (const auto& polygon : dec_poly)
+      {
+        std::vector<geometry_msgs::Point> waypoints_part =
+            convexCoverage(polygon, footprint_width.data, horizontal_overwrap.data);
 
-    res.waypoints = waypoints;
+        for (const auto& waypoint : waypoints_part)
+        {
+          waypoints.push_back(waypoint);
+        }
+      }
+
+      res.waypoints = waypoints;
+      */
   }
 
   return true;

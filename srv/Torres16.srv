@@ -7,3 +7,5 @@ std_msgs/Float64 horizontal_overwrap
 std_msgs/Float64 vertical_overwrap
 ---
 geometry_msgs/Point[] waypoints
+geometry_msgs/Point[] sweepDirection
+geometry_msgs/Point[] sweepLines
