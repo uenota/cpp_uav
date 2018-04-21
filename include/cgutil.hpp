@@ -143,11 +143,6 @@ double distance(const std::array<geometry_msgs::Point, 2>& edge, const geometry_
   alpha = vertexAngle(point_a, point_b, vertex);
   beta = vertexAngle(point_b, point_a, vertex);
 
-  printf("len_edge_a: %f\n", len_edge_a);
-  printf("len_edge_b: %f\n", len_edge_b);
-  printf("alpha     : %f\n", alpha);
-  printf("beta      : %f\n", beta);
-
   double distance = alpha < M_PI_2 ? std::sin(alpha) * len_edge_b : std::sin(beta) * len_edge_a;
 
   return distance;

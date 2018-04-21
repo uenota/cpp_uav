@@ -46,11 +46,9 @@ class PolygonBuilder(object):
     GUI class to specify a polygon
     """
 
-    def __init__(self, debug):
+    def __init__(self):
         """! Constructor
         """
-
-        self.debug = debug
 
         # @var fig
         #  Figure instance
@@ -84,9 +82,7 @@ class PolygonBuilder(object):
         #  - path: Line2D object representing coverage path
         self.lines = {"line": self.axis.plot([], [], "-")[0],
                       "dot": self.axis.plot([], [], "o")[0],
-                      "path": self.axis.plot([], [], "-")[0],
-                      "sweepDir": self.axis.plot([], [], "-")[0],
-                      "sweepLn": self.axis.plot([], [], "-")[0]}
+                      "path": self.axis.plot([], [], "-")[0]}
 
         # Register __call__ as callback function for line and dot
         self.lines["line"].figure.canvas.mpl_connect(
@@ -397,29 +393,6 @@ class PolygonBuilder(object):
                 waypoint_ys.append(point.y)
             self.lines["path"].set_data(waypoint_xs, waypoint_ys)
             self.lines["path"].figure.canvas.draw()
-
-            if self.debug == True:
-                self.points["sweepDir"] = ret.sweepDirection
-                self.points["sweepLns"] = ret.sweepLines
-                sweepLn_xs = []
-                sweepLn_ys = []
-                sweepDir_xs = []
-                sweepDir_ys = []
-                self.labels["sweepDir"] = []
-                for point in self.points["sweepLns"]:
-                    sweepLn_xs.append(point.x)
-                    sweepLn_ys.append(point.y)
-                for num, point in enumerate(self.points["sweepDir"]):
-                    sweepDir_xs.append(point.x)
-                    sweepDir_ys.append(point.y)
-                    self.labels["sweepDir"].append(
-                        self.axis.text(point.x, point.y, str(num)))
-                self.lines["sweepLn"].set_data(sweepLn_xs, sweepLn_ys)
-                self.lines["sweepLn"].figure.canvas.draw()
-                self.lines["sweepDir"].set_data(sweepDir_xs, sweepDir_ys)
-                # self.lines["sweepDir"].set_data([self.points["sweepDir"][0].x, self.points["sweepDir"][1].x],
-                #                                [self.points["sweepDir"][0].y, self.points["sweepDir"][1].y])
-                self.lines["sweepDir"].figure.canvas.draw()
         except rospy.ServiceException as ex:
             rospy.logerr(str(ex))
             return
@@ -457,14 +430,6 @@ class PolygonBuilder(object):
         self.lines["dot"].figure.canvas.draw()
         self.lines["line"].figure.canvas.draw()
         self.lines["path"].figure.canvas.draw()
-
-        if self.debug == True:
-            self.lines["sweepDir"].set_data([], [])
-            self.lines["sweepLn"].set_data([], [])
-            self.lines["sweepDir"].figure.canvas.draw()
-            self.lines["sweepLn"].figure.canvas.draw()
-            for lbl in self.labels["sweepDir"]:
-                lbl.remove()
 
     def image_resolution_h_update(self, event):
         """!
@@ -578,15 +543,15 @@ class PolygonBuilder(object):
         self.axis.set_xlim([-100 / val, 100 / val])
 
 
-def init_node(debug):
+def init_node():
     """!
     Initialize a node
     """
     rospy.init_node('specify_node', anonymous=True)
 
     # Call PolygonBuilder's constructor
-    PolygonBuilder(debug)
+    PolygonBuilder()
 
 
 if __name__ == '__main__':
-    init_node(True if sys.argv[1].lower() == "true" else False)
+    init_node()

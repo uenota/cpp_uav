@@ -53,10 +53,8 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
   {
     ROS_INFO("This polygon is convex");
     std::vector<geometry_msgs::Point> waypoints, sweepDir, sweepLns;
-    convexCoverage(polygon_vertices, footprint_width.data, horizontal_overwrap.data, waypoints, sweepDir, sweepLns);
+    convexCoverage(polygon_vertices, footprint_width.data, horizontal_overwrap.data, waypoints);
     res.waypoints = waypoints;
-    res.sweepDirection = sweepDir;
-    res.sweepLines = sweepLns;
   }
   else
   {
