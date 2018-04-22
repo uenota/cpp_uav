@@ -304,16 +304,6 @@ bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::arra
   {
     return false;
   }
-  /*
-  // true if a vertex on an edge is in between the other edge
-  if (inBetween(edge1.at(0), edge1.at(1), edge2.at(0)) or inBetween(edge1.at(0), edge1.at(1), edge2.at(1)) or
-      inBetween(edge2.at(0), edge2.at(1), edge1.at(0)) or inBetween(edge2.at(0), edge2.at(1), edge1.at(0)))
-  {
-    return true;
-  }
-  return (signedArea(edge1.at(0), edge1.at(1), edge2.at(0)) * signedArea(edge1.at(0), edge1.at(1), edge2.at(1)) < 0 and
-          signedArea(edge2.at(0), edge2.at(1), edge1.at(0)) * signedArea(edge2.at(0), edge2.at(1), edge1.at(1)) < 0);
-          */
 }
 
 /**

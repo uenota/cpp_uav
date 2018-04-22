@@ -206,7 +206,52 @@ bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double foo
   std::stable_sort(intersections.begin(), intersections.end(),
                    [](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) { return p1.y < p2.y; });
 
-  waypoints = rotatePoints(intersections, rotationAngle);
+  std::vector<geometry_msgs::Point> waypts;
+  for (int i = 0; i < std::round(intersections.size() / 2); ++i)
+  {
+    if (i % 2 == 0)
+    {
+      try
+      {
+        if (intersections.at(2 * i).x < intersections.at(2 * i + 1).x)
+        {
+          waypts.push_back(intersections.at(2 * i));
+          waypts.push_back(intersections.at(2 * i + 1));
+        }
+        else
+        {
+          waypts.push_back(intersections.at(2 * i + 1));
+          waypts.push_back(intersections.at(2 * i));
+        }
+      }
+      catch (const std::out_of_range& ex)
+      {
+        waypts.push_back(intersections.at(2 * i));
+      }
+    }
+    else
+    {
+      try
+      {
+        if (intersections.at(2 * i).x > intersections.at(2 * i + 1).x)
+        {
+          waypts.push_back(intersections.at(2 * i));
+          waypts.push_back(intersections.at(2 * i + 1));
+        }
+        else
+        {
+          waypts.push_back(intersections.at(2 * i + 1));
+          waypts.push_back(intersections.at(2 * i));
+        }
+      }
+      catch (const std::out_of_range& ex)
+      {
+        waypts.push_back(intersections.at(2 * i));
+      }
+    }
+  }
+
+  waypoints = rotatePoints(waypts, rotationAngle);
 
   return true;
 }
