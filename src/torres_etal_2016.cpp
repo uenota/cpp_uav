@@ -28,49 +28,45 @@
 /**
  * @brief Plans coverage path
  * @param req[in] Contains values neccesary to plan a path
- * @param res[out] Contains resulting waypoints
+ * @param res[out] Contains resulting path
  * @return bool
  * @details For details of this service, cf. srv/Torres16.srv
  */
 bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
 {
   // Initialization
-  std::vector<geometry_msgs::Point> polygon_vertices, waypoints;
+  PointVector polygon, path;
   geometry_msgs::Point start;
-  std_msgs::Float64 footprint_length, footprint_width, horizontal_overwrap, vertical_overwrap;
+  std_msgs::Float64 footprintLength, footprintWidth, horizontalOverwrap, verticalOverwrap;
 
-  polygon_vertices = req.polygon_vertices;
+  polygon = req.polygon;
 
   start = req.start;
 
-  footprint_length = req.footprint_length;
-  footprint_width = req.footprint_width;
-  horizontal_overwrap = req.horizontal_overwrap;
-  vertical_overwrap = req.vertical_overwrap;
+  footprintLength = req.footprint_length;
+  footprintWidth = req.footprint_width;
+  horizontalOverwrap = req.horizontal_overwrap;
+  verticalOverwrap = req.vertical_overwrap;
 
-  bool isOptimal = convexCoverage(polygon_vertices, footprint_width.data, horizontal_overwrap.data, waypoints);
+  bool isOptimal = computeConvexCoverage(polygon, footprintWidth.data, horizontalOverwrap.data, path);
 
   if (isOptimal == true)
   {
-    res.waypoints = findOptimalPath(waypoints, start);
+    res.path = identifyOptimalPath(path, start);
   }
   else
   {
-    std::vector<std::vector<geometry_msgs::Point>> dec_poly = decomposePolygon(polygon_vertices);
-    std::vector<geometry_msgs::Point> waypoints;
+    std::vector<PointVector> subPolygons = decomposePolygon(polygon);
+    double pathLengthSum = 0;
 
-    for (const auto& polygon : dec_poly)
+    for (const auto& polygon : subPolygons)
     {
-      std::vector<geometry_msgs::Point> waypoints_part;
-      convexCoverage(polygon, footprint_width.data, horizontal_overwrap.data, waypoints_part);
-
-      for (const auto& waypoint : waypoints_part)
-      {
-        waypoints.push_back(waypoint);
-      }
+      PointVector partialPath;
+      computeConvexCoverage(polygon, footprintWidth.data, horizontalOverwrap.data, partialPath);
+      pathLengthSum += calculatePathLength(partialPath);
     }
 
-    res.waypoints = waypoints;
+    res.path = path;
   }
 
   return true;

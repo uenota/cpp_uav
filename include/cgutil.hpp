@@ -69,9 +69,21 @@ using Polygon_list = std::list<Polygon_2>;
  * p_3.y - p_2.y\times p_3.x)
  *   \f}
  */
-inline double signedArea(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3)
+inline double calculateSignedArea(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2,
+                                  const geometry_msgs::Point& p3)
 {
   return p1.x * (p2.y - p3.y) - p1.y * (p2.x - p3.x) + (p2.x * p3.y - p2.y * p3.x);
+}
+
+/**
+ * @brief Calculates distance between given two points
+ * @param p1
+ * @param p2
+ * @return double Distance between two points
+ */
+inline double calculateDistance(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
+{
+  return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
 }
 
 /**
@@ -81,29 +93,30 @@ inline double signedArea(const geometry_msgs::Point& p1, const geometry_msgs::Po
  * @param p3 The other point of segment p1p3
  * @return Angle between segment p1p2 and p1p3 in radian [0, pi)
  */
-double vertexAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3)
+double calculateVertexAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2,
+                            const geometry_msgs::Point& p3)
 {
   // Length of edges composed of vertices
   // e1: (p1, p2)
   // e2: (p2, p3)
   // e3: (p3, p1)
-  double len_e1, len_e2, len_e3;
-  len_e1 = std::sqrt(std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2));
-  len_e2 = std::sqrt(std::pow(p2.x - p3.x, 2) + std::pow(p2.y - p3.y, 2));
-  len_e3 = std::sqrt(std::pow(p3.x - p1.x, 2) + std::pow(p3.y - p1.y, 2));
+  double lenE1, lenE2, lenE3;
+  lenE1 = calculateDistance(p2, p1);
+  lenE2 = calculateDistance(p2, p3);
+  lenE3 = calculateDistance(p3, p1);
 
   // Cosine of angle  between segment p1p2 and p1p3 (Law of cosines)
-  double cosine_p1;
-  cosine_p1 = (std::pow(len_e1, 2) + std::pow(len_e3, 2) - std::pow(len_e2, 2)) / (2 * len_e1 * len_e3);
+  double cosineP1;
+  cosineP1 = (std::pow(lenE1, 2) + std::pow(lenE3, 2) - std::pow(lenE2, 2)) / (2 * lenE1 * lenE3);
 
-  // vertex angle is 0.0 if len_e1 or len_e3 is zero
+  // vertex angle is 0.0 if lenE1 or lenE3 is zero
   // that means p1 and p2 or p1 and p3 is the same point
-  if (std::isnan(cosine_p1) != 0)
+  if (std::isnan(cosineP1) != 0)
   {
     return 0.0;
   }
 
-  return std::acos(cosine_p1);
+  return std::acos(cosineP1);
 }
 
 /**
@@ -112,12 +125,12 @@ double vertexAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p
  * @param p2 The other vertex of segment p1p2
  * @return Vertex angle of p1 in radian [-pi, pi]
  */
-double horizontalAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
+double calculateHorizontalAngle(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
 {
   geometry_msgs::Point p3;
   p3.x = p1.x + 1.0;
   p3.y = p1.y;
-  return p1.y >= p2.y ? -vertexAngle(p1, p2, p3) : vertexAngle(p1, p2, p3);
+  return p1.y >= p2.y ? -calculateVertexAngle(p1, p2, p3) : calculateVertexAngle(p1, p2, p3);
 }
 
 /**
@@ -126,28 +139,28 @@ double horizontalAngle(const geometry_msgs::Point& p1, const geometry_msgs::Poin
  * @param vertex A vertex of given polygon
  * @return double Distance between edge and vertex
  */
-double distance(const std::array<geometry_msgs::Point, 2>& edge, const geometry_msgs::Point& vertex)
+double calculateDistance(const LineSegment& edge, const geometry_msgs::Point& vertex)
 {
   // Vertices of triangle
-  geometry_msgs::Point point_a, point_b;
-  point_a = edge.front();
-  point_b = edge.back();
+  geometry_msgs::Point pointA, pointB;
+  pointA = edge.front();
+  pointB = edge.back();
 
   // Calculate length of each edge
   // Edge A: An edge facing vertex A
   // Edge B: An edge facing vertex B
-  double len_edge_a, len_edge_b, len_edge_c;
-  len_edge_a = std::sqrt(std::pow(point_b.x - vertex.x, 2) + std::pow(point_b.y - vertex.y, 2));
-  len_edge_b = std::sqrt(std::pow(vertex.x - point_a.x, 2) + std::pow(vertex.y - point_a.y, 2));
+  double lenEdgeA, lenEdgeB;
+  lenEdgeA = calculateDistance(pointB, vertex);
+  lenEdgeB = calculateDistance(vertex, pointA);
 
   // Vertex angles
-  // alpha: vertex angle of point_a
-  // beta: vertex angle of point_b
+  // alpha: vertex angle of pointA
+  // beta: vertex angle of pointB
   double alpha, beta;
-  alpha = vertexAngle(point_a, point_b, vertex);
-  beta = vertexAngle(point_b, point_a, vertex);
+  alpha = calculateVertexAngle(pointA, pointB, vertex);
+  beta = calculateVertexAngle(pointB, pointA, vertex);
 
-  double distance = alpha < M_PI_2 ? std::sin(alpha) * len_edge_b : std::sin(beta) * len_edge_a;
+  double distance = alpha < M_PI_2 ? std::sin(alpha) * lenEdgeB : std::sin(beta) * lenEdgeA;
 
   return distance;
 }
@@ -159,13 +172,13 @@ double distance(const std::array<geometry_msgs::Point, 2>& edge, const geometry_
  *
  * This function is based on graham scan algorithm
  */
-std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> points)
+PointVector computeConvexHull(PointVector points)
 {
-  std::vector<geometry_msgs::Point> convex_hull;
+  PointVector convexHull;
 
   if (points.empty())
   {
-    return convex_hull;
+    return convexHull;
   }
 
   // remove points that have same coodinate with other points
@@ -179,7 +192,7 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
 
   if (points.size() < 3)
   {
-    return convex_hull;
+    return convexHull;
   }
 
   // sort by vertex's y coordinate in an ascending order
@@ -187,46 +200,46 @@ std::vector<geometry_msgs::Point> grahamScan(std::vector<geometry_msgs::Point> p
                    [](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) { return p1.y < p2.y; });
 
   // point with minimum y coordinate
-  geometry_msgs::Point min_y_point = points.front();
+  geometry_msgs::Point pointMinY = points.front();
   points.erase(points.begin());
 
-  // sort by an angle between a segment composed of min_y_point and pj (in a set
+  // sort by an angle between a segment composed of pointMinY and pj (in a set
   // of points) and horizontal line
   // in an ascending order
   std::stable_sort(points.begin(), points.end(), [&](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) {
-    return horizontalAngle(min_y_point, p1) < horizontalAngle(min_y_point, p2);
+    return calculateHorizontalAngle(pointMinY, p1) < calculateHorizontalAngle(pointMinY, p2);
   });
 
-  // add min_y_point in convex hull
-  convex_hull.push_back(min_y_point);
+  // add pointMinY in convex hull
+  convexHull.push_back(pointMinY);
 
   // add the point with minimum angle
-  convex_hull.push_back(points.front());
+  convexHull.push_back(points.front());
   points.erase(points.begin());
 
   for (const auto& point : points)
   {
-    for (std::size_t i = convex_hull.size() - 1; i > 1; --i)
+    for (std::size_t i = convexHull.size() - 1; i > 1; --i)
     {
-      if (signedArea(convex_hull.at(i - 1), convex_hull.at(i), point) >= 0)
+      if (calculateSignedArea(convexHull.at(i - 1), convexHull.at(i), point) >= 0)
       {
         break;
       }
 
-      convex_hull.pop_back();
+      convexHull.pop_back();
     }
-    convex_hull.push_back(point);
+    convexHull.push_back(point);
   }
 
   geometry_msgs::Point origin;
   origin.x = 0;
   origin.y = 0;
-  std::stable_sort(convex_hull.begin(), convex_hull.end(),
+  std::stable_sort(convexHull.begin(), convexHull.end(),
                    [&](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) {
-                     return horizontalAngle(origin, p1) < horizontalAngle(origin, p2);
+                     return calculateHorizontalAngle(origin, p1) < calculateHorizontalAngle(origin, p2);
                    });
 
-  return convex_hull;
+  return convexHull;
 }
 
 /**
@@ -279,6 +292,7 @@ bool inBetween(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, c
   }
   // true if vertex angle of p3 is smaller than threshold
   return std::abs(vertexAngle(p1, p2, p3)) < epsilon;
+  return computeConvexHull(points).size() == points.size();
 }
 
 /**
@@ -287,7 +301,7 @@ bool inBetween(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, c
  * @param edge2 An edge
  * @return True if two edges intersect
  */
-bool intersect(const std::array<geometry_msgs::Point, 2>& edge1, const std::array<geometry_msgs::Point, 2>& edge2)
+bool hasIntersection(const LineSegment& edge1, const LineSegment& edge2)
 {
   geometry_msgs::Point p1, p2, p3, p4;
   p1 = edge1.at(0);
@@ -337,6 +351,7 @@ intersect(const std::vector<std::array<geometry_msgs::Point, 2>>& segments)
 
 geometry_msgs::Point localizeIntersection(const std::array<geometry_msgs::Point, 2>& edge1,
                                           const std::array<geometry_msgs::Point, 2>& edge2)
+geometry_msgs::Point localizeIntersection(const LineSegment& edge1, const LineSegment& edge2)
 {
   geometry_msgs::Point p1, p2, p3, p4;
   p1 = edge1.at(0);
@@ -363,55 +378,55 @@ geometry_msgs::Point localizeIntersection(const std::array<geometry_msgs::Point,
 
 PointVector rotatePoints(const PointVector& points, double angle_rad)
 {
-  std::array<double, 4> rotation_matrix;
-  rotation_matrix.at(0) = std::cos(angle_rad);
-  rotation_matrix.at(1) = -std::sin(angle_rad);
-  rotation_matrix.at(2) = std::sin(angle_rad);
-  rotation_matrix.at(3) = std::cos(angle_rad);
+  std::array<double, 4> rotationMatrix;
+  rotationMatrix.at(0) = std::cos(angle_rad);
+  rotationMatrix.at(1) = -std::sin(angle_rad);
+  rotationMatrix.at(2) = std::sin(angle_rad);
+  rotationMatrix.at(3) = std::cos(angle_rad);
 
-  std::vector<geometry_msgs::Point> rotated_points;
+  PointVector rotatedPoints;
 
   for (const auto& point : points)
   {
     geometry_msgs::Point pt;
-    pt.x = rotation_matrix.at(0) * point.x + rotation_matrix.at(1) * point.y;
-    pt.y = rotation_matrix.at(2) * point.x + rotation_matrix.at(3) * point.y;
-    rotated_points.push_back(pt);
+    pt.x = rotationMatrix.at(0) * point.x + rotationMatrix.at(1) * point.y;
+    pt.y = rotationMatrix.at(2) * point.x + rotationMatrix.at(3) * point.y;
+    rotatedPoints.push_back(pt);
   }
-  return rotated_points;
+  return rotatedPoints;
 }
 
 std::vector<PointVector> decomposePolygon(const PointVector& polygon)
 {
   std::vector<PointVector> decomposedPolygons;
 
-  Polygon_2 cgal_polygon;
+  Polygon_2 cgalPolygon;
 
   for (const auto& vertex : polygon)
   {
-    cgal_polygon.push_back(Point_2(vertex.x, vertex.y));
+    cgalPolygon.push_back(Point_2(vertex.x, vertex.y));
   }
 
-  Polygon_list partition_polygons;
-  Traits partition_traits;
+  Polygon_list partialCGALPolygons;
+  Traits partitionTraits;
 
   // note that this function has O(n^4) time complexity and O(n^3) space complexity
   // use approx_convex_partition_2 instead if the number of vertices are big because its time complexity is O(n)
   // but apptox_convex_partition_2 generates more polygons
-  CGAL::optimal_convex_partition_2(cgal_polygon.vertices_begin(), cgal_polygon.vertices_end(),
-                                   std::back_inserter(partition_polygons), partition_traits);
+  CGAL::optimal_convex_partition_2(cgalPolygon.vertices_begin(), cgalPolygon.vertices_end(),
+                                   std::back_inserter(partialCGALPolygons), partitionTraits);
 
-  for (const auto& partition_polygon : partition_polygons)
+  for (const auto& partialCGALPolygon : partialCGALPolygons)
   {
-    std::vector<geometry_msgs::Point> part_poly;
-    for (auto itr = partition_polygon.vertices_begin(); itr != partition_polygon.vertices_end(); ++itr)
+    PointVector partialPolygon;
+    for (auto itr = partialCGALPolygon.vertices_begin(); itr != partialCGALPolygon.vertices_end(); ++itr)
     {
       geometry_msgs::Point pt;
       pt.x = itr->x();
       pt.y = itr->y();
-      part_poly.push_back(pt);
+      partialPolygon.push_back(pt);
     }
-    decomposedPolygons.push_back(part_poly);
+    decomposedPolygons.push_back(partialPolygon);
   }
 
   return decomposedPolygons;

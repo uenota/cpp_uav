@@ -47,8 +47,8 @@ using LineSegmentVector = std::vector<LineSegment>;
  */
 struct Direction
 {
-  std::array<geometry_msgs::Point, 2> base_edge;
-  geometry_msgs::Point opposed_vertex;
+  LineSegment baseEdge;
+  geometry_msgs::Point opposedVertex;
 };
 
 /**
@@ -56,119 +56,119 @@ struct Direction
  * @param polygon Line sweep direction is calculated on this region
  * @return direction Struct containing edge and vertex
  */
-Direction sweepDirection(const std::vector<geometry_msgs::Point>& polygon)
+Direction identifySweepDir(const PointVector& polygon)
 {
-  Direction line_sweep;
+  Direction sweepDirection;
 
-  std::vector<geometry_msgs::Point> convex_hull = grahamScan(polygon);
+  PointVector convexHull = computeConvexHull(polygon);
 
   // Edges of polygon
   LineSegmentVector edges;
 
   // Make a list of edges of polygon
-  for (std::size_t i = 0; i < convex_hull.size(); ++i)
+  for (std::size_t i = 0; i < convexHull.size(); ++i)
   {
     LineSegment ar;
 
-    ar.at(0) = convex_hull.at(i);
+    ar.at(0) = convexHull.at(i);
 
     // if vertex is the last one,
     // that vertex makes an edge whose end is the first vertex
-    if (i == convex_hull.size() - 1)
+    if (i == convexHull.size() - 1)
     {
-      ar.at(1) = convex_hull.at(0);
+      ar.at(1) = convexHull.at(0);
     }
     else
     {
-      ar.at(1) = convex_hull.at(i + 1);
+      ar.at(1) = convexHull.at(i + 1);
     }
     edges.push_back(ar);
   }
 
-  double optimal_dist = 0;
+  double optimalDistance = 0;
 
   // Calculate line sweep direction
   // Algorithm 1 in Torres et al, 2016
   for (const auto& edge : edges | boost::adaptors::indexed())
   {
-    double max_dist_edge = 0;
-    geometry_msgs::Point opposed_vertex;
+    double edgeMaxDistance = 0;
+    geometry_msgs::Point opposedVertex;
 
-    for (const geometry_msgs::Point& vertex : convex_hull)
+    for (const geometry_msgs::Point& vertex : convexHull)
     {
-      // distance() function returns distance
+      // calculateDistance() function returns distance
       // between given edge and vertex
-      double dist = distance(edge.value(), vertex);
+      double distance = calculateDistance(edge.value(), vertex);
 
-      if (dist > max_dist_edge)
+      if (distance > edgeMaxDistance)
       {
-        max_dist_edge = dist;
-        opposed_vertex = vertex;
+        edgeMaxDistance = distance;
+        opposedVertex = vertex;
       }
     }
 
-    if ((max_dist_edge < optimal_dist) or edge.index() == 0)
+    if ((edgeMaxDistance < optimalDistance) or edge.index() == 0)
     {
-      optimal_dist = max_dist_edge;
-      line_sweep.base_edge = edge.value();
-      line_sweep.opposed_vertex = opposed_vertex;
+      optimalDistance = edgeMaxDistance;
+      sweepDirection.baseEdge = edge.value();
+      sweepDirection.opposedVertex = opposedVertex;
     }
   }
 
-  return line_sweep;
+  return sweepDirection;
 }
 
 /**
  * @brief Calculates coverage path for convex polygon
  * @param polygon Coverage path is calculated on this region
- * @param footprint_width Width of the area taken by one sweep
- * @param horizontal_overwrap Horizontal overwrap of each sweep
- * @param waypoints Waypoints of coverage path
+ * @param footprintWidth Width of the area taken by one sweep
+ * @param horizontalOverwrap Horizontal overwrap of each sweep
+ * @param path Path of coverage path
  * @return bool True if path does not intersect with polygon
  */
-bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double footprint_width,
-                    double horizontal_overwrap, std::vector<geometry_msgs::Point>& waypoints)
+bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, double horizontalOverwrap,
+                           PointVector& path)
 {
   const double padding = 5.0;
 
-  Direction dir = sweepDirection(polygon);
+  Direction dir = identifySweepDir(polygon);
 
-  // rotate input polygon so that base_edge become horizontal
-  double rotationAngle = horizontalAngle(dir.base_edge.front(), dir.base_edge.back());
-  std::vector<geometry_msgs::Point> rotatedPolygon = rotatePoints(polygon, -rotationAngle);
+  // rotate input polygon so that baseEdge become horizontal
+  double rotationAngle = calculateHorizontalAngle(dir.baseEdge.front(), dir.baseEdge.back());
+  PointVector rotatedPolygon = rotatePoints(polygon, -rotationAngle);
 
   // find x coordinate of most left and most right point
-  double smallest_x(0), largest_x(0);
+  double minX(0), maxX(0);
   for (const auto& vertex : rotatedPolygon)
   {
-    if (vertex.x < smallest_x)
+    if (vertex.x < minX)
     {
-      smallest_x = vertex.x;
+      minX = vertex.x;
     }
-    else if (vertex.x > largest_x)
+    else if (vertex.x > maxX)
     {
-      largest_x = vertex.x;
+      maxX = vertex.x;
     }
   }
 
-  double stepWidth = footprint_width * (1 - horizontal_overwrap);
+  double stepWidth = footprintWidth * (1 - horizontalOverwrap);
 
   // calculate sweep direction of rotated polygon
-  Direction rotatedDir = sweepDirection(rotatedPolygon);
+  Direction rotatedDir = identifySweepDir(rotatedPolygon);
 
-  int stepNum = std::ceil(distance(rotatedDir.base_edge, rotatedDir.opposed_vertex) / stepWidth);
+  int stepNum = std::ceil(calculateDistance(rotatedDir.baseEdge, rotatedDir.opposedVertex) / stepWidth);
 
-  std::vector<std::array<geometry_msgs::Point, 2>> sweepLines;
+  LineSegmentVector sweepLines;
 
   // generate list of sweep lines which is horizontal against the base edge
   for (int i = 0; i < stepNum; ++i)
   {
-    std::array<geometry_msgs::Point, 2> ar;
+    LineSegment ar;
     geometry_msgs::Point p1, p2;
-    p1.x = smallest_x;
-    p1.y = rotatedDir.base_edge.at(0).y + (i * stepWidth) + padding;
-    p2.x = largest_x;
-    p2.y = rotatedDir.base_edge.at(1).y + (i * stepWidth) + padding;
+    p1.x = minX;
+    p1.y = rotatedDir.baseEdge.at(0).y + (i * stepWidth) + padding;
+    p2.x = maxX;
+    p2.y = rotatedDir.baseEdge.at(1).y + (i * stepWidth) + padding;
 
     ar.at(0) = p1;
     ar.at(1) = p2;
@@ -200,15 +200,15 @@ bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double foo
 
   for (const auto& sweepLine : sweepLines)
   {
-    int intersection_num = 0;
+    int intersectionCount = 0;
     for (const auto& edge : rotatedEdges)
     {
-      if (intersect(sweepLine, edge))
+      if (hasIntersection(sweepLine, edge))
       {
         intersections.push_back(localizeIntersection(edge, sweepLine));
-        ++intersection_num;
+        ++intersectionCount;
       }
-      if (intersection_num > 3)
+      if (intersectionCount > 3)
       {
         return false;
       }
@@ -263,87 +263,104 @@ bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double foo
     }
   }
 
-  waypoints = rotatePoints(waypts, rotationAngle);
+  path = rotatePoints(waypts, rotationAngle);
 
   return true;
 }
 
-inline double distance(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
+/**
+ * @brief Calculates length of path
+ * @param path
+ * @return double Length of path
+ */
+inline double calculatePathLength(const PointVector& path)
 {
-  return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
-}
-
-inline bool isClockWise(std::vector<geometry_msgs::Point> waypoints)
-{
-  return waypoints.at(0).x < waypoints.at(1).x ? true : false;
-}
-
-std::vector<geometry_msgs::Point> counterClockWise(std::vector<geometry_msgs::Point> waypoints)
-{
-  for (int i = 0; i < std::round(waypoints.size() / 2); ++i)
+  double pathLength = 0;
+  for (int i = 0; i < path.size() - 1; ++i)
   {
-    geometry_msgs::Point tmp = waypoints.at(2 * i);
+    pathLength += calculateDistance(path.at(i), path.at(i + 1));
+  }
+  return pathLength;
+}
 
-    waypoints.at(2 * i) = waypoints.at(2 * i + 1);
+/**
+ * @brief Checks if given path is clockwise (the first turn made to the left) or not
+ * @param path
+ * @return bool True if path is clockwise
+ * @detail the definition of "clockwise" is based on Fig.8 in Torres et al. 2016
+ *
+ */
+inline bool isClockWise(PointVector path)
+{
+  return path.at(0).x < path.at(1).x ? true : false;
+}
+
+PointVector computeCCWPath(PointVector path)
+{
+  for (int i = 0; i < std::round(path.size() / 2); ++i)
+  {
+    geometry_msgs::Point tmp = path.at(2 * i);
+
+    path.at(2 * i) = path.at(2 * i + 1);
     try
     {
-      waypoints.at(2 * i + 1) = tmp;
+      path.at(2 * i + 1) = tmp;
     }
     catch (const std::out_of_range& ex)
     {
     }
   }
-  return waypoints;
+  return path;
 }
 
-std::vector<geometry_msgs::Point> oppositePath(const std::vector<geometry_msgs::Point>& waypoints)
+PointVector computeOppositePath(const PointVector& path)
 {
-  std::vector<geometry_msgs::Point> oppositeWaypoints;
+  PointVector oppositePath;
 
-  for (int i = waypoints.size() - 1; i >= 0; --i)
+  for (int i = path.size() - 1; i >= 0; --i)
   {
-    oppositeWaypoints.push_back(waypoints.at(i));
+    oppositePath.push_back(path.at(i));
   }
 
-  return oppositeWaypoints;
+  return oppositePath;
 }
 
-std::vector<geometry_msgs::Point> findOptimalPath(const std::vector<geometry_msgs::Point>& waypoints,
-                                                  const geometry_msgs::Point& start)
+PointVector identifyOptimalPath(const PointVector& path, const geometry_msgs::Point& start)
 {
   // The naming of the following variable follows torres et al. 2016
   std::unordered_map<int, std::unordered_map<std::string, geometry_msgs::Point>> coverageAlternatives;
   std::unordered_map<std::string, geometry_msgs::Point> a1, a2, a3, a4;
 
-  std::vector<geometry_msgs::Point> waypointsCW = isClockWise(waypoints) ? waypoints : counterClockWise(waypoints);
-  std::vector<geometry_msgs::Point> waypointsCCW = isClockWise(waypoints) ? counterClockWise(waypoints) : waypoints;
+  PointVector pathCW = isClockWise(path) ? path : computeCCWPath(path);
+  PointVector pathCCW = isClockWise(path) ? computeCCWPath(path) : path;
 
-  a1["SP"] = waypointsCW.front();
-  a1["EP"] = waypointsCW.back();
+  a1["SP"] = pathCW.front();
+  a1["EP"] = pathCW.back();
 
-  a2["SP"] = waypointsCCW.front();
-  a2["EP"] = waypointsCCW.back();
+  a2["SP"] = pathCCW.front();
+  a2["EP"] = pathCCW.back();
 
-  a3["SP"] = waypointsCW.back();
-  a3["EP"] = waypointsCW.front();
+  a3["SP"] = pathCW.back();
+  a3["EP"] = pathCW.front();
 
-  a4["SP"] = waypointsCCW.back();
-  a4["EP"] = waypointsCCW.front();
+  a4["SP"] = pathCCW.back();
+  a4["EP"] = pathCCW.front();
 
   coverageAlternatives[1] = a1;
   coverageAlternatives[2] = a2;
   coverageAlternatives[3] = a3;
   coverageAlternatives[4] = a4;
 
-  double coverageDistance;
+  double minDistance;
   int optimalPath;
   for (const auto& coverage : coverageAlternatives | boost::adaptors::indexed())
   {
-    double dist = distance(coverage.value().second.at("SP"), start) + distance(start, coverage.value().second.at("EP"));
+    double distance = calculateDistance(coverage.value().second.at("SP"), start) +
+                      calculateDistance(start, coverage.value().second.at("EP"));
 
-    if (dist < coverageDistance or coverage.index() == 0)
+    if (distance < minDistance or coverage.index() == 0)
     {
-      coverageDistance = dist;
+      minDistance = distance;
       optimalPath = coverage.value().first;
     }
   }
@@ -352,21 +369,19 @@ std::vector<geometry_msgs::Point> findOptimalPath(const std::vector<geometry_msg
   {
     case 1:
     {
-      return waypointsCW;
+      return pathCW;
     }
     case 2:
     {
-      return waypointsCCW;
+      return pathCCW;
     }
     case 3:
     {
-      std::vector<geometry_msgs::Point> oppositeWaypointsCW = oppositePath(waypointsCW);
-      return oppositeWaypointsCW;
+      return computeOppositePath(pathCW);
     }
     default:
     {
-      std::vector<geometry_msgs::Point> oppositeWaypointsCCW = oppositePath(waypointsCCW);
-      return oppositeWaypointsCCW;
+      return computeOppositePath(pathCCW);
     }
   }
 }
