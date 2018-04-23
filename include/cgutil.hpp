@@ -33,13 +33,17 @@
 // geometry_msgs
 #include <geometry_msgs/Point.h>
 
-// typedefs for cgal
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Partition_traits_2<K> Traits;
-typedef Traits::Polygon_2 Polygon_2;
-typedef Traits::Point_2 Point_2;
-typedef Polygon_2::Vertex_const_iterator Vertex_iterator;
-typedef std::list<Polygon_2> Polygon_list;
+using PointVector = std::vector<geometry_msgs::Point>;
+using LineSegment = std::array<geometry_msgs::Point, 2>;
+using LineSegmentVector = std::vector<LineSegment>;
+
+// type aliases for cgal
+using K = CGAL::Exact_predicates_inexact_constructions_kernel;
+using Traits = CGAL::Partition_traits_2<K>;
+using Polygon_2 = Traits::Polygon_2;
+using Point_2 = Traits::Point_2;
+using Vertex_iterator = Polygon_2::Vertex_const_iterator;
+using Polygon_list = std::list<Polygon_2>;
 
 /**
  * @brief Calculates signed area of given triangle
@@ -357,7 +361,7 @@ geometry_msgs::Point localizeIntersection(const std::array<geometry_msgs::Point,
   return intersection;
 }
 
-std::vector<geometry_msgs::Point> rotatePoints(const std::vector<geometry_msgs::Point>& points, double angle_rad)
+PointVector rotatePoints(const PointVector& points, double angle_rad)
 {
   std::array<double, 4> rotation_matrix;
   rotation_matrix.at(0) = std::cos(angle_rad);
@@ -377,9 +381,9 @@ std::vector<geometry_msgs::Point> rotatePoints(const std::vector<geometry_msgs::
   return rotated_points;
 }
 
-std::vector<std::vector<geometry_msgs::Point>> decomposePolygon(const std::vector<geometry_msgs::Point>& polygon)
+std::vector<PointVector> decomposePolygon(const PointVector& polygon)
 {
-  std::vector<std::vector<geometry_msgs::Point>> decomposedPolygons;
+  std::vector<PointVector> decomposedPolygons;
 
   Polygon_2 cgal_polygon;
 

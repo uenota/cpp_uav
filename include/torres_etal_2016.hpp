@@ -35,6 +35,10 @@
 // geometry_msgs
 #include <geometry_msgs/Point.h>
 
+using PointVector = std::vector<geometry_msgs::Point>;
+using LineSegment = std::array<geometry_msgs::Point, 2>;
+using LineSegmentVector = std::vector<LineSegment>;
+
 /**
  * @struct Direction
  * @brief Storage for line sweep direction
@@ -59,12 +63,12 @@ Direction sweepDirection(const std::vector<geometry_msgs::Point>& polygon)
   std::vector<geometry_msgs::Point> convex_hull = grahamScan(polygon);
 
   // Edges of polygon
-  std::vector<std::array<geometry_msgs::Point, 2>> edges;
+  LineSegmentVector edges;
 
   // Make a list of edges of polygon
   for (std::size_t i = 0; i < convex_hull.size(); ++i)
   {
-    std::array<geometry_msgs::Point, 2> ar;
+    LineSegment ar;
 
     ar.at(0) = convex_hull.at(i);
 
@@ -173,10 +177,10 @@ bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double foo
   }
 
   // generate list of edge of rotated polygon
-  std::vector<std::array<geometry_msgs::Point, 2>> rotatedEdges;
+  LineSegmentVector rotatedEdges;
   for (int i = 0; i < rotatedPolygon.size(); ++i)
   {
-    std::array<geometry_msgs::Point, 2> edge;
+    LineSegment edge;
 
     edge.at(0) = rotatedPolygon.at(i);
 
@@ -192,7 +196,7 @@ bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double foo
     rotatedEdges.push_back(edge);
   }
 
-  std::vector<geometry_msgs::Point> intersections;
+  PointVector intersections;
 
   for (const auto& sweepLine : sweepLines)
   {
@@ -214,7 +218,7 @@ bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double foo
   std::stable_sort(intersections.begin(), intersections.end(),
                    [](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) { return p1.y < p2.y; });
 
-  std::vector<geometry_msgs::Point> waypts;
+  PointVector waypts;
   for (int i = 0; i < std::round(intersections.size() / 2); ++i)
   {
     if (i % 2 == 0)
