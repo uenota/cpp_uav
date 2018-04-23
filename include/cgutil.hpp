@@ -247,51 +247,8 @@ PointVector computeConvexHull(PointVector points)
  * @param points Points consisting of polygon is to be checked
  * @return True if given polygon is convex, false if it's not convex
  */
-inline bool isConvex(std::vector<geometry_msgs::Point> points)
+inline bool isConvex(PointVector points)
 {
-  return grahamScan(points).size() == points.size();
-}
-
-/**
- * @brief Checks if given point p3 is in between p1 and p2
- * @param p1 A vertex of an edge(p1, p2)
- * @param p2 A vertex of an edge(p1, p2)
- * @param p3 A point checked if beeing in between p1 and p2
- * @param epsilon Threshold for a vertex angle
- * @return True if p3 is in between p1 and p2 else returns False
- */
-bool inBetween(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2, const geometry_msgs::Point& p3,
-               double epsilon = 1e-5)
-{
-  // if p1 is located on the left of p2
-  if (p1.x < p2.x)
-  {
-    // false if p3 is not in between p1 and p2
-    if (p3.x < p1.x or p2.x < p3.x)
-    {
-      return false;
-    }
-  }
-  // if p2 is located on the left of p1
-  else if (p2.x < p1.x)
-  {
-    // false if p3 is not in between p1 and p2
-    if (p3.x < p2.x or p1.x < p3.x)
-    {
-      return false;
-    }
-  }
-  // if p1 and p2 are located on the same point
-  else
-  {
-    // false if p1, p2 and p3 are not the same point
-    if (p3.x < p1.x)
-    {
-      return false;
-    }
-  }
-  // true if vertex angle of p3 is smaller than threshold
-  return std::abs(vertexAngle(p1, p2, p3)) < epsilon;
   return computeConvexHull(points).size() == points.size();
 }
 
@@ -324,33 +281,6 @@ bool hasIntersection(const LineSegment& edge1, const LineSegment& edge2)
   }
 }
 
-/**
- * @brief Returns intersecting edges using brute force method
- * @param segments Line segments are to be checked if it is in intersection
- * @return Pairs of intersecting segments
- */
-std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2>>
-intersect(const std::vector<std::array<geometry_msgs::Point, 2>>& segments)
-{
-  std::vector<std::array<std::array<geometry_msgs::Point, 2>, 2>> intersecting_segments;
-  for (size_t i = 0; i < segments.size() - 1; ++i)
-  {
-    for (size_t j = i + 1; j < segments.size(); ++j)
-    {
-      if (intersect(segments.at(i), segments.at(j)))
-      {
-        std::array<std::array<geometry_msgs::Point, 2>, 2> segment;
-        segment.at(0) = segments.at(i);
-        segment.at(1) = segments.at(j);
-        intersecting_segments.push_back(segment);
-      }
-    }
-  }
-  return intersecting_segments;
-}
-
-geometry_msgs::Point localizeIntersection(const std::array<geometry_msgs::Point, 2>& edge1,
-                                          const std::array<geometry_msgs::Point, 2>& edge2)
 geometry_msgs::Point localizeIntersection(const LineSegment& edge1, const LineSegment& edge2)
 {
   geometry_msgs::Point p1, p2, p3, p4;
