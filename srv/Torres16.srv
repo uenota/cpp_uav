@@ -1,6 +1,5 @@
 geometry_msgs/Point[] polygon_vertices
 geometry_msgs/Point start
-geometry_msgs/Point end
 std_msgs/Float64 footprint_length
 std_msgs/Float64 footprint_width
 std_msgs/Float64 horizontal_overwrap

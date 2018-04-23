@@ -105,12 +105,10 @@ class PolygonBuilder(object):
         #  - vertices_x: List of x coordinates of vertices
         #  - vertices_y: List of y coordinates of vertices
         #  - start: geometry_msgs/Point object stores info about start point
-        #  - end: geometry_msgs/Point object stores info about end point
         #  - waypoints: List of waypoints returned by a coverage path planner
         self.points = {"vertices_x": list(),
                        "vertices_y": list(),
                        "start": None,
-                       "end": None,
                        "waypoints": list()}
 
         # @var shooting_cond
@@ -265,7 +263,8 @@ class PolygonBuilder(object):
         #  - footprint_width_text: Text object to display footprint_width
         #  - mode_text: Text object to display mode
         #  - start_point: Text object to display start point
-        #  - end_point: Text object to display end point
+        #  - SP: Start of waypoints
+        #  - EP: End of waypoints
         self.labels = {"aspect_ratio_text":
                        plt.text(-0.5, 5,
                                 "Aspect ratio:\n    " + str(self.coverage_params["aspect_ratio"])),
@@ -278,7 +277,8 @@ class PolygonBuilder(object):
                                     "Footprint Width [m]:\n    " +
                                     str(round(self.coverage_params["footprint_width"].data, 2))),
                        "start_point": None,
-                       "end_point": None}
+                       "SP": None,
+                       "EP": None}
 
         # wait for the position of drone
         rospy.loginfo("Waiting for mavros/global_position/global.")
@@ -320,22 +320,9 @@ class PolygonBuilder(object):
 
             # set and display start point and its label
             self.labels["start_point"] = self.axis.text(
-                event.xdata, event.ydata, "Start")
+                event.xdata, event.ydata, "Start", color="red", fontsize=16)
             self.lines["dot"].set_data(self.points["vertices_x"] + [event.xdata],
                                        self.points["vertices_y"] + [event.ydata])
-            self.lines["dot"].figure.canvas.draw()
-        # true if end point is not set
-        elif not self.points["end"]:
-            # set end point
-            self.points["end"] = Point()
-            self.points["end"].x = event.xdata
-            self.points["end"].y = event.ydata
-
-            # set and display end point and its label
-            self.labels["end_point"] = self.axis.text(
-                event.xdata, event.ydata, "Goal")
-            self.lines["dot"].set_data(self.points["vertices_x"] + [self.points["start"].x, event.xdata],
-                                       self.points["vertices_y"] + [self.points["start"].y, event.ydata])
             self.lines["dot"].figure.canvas.draw()
         else:
             rospy.logwarn("Unable to register points anymore.")
@@ -424,6 +411,10 @@ class PolygonBuilder(object):
         if not self.is_polygon_drawn:
             return
 
+        if not self.points["start"]:
+            rospy.logwarn("Choose start point.")
+            return
+
         # assign server node if server node is None
         if not self.server_node:
             rospy.loginfo("Waiting for Server Node.")
@@ -441,11 +432,6 @@ class PolygonBuilder(object):
                 rospy.logerr(str(ex))
                 return
 
-        # Set end point as same as start point
-        # if start point is set and not end point is set
-        if self.points["start"] and not self.points["end"]:
-            # it's ok that start and end are the same object
-            self.points["end"] = self.points["start"]
         # Create a list of vertices
         vertices = []
         waypoint_xs = []
@@ -463,7 +449,6 @@ class PolygonBuilder(object):
         try:
             ret = self.server_node(vertices,
                                    self.points["start"],
-                                   self.points["end"],
                                    self.coverage_params["footprint_length"],
                                    self.coverage_params["footprint_width"],
                                    self.coverage_params["horizontal_overwrap"],
@@ -471,9 +456,19 @@ class PolygonBuilder(object):
             self.points["waypoints"] = ret.waypoints
 
             # fill the lists of waypoints' coordinate to draw path
-            for point in self.points["waypoints"]:
+            for num, point in enumerate(self.points["waypoints"]):
+                if num == 0:
+                    waypoint_xs.append(self.points["start"].x)
+                    waypoint_ys.append(self.points["start"].y)
+                    self.labels["SP"] = self.axis.text(
+                        point.x, point.y, "SP", color="red", fontsize=16)
                 waypoint_xs.append(point.x)
                 waypoint_ys.append(point.y)
+                if num == len(self.points["waypoints"]) - 1:
+                    waypoint_xs.append(self.points["start"].x)
+                    waypoint_ys.append(self.points["start"].y)
+                    self.labels["EP"] = self.axis.text(
+                        point.x, point.y, "EP", color="red", fontsize=16)
             self.lines["path"].set_data(waypoint_xs, waypoint_ys)
             self.lines["path"].figure.canvas.draw()
         except rospy.ServiceException as ex:
@@ -486,19 +481,13 @@ class PolygonBuilder(object):
         @param event MouseEvent object
         """
 
-        if self.points["start"]:
-            self.labels["start_point"].remove()
-        if self.points["end"] and self.points["start"] != self.points["end"]:
-            self.labels["end_point"].remove()
-
         # Clear lists of vertices' coordinates
         self.points["vertices_x"] = []
         self.points["vertices_y"] = []
         # Set flag as False
         self.is_polygon_drawn = False
-        # Clear start point and end point
+        # Clear start point
         self.points["start"] = None
-        self.points["end"] = None
 
         # Clear waypoints
         self.points["waypoints"] = []
@@ -509,6 +498,10 @@ class PolygonBuilder(object):
         self.lines["line"].set_data(
             self.points["vertices_x"], self.points["vertices_y"])
         self.lines["path"].set_data([], [])
+
+        self.labels["start_point"].remove()
+        self.labels["SP"].remove()
+        self.labels["EP"].remove()
 
         # Refresh a canvas
         self.lines["dot"].figure.canvas.draw()

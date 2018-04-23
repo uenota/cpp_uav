@@ -36,52 +36,41 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
 {
   // Initialization
   std::vector<geometry_msgs::Point> polygon_vertices, waypoints;
-  geometry_msgs::Point start, end;
+  geometry_msgs::Point start;
   std_msgs::Float64 footprint_length, footprint_width, horizontal_overwrap, vertical_overwrap;
 
   polygon_vertices = req.polygon_vertices;
 
   start = req.start;
-  end = req.end;
 
   footprint_length = req.footprint_length;
   footprint_width = req.footprint_width;
   horizontal_overwrap = req.horizontal_overwrap;
   vertical_overwrap = req.vertical_overwrap;
 
-  if (isConvex(polygon_vertices) == true)
+  bool isOptimal = convexCoverage(polygon_vertices, footprint_width.data, horizontal_overwrap.data, waypoints);
+
+  if (isOptimal == true)
   {
-    ROS_INFO("This polygon is convex");
-    std::vector<geometry_msgs::Point> waypoints, sweepDir, sweepLns;
-    convexCoverage(polygon_vertices, footprint_width.data, horizontal_overwrap.data, waypoints);
-    res.waypoints = waypoints;
+    res.waypoints = findOptimalPath(waypoints, start);
   }
   else
   {
-    ROS_INFO("This polygon is concave");
+    std::vector<std::vector<geometry_msgs::Point>> dec_poly = decomposePolygon(polygon_vertices);
+    std::vector<geometry_msgs::Point> waypoints;
 
-    std::vector<geometry_msgs::Point> convex_hull = grahamScan(polygon_vertices);
+    for (const auto& polygon : dec_poly)
+    {
+      std::vector<geometry_msgs::Point> waypoints_part;
+      convexCoverage(polygon, footprint_width.data, horizontal_overwrap.data, waypoints_part);
 
-    Direction optimal_sweep_dir = sweepDirection(convex_hull);
-
-    /*
-      std::vector<std::vector<geometry_msgs::Point>> dec_poly = decomposePolygon(polygon_vertices);
-
-      std::vector<geometry_msgs::Point> waypoints;
-
-      for (const auto& polygon : dec_poly)
+      for (const auto& waypoint : waypoints_part)
       {
-        std::vector<geometry_msgs::Point> waypoints_part =
-            convexCoverage(polygon, footprint_width.data, horizontal_overwrap.data);
-
-        for (const auto& waypoint : waypoints_part)
-        {
-          waypoints.push_back(waypoint);
-        }
+        waypoints.push_back(waypoint);
       }
+    }
 
-      res.waypoints = waypoints;
-      */
+    res.waypoints = waypoints;
   }
 
   return true;

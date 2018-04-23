@@ -18,10 +18,13 @@
 // cpp standard libraries
 #include <array>
 #include <cmath>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 // Boost
 #include <boost/range/adaptor/indexed.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 
 // roscpp
 #include <ros/ros.h>
@@ -199,6 +202,11 @@ bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double foo
       if (intersect(sweepLine, edge))
       {
         intersections.push_back(localizeIntersection(edge, sweepLine));
+        ++intersection_num;
+      }
+      if (intersection_num > 3)
+      {
+        return false;
       }
     }
   }
@@ -254,6 +262,109 @@ bool convexCoverage(const std::vector<geometry_msgs::Point>& polygon, double foo
   waypoints = rotatePoints(waypts, rotationAngle);
 
   return true;
+}
+
+inline double distance(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
+{
+  return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
+}
+
+inline bool isClockWise(std::vector<geometry_msgs::Point> waypoints)
+{
+  return waypoints.at(0).x < waypoints.at(1).x ? true : false;
+}
+
+std::vector<geometry_msgs::Point> counterClockWise(std::vector<geometry_msgs::Point> waypoints)
+{
+  for (int i = 0; i < std::round(waypoints.size() / 2); ++i)
+  {
+    geometry_msgs::Point tmp = waypoints.at(2 * i);
+
+    waypoints.at(2 * i) = waypoints.at(2 * i + 1);
+    try
+    {
+      waypoints.at(2 * i + 1) = tmp;
+    }
+    catch (const std::out_of_range& ex)
+    {
+    }
+  }
+  return waypoints;
+}
+
+std::vector<geometry_msgs::Point> oppositePath(const std::vector<geometry_msgs::Point>& waypoints)
+{
+  std::vector<geometry_msgs::Point> oppositeWaypoints;
+
+  for (int i = waypoints.size() - 1; i >= 0; --i)
+  {
+    oppositeWaypoints.push_back(waypoints.at(i));
+  }
+
+  return oppositeWaypoints;
+}
+
+std::vector<geometry_msgs::Point> findOptimalPath(const std::vector<geometry_msgs::Point>& waypoints,
+                                                  const geometry_msgs::Point& start)
+{
+  // The naming of the following variable follows torres et al. 2016
+  std::unordered_map<int, std::unordered_map<std::string, geometry_msgs::Point>> coverageAlternatives;
+  std::unordered_map<std::string, geometry_msgs::Point> a1, a2, a3, a4;
+
+  std::vector<geometry_msgs::Point> waypointsCW = isClockWise(waypoints) ? waypoints : counterClockWise(waypoints);
+  std::vector<geometry_msgs::Point> waypointsCCW = isClockWise(waypoints) ? counterClockWise(waypoints) : waypoints;
+
+  a1["SP"] = waypointsCW.front();
+  a1["EP"] = waypointsCW.back();
+
+  a2["SP"] = waypointsCCW.front();
+  a2["EP"] = waypointsCCW.back();
+
+  a3["SP"] = waypointsCW.back();
+  a3["EP"] = waypointsCW.front();
+
+  a4["SP"] = waypointsCCW.back();
+  a4["EP"] = waypointsCCW.front();
+
+  coverageAlternatives[1] = a1;
+  coverageAlternatives[2] = a2;
+  coverageAlternatives[3] = a3;
+  coverageAlternatives[4] = a4;
+
+  double coverageDistance;
+  int optimalPath;
+  for (const auto& coverage : coverageAlternatives | boost::adaptors::indexed())
+  {
+    double dist = distance(coverage.value().second.at("SP"), start) + distance(start, coverage.value().second.at("EP"));
+
+    if (dist < coverageDistance or coverage.index() == 0)
+    {
+      coverageDistance = dist;
+      optimalPath = coverage.value().first;
+    }
+  }
+
+  switch (optimalPath)
+  {
+    case 1:
+    {
+      return waypointsCW;
+    }
+    case 2:
+    {
+      return waypointsCCW;
+    }
+    case 3:
+    {
+      std::vector<geometry_msgs::Point> oppositeWaypointsCW = oppositePath(waypointsCW);
+      return oppositeWaypointsCW;
+    }
+    default:
+    {
+      std::vector<geometry_msgs::Point> oppositeWaypointsCCW = oppositePath(waypointsCCW);
+      return oppositeWaypointsCCW;
+    }
+  }
 }
 
 #endif
