@@ -52,6 +52,7 @@ using Polygon_list = std::list<Polygon_2>;
  * @param p3 The end point of vector \f$ \vec{p_1p_3} \f$
  * @return Signed area of given triangle
  *
+ * @detail
  * Signed area of triangle \f$ S(p1, p2, p3) \f$ is
  * half of the outer product of vector \f$ \vec{p_1p_2} \f$ and \f$ \vec{p_1p_3}
  * \f$.\n
@@ -281,6 +282,12 @@ bool hasIntersection(const LineSegment& edge1, const LineSegment& edge2)
   }
 }
 
+/**
+ * @brief Find the location where given edges intersect each other
+ * @param edge1
+ * @param edge2
+ * @return geometry_msgs::Point Point of intersection
+ */
 geometry_msgs::Point localizeIntersection(const LineSegment& edge1, const LineSegment& edge2)
 {
   geometry_msgs::Point p1, p2, p3, p4;
@@ -306,6 +313,12 @@ geometry_msgs::Point localizeIntersection(const LineSegment& edge1, const LineSe
   return intersection;
 }
 
+/**
+ * @brief Rotate points by given angle around the origin
+ * @param points Points to be rotated
+ * @param angle_rad Rotation angle in radian
+ * @return PointVector Rotated points
+ */
 PointVector rotatePoints(const PointVector& points, double angle_rad)
 {
   std::array<double, 4> rotationMatrix;
@@ -326,6 +339,17 @@ PointVector rotatePoints(const PointVector& points, double angle_rad)
   return rotatedPoints;
 }
 
+/**
+ * @brief Decompose given polygon
+ * @param polygon Polygon to be decomposed
+ * @return std::vector<PointVector> Decomposed polygons
+ * @detail
+ * This function uses CGAL::optimal_convex_partition_2 in order to perform optimal polygon decomposition.
+ * Note that this function has O(n^4) time complexity and O(n^3) space complexity.
+ * Use approx_convex_partition_2 instead if the number of vertices are big because its time complexity is O(n).
+ * But apptox_convex_partition_2 generates more polygons.
+ * For detail, see https://doc.cgal.org/latest/Partition_2/index.html
+ */
 std::vector<PointVector> decomposePolygon(const PointVector& polygon)
 {
   std::vector<PointVector> decomposedPolygons;

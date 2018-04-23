@@ -295,6 +295,11 @@ inline bool isClockWise(PointVector path)
   return path.at(0).x < path.at(1).x ? true : false;
 }
 
+/**
+ * @brief Return counter clock wise-ed path of given path
+ * @param path
+ * @return PointVector Counter clock wise version of given path
+ */
 PointVector computeCCWPath(PointVector path)
 {
   for (int i = 0; i < std::round(path.size() / 2); ++i)
@@ -313,6 +318,11 @@ PointVector computeCCWPath(PointVector path)
   return path;
 }
 
+/**
+ * @brief Return opposite path of given path
+ * @param path
+ * @return PointVector Path with points of reversed order of given path
+ */
 PointVector computeOppositePath(const PointVector& path)
 {
   PointVector oppositePath;
@@ -325,6 +335,12 @@ PointVector computeOppositePath(const PointVector& path)
   return oppositePath;
 }
 
+/**
+ * @brief Identify optimal path from 4 coverage alternatives
+ * @param path
+ * @param start Start point
+ * @return PointVector Optimal path that minimizes the length of path
+ */
 PointVector identifyOptimalPath(const PointVector& path, const geometry_msgs::Point& start)
 {
   // The naming of the following variable follows torres et al. 2016
