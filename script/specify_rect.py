@@ -453,7 +453,7 @@ class PolygonBuilder(object):
                                    self.coverage_params["footprint_width"],
                                    self.coverage_params["horizontal_overwrap"],
                                    self.coverage_params["vertical_overwrap"])
-            self.points["waypoints"] = ret.waypoints
+            self.points["waypoints"] = ret.path
 
             # fill the lists of waypoints' coordinate to draw path
             for num, point in enumerate(self.points["waypoints"]):
