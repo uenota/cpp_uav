@@ -6,3 +6,4 @@ std_msgs/Float64 horizontal_overwrap
 std_msgs/Float64 vertical_overwrap
 ---
 geometry_msgs/Point[] path
+geometry_msgs/Polygon[] subpolygons
