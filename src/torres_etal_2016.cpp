@@ -54,6 +54,18 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
 
   if (isOptimal == true)
   {
+    geometry_msgs::Polygon poly;
+
+    for (const auto& vertex : polygon)
+    {
+      geometry_msgs::Point32 p;
+      p.x = vertex.x;
+      p.y = vertex.y;
+      poly.points.push_back(p);
+    }
+
+    std::vector<geometry_msgs::Polygon> polygons = { poly };
+    res.subpolygons = polygons;
     res.path = identifyOptimalAlternative(polygon, path, start);
   }
   else
@@ -86,6 +98,19 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
       secondOptimalPath = identifyOptimalAlternative(polygon, path, start);
       if (pathLengthSum > calculatePathLength(secondOptimalPath))
       {
+        geometry_msgs::Polygon poly;
+
+        for (const auto& vertex : polygon)
+        {
+          geometry_msgs::Point32 p;
+          p.x = vertex.x;
+          p.y = vertex.y;
+          poly.points.push_back(p);
+        }
+
+        std::vector<geometry_msgs::Polygon> polygons = { poly };
+        res.subpolygons = polygons;
+
         res.path = secondOptimalPath;
         ROS_INFO("second optimal path is considered as optimal");
         return true;
