@@ -76,6 +76,45 @@ inline double calculateSignedArea(const geometry_msgs::Point& p1, const geometry
   return p1.x * (p2.y - p3.y) - p1.y * (p2.x - p3.x) + (p2.x * p3.y - p2.y * p3.x);
 }
 
+bool operator==(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
+{
+  bool x =
+      p1.x == p2.x || std::abs(p1.x - p2.x) < std::abs(std::min(p1.x, p2.x)) * std::numeric_limits<double>::epsilon();
+  bool y =
+      p1.y == p2.y || std::abs(p1.y - p2.y) < std::abs(std::min(p1.y, p2.y)) * std::numeric_limits<double>::epsilon();
+  bool z =
+      p1.z == p2.z || std::abs(p1.z - p2.z) < std::abs(std::min(p1.z, p2.z)) * std::numeric_limits<double>::epsilon();
+  return x and y and z;
+}
+
+bool operator!=(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
+{
+  return !(p1 == p2);
+}
+
+LineSegmentVector generateEdgeVector(const PointVector& vec)
+{
+  LineSegmentVector edgeVector;
+  for (int i = 0; i < vec.size(); ++i)
+  {
+    LineSegment edge;
+
+    edge.at(0) = vec.at(i);
+
+    if (i < vec.size() - 1)
+    {
+      edge.at(1) = vec.at(i + 1);
+    }
+    else
+    {
+      edge.at(1) = vec.at(0);
+    }
+
+    edgeVector.push_back(edge);
+  }
+  return edgeVector;
+}
+
 /**
  * @brief Calculates distance between given two points
  * @param p1
@@ -177,7 +216,7 @@ PointVector computeConvexHull(PointVector points)
 {
   PointVector convexHull;
 
-  if (points.empty())
+  if (points.empty() or points.size() < 3)
   {
     return convexHull;
   }
@@ -280,6 +319,26 @@ bool hasIntersection(const LineSegment& edge1, const LineSegment& edge2)
   {
     return false;
   }
+}
+
+bool hasIntersection(const PointVector& vec1, const PointVector& vec2)
+{
+  LineSegmentVector edges1, edges2;
+  edges1 = generateEdgeVector(vec1);
+  edges2 = generateEdgeVector(vec2);
+
+  for (const auto& edge1 : edges1)
+  {
+    for (const auto& edge2 : edges2)
+    {
+      if (hasIntersection(edge1, edge2) == true)
+      {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /**

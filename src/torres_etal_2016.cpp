@@ -21,6 +21,8 @@
 
 // geometry_msgs
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/Point32.h>
+#include <geometry_msgs/Polygon.h>
 
 // Service
 #include "cpp_uav/Torres16.h"
@@ -52,21 +54,79 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
 
   if (isOptimal == true)
   {
-    res.path = identifyOptimalPath(path, start);
+    res.path = identifyOptimalAlternative(polygon, path, start);
   }
   else
   {
+    ROS_INFO("decomposing polygon");
     std::vector<PointVector> subPolygons = decomposePolygon(polygon);
+    ROS_INFO("polygon decomposed");
+    ROS_INFO("Number of Sub Polygon: %d", subPolygons.size());
     double pathLengthSum = 0;
 
+    ROS_INFO("computing coverage of subpolygons");
     for (const auto& polygon : subPolygons)
     {
       PointVector partialPath;
+      ROS_INFO("1");
+      ROS_INFO("Num. of polygon vertices: %d", polygon.size());
       computeConvexCoverage(polygon, footprintWidth.data, horizontalOverwrap.data, partialPath);
+      ROS_INFO("2");
       pathLengthSum += calculatePathLength(partialPath);
+      ROS_INFO("3");
+    }
+    ROS_INFO("finish computing coverage of subpolygons");
+
+    ROS_INFO("searching second optimal path");
+    PointVector secondOptimalPath;
+    bool existsSecondOptimalPath = findSecondOptimalPath(polygon, footprintWidth.data, horizontalOverwrap.data, path);
+    ROS_INFO("finish searching second optimal path");
+    if (existsSecondOptimalPath == true)
+    {
+      secondOptimalPath = identifyOptimalAlternative(polygon, path, start);
+      if (pathLengthSum > calculatePathLength(secondOptimalPath))
+      {
+        res.path = secondOptimalPath;
+        ROS_INFO("second optimal path is considered as optimal");
+        return true;
+      }
+    }
+    else if (subPolygons.size() < 2)
+    {
+      ROS_WARN("Unable to generate path.");
+      return true;
     }
 
-    res.path = path;
+    /*
+    PointVector srvRetSubPolygons;
+    for (const auto& subPolygon : subPolygons)
+    {
+      srvRetSubPolygons.insert(srvRetSubPolygons.begin(), subPolygon.begin(), subPolygon.end());
+    }
+    res.subpolygons = srvRetSubPolygons;
+    */
+    std::vector<geometry_msgs::Polygon> subPolygonsRet;
+
+    for (const auto& subPolygon : subPolygons)
+    {
+      geometry_msgs::Polygon poly;
+      for (const auto& vertex : subPolygon)
+      {
+        geometry_msgs::Point32 pt;
+        pt.x = vertex.x;
+        pt.y = vertex.y;
+        poly.points.push_back(pt);
+      }
+      subPolygonsRet.push_back(poly);
+    }
+
+    res.subpolygons = subPolygonsRet;
+
+    ROS_INFO("computing multiple polygon coverage");
+    PointVector gePath = computeMultiplePolygonCoverage(subPolygons, footprintWidth.data, horizontalOverwrap.data);
+    ROS_INFO("finish computing multiple polygon coverage");
+
+    res.path = gePath;
   }
 
   return true;
