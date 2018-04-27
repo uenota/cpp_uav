@@ -21,6 +21,8 @@
 
 // geometry_msgs
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/Point32.h>
+#include <geometry_msgs/Polygon.h>
 
 // Service
 #include "cpp_uav/Torres16.h"
@@ -28,60 +30,128 @@
 /**
  * @brief Plans coverage path
  * @param req[in] Contains values neccesary to plan a path
- * @param res[out] Contains resulting waypoints
+ * @param res[out] Contains resulting path
  * @return bool
  * @details For details of this service, cf. srv/Torres16.srv
  */
 bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
 {
   // Initialization
-  std::vector<geometry_msgs::Point> polygon_vertices, waypoints;
-  geometry_msgs::Point start, end;
-  std_msgs::Float64 footprint_length, footprint_width, horizontal_overwrap, vertical_overwrap;
+  PointVector polygon, path;
+  geometry_msgs::Point start;
+  std_msgs::Float64 footprintLength, footprintWidth, horizontalOverwrap, verticalOverwrap;
 
-  polygon_vertices = req.polygon_vertices;
+  polygon = req.polygon;
 
   start = req.start;
-  end = req.end;
 
-  footprint_length = req.footprint_length;
-  footprint_width = req.footprint_width;
-  horizontal_overwrap = req.horizontal_overwrap;
-  vertical_overwrap = req.vertical_overwrap;
+  footprintLength = req.footprint_length;
+  footprintWidth = req.footprint_width;
+  horizontalOverwrap = req.horizontal_overwrap;
+  verticalOverwrap = req.vertical_overwrap;
 
-  if (isConvex(polygon_vertices) == true)
+  bool isOptimal = computeConvexCoverage(polygon, footprintWidth.data, horizontalOverwrap.data, path);
+
+  if (isOptimal == true)
   {
-    ROS_INFO("This polygon is convex");
-    std::vector<geometry_msgs::Point> waypoints, sweepDir, sweepLns;
-    convexCoverage(polygon_vertices, footprint_width.data, horizontal_overwrap.data, waypoints);
-    res.waypoints = waypoints;
+    geometry_msgs::Polygon poly;
+
+    for (const auto& vertex : polygon)
+    {
+      geometry_msgs::Point32 p;
+      p.x = vertex.x;
+      p.y = vertex.y;
+      poly.points.push_back(p);
+    }
+
+    std::vector<geometry_msgs::Polygon> polygons = { poly };
+    res.subpolygons = polygons;
+    res.path = identifyOptimalAlternative(polygon, path, start);
   }
   else
   {
-    ROS_INFO("This polygon is concave");
+    ROS_INFO("decomposing polygon");
+    std::vector<PointVector> subPolygons = decomposePolygon(polygon);
+    ROS_INFO("polygon decomposed");
+    ROS_INFO("Number of Sub Polygon: %d", subPolygons.size());
+    double pathLengthSum = 0;
 
-    std::vector<geometry_msgs::Point> convex_hull = grahamScan(polygon_vertices);
+    ROS_INFO("computing coverage of subpolygons");
+    for (const auto& polygon : subPolygons)
+    {
+      PointVector partialPath;
+      ROS_INFO("1");
+      ROS_INFO("Num. of polygon vertices: %d", polygon.size());
+      computeConvexCoverage(polygon, footprintWidth.data, horizontalOverwrap.data, partialPath);
+      ROS_INFO("2");
+      pathLengthSum += calculatePathLength(partialPath);
+      ROS_INFO("3");
+    }
+    ROS_INFO("finish computing coverage of subpolygons");
 
-    Direction optimal_sweep_dir = sweepDirection(convex_hull);
+    ROS_INFO("searching second optimal path");
+    PointVector secondOptimalPath;
+    bool existsSecondOptimalPath = findSecondOptimalPath(polygon, footprintWidth.data, horizontalOverwrap.data, path);
+    ROS_INFO("finish searching second optimal path");
+    if (existsSecondOptimalPath == true)
+    {
+      secondOptimalPath = identifyOptimalAlternative(polygon, path, start);
+      if (pathLengthSum > calculatePathLength(secondOptimalPath))
+      {
+        geometry_msgs::Polygon poly;
+
+        for (const auto& vertex : polygon)
+        {
+          geometry_msgs::Point32 p;
+          p.x = vertex.x;
+          p.y = vertex.y;
+          poly.points.push_back(p);
+        }
+
+        std::vector<geometry_msgs::Polygon> polygons = { poly };
+        res.subpolygons = polygons;
+
+        res.path = secondOptimalPath;
+        ROS_INFO("second optimal path is considered as optimal");
+        return true;
+      }
+    }
+    else if (subPolygons.size() < 2)
+    {
+      ROS_WARN("Unable to generate path.");
+      return true;
+    }
 
     /*
-      std::vector<std::vector<geometry_msgs::Point>> dec_poly = decomposePolygon(polygon_vertices);
+    PointVector srvRetSubPolygons;
+    for (const auto& subPolygon : subPolygons)
+    {
+      srvRetSubPolygons.insert(srvRetSubPolygons.begin(), subPolygon.begin(), subPolygon.end());
+    }
+    res.subpolygons = srvRetSubPolygons;
+    */
+    std::vector<geometry_msgs::Polygon> subPolygonsRet;
 
-      std::vector<geometry_msgs::Point> waypoints;
-
-      for (const auto& polygon : dec_poly)
+    for (const auto& subPolygon : subPolygons)
+    {
+      geometry_msgs::Polygon poly;
+      for (const auto& vertex : subPolygon)
       {
-        std::vector<geometry_msgs::Point> waypoints_part =
-            convexCoverage(polygon, footprint_width.data, horizontal_overwrap.data);
-
-        for (const auto& waypoint : waypoints_part)
-        {
-          waypoints.push_back(waypoint);
-        }
+        geometry_msgs::Point32 pt;
+        pt.x = vertex.x;
+        pt.y = vertex.y;
+        poly.points.push_back(pt);
       }
+      subPolygonsRet.push_back(poly);
+    }
 
-      res.waypoints = waypoints;
-      */
+    res.subpolygons = subPolygonsRet;
+
+    ROS_INFO("computing multiple polygon coverage");
+    PointVector gePath = computeMultiplePolygonCoverage(subPolygons, footprintWidth.data, horizontalOverwrap.data);
+    ROS_INFO("finish computing multiple polygon coverage");
+
+    res.path = gePath;
   }
 
   return true;
