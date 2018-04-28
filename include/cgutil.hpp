@@ -92,9 +92,10 @@ bool operator!=(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
   return !(p1 == p2);
 }
 
-LineSegmentVector generateEdgeVector(const PointVector& vec)
+LineSegmentVector generateEdgeVector(const PointVector& vec, bool isClosed)
 {
   LineSegmentVector edgeVector;
+
   for (int i = 0; i < vec.size(); ++i)
   {
     LineSegment edge;
@@ -108,6 +109,10 @@ LineSegmentVector generateEdgeVector(const PointVector& vec)
     else
     {
       edge.at(1) = vec.at(0);
+      if (not isClosed)
+      {
+        break;
+      }
     }
 
     edgeVector.push_back(edge);

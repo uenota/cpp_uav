@@ -286,7 +286,7 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
     sweepLines.push_back(ar);
   }
 
-  LineSegmentVector rotatedEdges = generateEdgeVector(rotatedPolygon);
+  LineSegmentVector rotatedEdges = generateEdgeVector(rotatedPolygon, true);
 
   PointVector intersections;
 
@@ -314,7 +314,7 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
 
   path = rotatePoints(rotatedPath, rotationAngle);
 
-  if (hasIntersection(polygon, path) == true)
+  if (hasIntersection(generateEdgeVector(polygon, true), generateEdgeVector(path, false)) == true)
   {
     return false;
   }
@@ -423,8 +423,8 @@ PointVector identifyOptimalAlternative(const PointVector& polygon, const PointVe
   coverageAlternatives[3] = a3;
   coverageAlternatives[4] = a4;
 
-  bool hasIntersectionCW = hasIntersection(polygon, pathCW);
-  bool hasIntersectionCCW = hasIntersection(polygon, pathCCW);
+  bool hasIntersectionCW = hasIntersection(generateEdgeVector(polygon, true), generateEdgeVector(pathCW, false));
+  bool hasIntersectionCCW = hasIntersection(generateEdgeVector(polygon, true), generateEdgeVector(pathCCW, false));
 
   double minDistance;
   int optimalPath;
@@ -477,7 +477,7 @@ bool findSecondOptimalPath(const PointVector& polygon, double footprintWidth, do
 {
   std::vector<Direction> sweepDirections;
   PointVector convexHull = computeConvexHull(polygon);
-  LineSegmentVector edges = generateEdgeVector(convexHull);
+  LineSegmentVector edges = generateEdgeVector(convexHull, true);
 
   for (const auto& edge : edges)
   {
