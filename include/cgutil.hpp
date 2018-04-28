@@ -306,17 +306,36 @@ inline bool isConvex(PointVector points)
 bool hasIntersection(const LineSegment& edge1, const LineSegment& edge2)
 {
   geometry_msgs::Point p1, p2, p3, p4;
-  p1 = edge1.at(0);
-  p2 = edge1.at(1);
-  p3 = edge2.at(0);
-  p4 = edge2.at(1);
 
-  if (((p1.x - p2.x) * (p3.y - p1.y) + (p1.y - p2.y) * (p1.x - p3.x)) *
-              ((p1.x - p2.x) * (p4.y - p1.y) + (p1.y - p2.y) * (p1.x - p4.x)) <
-          0 and
-      ((p3.x - p4.x) * (p1.y - p3.y) + (p3.y - p4.y) * (p3.x - p1.x)) *
-              ((p3.x - p4.x) * (p2.y - p3.y) + (p3.y - p4.y) * (p3.x - p2.x)) <
-          0)
+  try
+  {
+    p1 = edge1.at(0);
+    p2 = edge1.at(1);
+    p3 = edge2.at(0);
+    p4 = edge2.at(1);
+
+    ROS_INFO("p1.x: %f", p1.x);
+
+    ROS_INFO("p2.x: %f", p2.x);
+
+    ROS_INFO("p3.x: %f", p3.x);
+
+    ROS_INFO("p4.x: %f", p4.x);
+  }
+  catch (std::out_of_range& ex)
+  {
+    ROS_ERROR("%s", ex.what());
+    return false;
+  }
+
+  bool condA = ((p1.x - p2.x) * (p3.y - p1.y) + (p1.y - p2.y) * (p1.x - p3.x)) *
+                   ((p1.x - p2.x) * (p4.y - p1.y) + (p1.y - p2.y) * (p1.x - p4.x)) <
+               0;
+  bool condB = ((p3.x - p4.x) * (p1.y - p3.y) + (p3.y - p4.y) * (p3.x - p1.x)) *
+                   ((p3.x - p4.x) * (p2.y - p3.y) + (p3.y - p4.y) * (p3.x - p2.x)) <
+               0;
+
+  if (condA and condB)
   {
     return true;
   }
@@ -326,21 +345,25 @@ bool hasIntersection(const LineSegment& edge1, const LineSegment& edge2)
   }
 }
 
-bool hasIntersection(const PointVector& vec1, const PointVector& vec2)
+bool hasIntersection(const LineSegmentVector& vec1, const LineSegmentVector& vec2)
 {
-  LineSegmentVector edges1, edges2;
-  edges1 = generateEdgeVector(vec1);
-  edges2 = generateEdgeVector(vec2);
+  ROS_INFO("edges1: %d", vec1.size());
+  ROS_INFO("edges2: %d", vec2.size());
 
-  for (const auto& edge1 : edges1)
+  int i = 0;
+
+  for (const auto& segment1 : vec1)
   {
-    for (const auto& edge2 : edges2)
+    ROS_INFO("vec1: %d", i);
+    for (const auto& segment2 : vec2)
     {
-      if (hasIntersection(edge1, edge2) == true)
+      if (hasIntersection(segment1, segment2) == true)
       {
+        ROS_INFO("has intersection");
         return true;
       }
     }
+    ++i;
   }
 
   return false;
@@ -419,7 +442,6 @@ std::vector<PointVector> decomposePolygon(const PointVector& polygon)
   std::vector<PointVector> decomposedPolygons;
 
   Polygon_2 cgalPolygon;
-
   for (const auto& vertex : polygon)
   {
     cgalPolygon.push_back(Point_2(vertex.x, vertex.y));

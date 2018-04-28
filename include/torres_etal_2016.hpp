@@ -161,7 +161,7 @@ PointVector generateZigzagPath(const PointVector& path, double padding)
           zigzagPath.push_back(p1);
         }
       }
-      catch (const std::out_of_range& ex)
+      catch (std::out_of_range& ex)
       {
         geometry_msgs::Point p = path.at(2 * i);
         if (isClockWise(path))
@@ -174,6 +174,7 @@ PointVector generateZigzagPath(const PointVector& path, double padding)
           p.x -= padding;
           zigzagPath.push_back(p);
         }
+        ROS_ERROR("%s", ex.what());
       }
     }
     else
@@ -201,7 +202,7 @@ PointVector generateZigzagPath(const PointVector& path, double padding)
           zigzagPath.push_back(p1);
         }
       }
-      catch (const std::out_of_range& ex)
+      catch (std::out_of_range& ex)
       {
         geometry_msgs::Point p = path.at(2 * i);
         if (isClockWise(path))
@@ -214,6 +215,7 @@ PointVector generateZigzagPath(const PointVector& path, double padding)
           p.x += padding;
           zigzagPath.push_back(p);
         }
+        ROS_ERROR("%s", ex.what());
       }
     }
   }
@@ -365,8 +367,9 @@ PointVector computeCCWPath(PointVector path)
     {
       path.at(2 * i + 1) = tmp;
     }
-    catch (const std::out_of_range& ex)
+    catch (std::out_of_range& ex)
     {
+      ROS_ERROR("%s", ex.what());
     }
   }
   return path;
@@ -497,23 +500,25 @@ bool findSecondOptimalPath(const PointVector& polygon, double footprintWidth, do
   }
 
   double pathLength = 0;
+  PointVector tempPath;
   for (const auto& sweepDirection : sweepDirections)
   {
-    PointVector tempPath;
-    if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, sweepDirection, tempPath) and
-        (calculatePathLength(tempPath) < pathLength or pathLength == 0))
+    PointVector p;
+    bool isValidPath = computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, sweepDirection, p);
+    if (isValidPath and ((calculatePathLength(tempPath) < pathLength) or (pathLength == 0)))
     {
-      path = tempPath;
-      pathLength = calculatePathLength(path);
+      tempPath = p;
+      pathLength = calculatePathLength(tempPath);
     }
   }
 
-  if (path.size() <= 1)
+  if (tempPath.size() <= 1)
   {
     return false;
   }
   else
   {
+    path = tempPath;
     return true;
   }
 }
@@ -545,6 +550,7 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
 
   do
   {
+    ROS_INFO("%d", permutation.front());
     if (permutation.front() != 0)
     {
       continue;
@@ -568,42 +574,93 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
 
     for (auto itr = permutation.begin(); itr != permutation.end(); ++itr)
     {
+      ROS_INFO("itr: %d", *itr);
       PointVector partPath, optimalAlternative;
       if (itr == permutation.begin())
       {
-        geometry_msgs::Point start = subPolygons.at(*(permutation.end() - 1)).back();
-        geometry_msgs::Point end = subPolygons.at(*(itr + 1)).front();
-        PointVector polygon = subPolygons.at(*itr);
-        computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath);
-        optimalAlternative = identifyOptimalAlternative(polygon, partPath, start, end);
-        candidatePath.push_back(optimalAlternative);
-        pathLength += calculatePathLength(optimalAlternative);
+        ROS_INFO("1");
+        try
+        {
+          geometry_msgs::Point start = subPolygons.at(*(permutation.end() - 1)).back();
+          geometry_msgs::Point end;
+          PointVector polygon = subPolygons.at(*itr);
+
+          if (permutation.size() == 1)
+          {
+            // in case that subPolygons.at(*(itr+1)) is out of range
+            end = start;
+          }
+          else
+          {
+            end = subPolygons.at(*(itr + 1)).front();
+          }
+
+          if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath) == false)
+          {
+            break;
+          }
+          optimalAlternative = identifyOptimalAlternative(polygon, partPath, start, end);
+          candidatePath.push_back(optimalAlternative);
+          pathLength += calculatePathLength(optimalAlternative);
+        }
+        catch (std::out_of_range& ex)
+        {
+          ROS_ERROR("%s", ex.what());
+        }
       }
       else if (itr == permutation.end() - 1)
       {
-        geometry_msgs::Point start = subPolygons.at(*(itr - 1)).back();
-        geometry_msgs::Point end = subPolygons.at(*permutation.begin()).front();
-        PointVector polygon = subPolygons.at(*itr);
-        computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath);
-        optimalAlternative = identifyOptimalAlternative(polygon, partPath, start, end);
-        candidatePath.push_back(optimalAlternative);
-        pathLength += calculatePathLength(optimalAlternative);
+        ROS_INFO("2");
+        try
+        {
+          geometry_msgs::Point start = subPolygons.at(*(itr - 1)).back();
+          geometry_msgs::Point end = subPolygons.at(*permutation.begin()).front();
+          PointVector polygon = subPolygons.at(*itr);
+          if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath) == false)
+          {
+            break;
+          }
+          optimalAlternative = identifyOptimalAlternative(polygon, partPath, start, end);
+          candidatePath.push_back(optimalAlternative);
+          pathLength += calculatePathLength(optimalAlternative);
+        }
+        catch (std::out_of_range& ex)
+        {
+          ROS_ERROR("%s", ex.what());
+        }
       }
       else
       {
-        geometry_msgs::Point start = subPolygons.at(*(itr - 1)).back();
-        geometry_msgs::Point end = subPolygons.at(*(itr + 1)).front();
-        PointVector polygon = subPolygons.at(*itr);
-        computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath);
-        optimalAlternative = identifyOptimalAlternative(polygon, partPath, start, end);
-        candidatePath.push_back(optimalAlternative);
-        pathLength += calculatePathLength(optimalAlternative);
+        ROS_INFO("3");
+        try
+        {
+          geometry_msgs::Point start = subPolygons.at(*(itr - 1)).back();
+          geometry_msgs::Point end = subPolygons.at(*(itr + 1)).front();
+          PointVector polygon = subPolygons.at(*itr);
+          if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath) == false)
+          {
+            break;
+          }
+          optimalAlternative = identifyOptimalAlternative(polygon, partPath, start, end);
+          candidatePath.push_back(optimalAlternative);
+          pathLength += calculatePathLength(optimalAlternative);
+        }
+        catch (std::out_of_range& ex)
+        {
+          ROS_ERROR("%s", ex.what());
+        }
       }
     }
 
     if (minPathLength < 0 or pathLength < minPathLength)
     {
       minPathLength = pathLength;
+
+      if (not path.empty())
+      {
+        path.clear();
+      }
+
       for (const auto& part : candidatePath)
       {
         path.insert(path.begin(), part.begin(), part.end());
