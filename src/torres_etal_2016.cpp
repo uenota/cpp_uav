@@ -66,6 +66,7 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
 
     std::vector<geometry_msgs::Polygon> polygons = { poly };
     res.subpolygons = polygons;
+
     res.path = identifyOptimalAlternative(polygon, path, start);
   }
   else
@@ -118,18 +119,10 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
     }
     else if (subPolygons.size() < 2)
     {
-      ROS_WARN("Unable to generate path.");
+      ROS_ERROR("Unable to generate path.");
       return true;
     }
 
-    /*
-    PointVector srvRetSubPolygons;
-    for (const auto& subPolygon : subPolygons)
-    {
-      srvRetSubPolygons.insert(srvRetSubPolygons.begin(), subPolygon.begin(), subPolygon.end());
-    }
-    res.subpolygons = srvRetSubPolygons;
-    */
     std::vector<geometry_msgs::Polygon> subPolygonsRet;
 
     for (const auto& subPolygon : subPolygons)
