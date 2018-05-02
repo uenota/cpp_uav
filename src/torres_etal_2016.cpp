@@ -36,13 +36,16 @@
  */
 bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
 {
-  // Initialization
-  PointVector polygon, path;
+  // see torres et al. 2016 for the flow of this algorithm
+
+  // polygon from request and path for response
+  PointVector polygon, candidatePath;
+  // start point of coverage path
   geometry_msgs::Point start;
+  // parameters of coverage path
   std_msgs::Float64 footprintLength, footprintWidth, horizontalOverwrap, verticalOverwrap;
 
   polygon = req.polygon;
-
   start = req.start;
 
   footprintLength = req.footprint_length;
@@ -50,7 +53,8 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
   horizontalOverwrap = req.horizontal_overwrap;
   verticalOverwrap = req.vertical_overwrap;
 
-  bool isOptimal = computeConvexCoverage(polygon, footprintWidth.data, horizontalOverwrap.data, path);
+  // isOptimal is true if computed path is optimal
+  bool isOptimal = computeConvexCoverage(polygon, footprintWidth.data, horizontalOverwrap.data, candidatePath);
 
   if (isOptimal == true)
   {
@@ -75,9 +79,12 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
     std::vector<PointVector> subPolygons = decomposePolygon(polygon);
     ROS_INFO("polygon decomposed");
     ROS_INFO("Number of Sub Polygon: %d", subPolygons.size());
+
+    // sum of length of all coverage path
     double pathLengthSum = 0;
 
     ROS_INFO("computing coverage of subpolygons");
+    // compute length of coverage path of each subpolygon
     for (const auto& polygon : subPolygons)
     {
       PointVector partialPath;
@@ -91,12 +98,20 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
     ROS_INFO("finish computing coverage of subpolygons");
 
     ROS_INFO("searching second optimal path");
+    // existsSecondOptimalPath is true if there is at least one coverage that has no intersection with polygon
+    // second optimal path is the path that has second shortest sweep direction without any intersection with polygon
     PointVector secondOptimalPath;
-    bool existsSecondOptimalPath = findSecondOptimalPath(polygon, footprintWidth.data, horizontalOverwrap.data, path);
     ROS_INFO("finish searching second optimal path");
+    bool existsSecondOptimalPath =
+        findSecondOptimalPath(polygon, footprintWidth.data, horizontalOverwrap.data, candidatePath);
+
     if (existsSecondOptimalPath == true)
     {
-      secondOptimalPath = identifyOptimalAlternative(polygon, path, start);
+      // compute optimal alternative for second optimal path
+      secondOptimalPath = identifyOptimalAlternative(polygon, candidatePath, start);
+
+      // if the length of second optimal path is shorter than the sum of coverage path of subpolygons,
+      // set second optimal path as the path
       if (pathLengthSum > calculatePathLength(secondOptimalPath))
       {
         geometry_msgs::Polygon poly;
@@ -119,6 +134,8 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
     }
     else if (subPolygons.size() < 2)
     {
+      // if number of subpolygon is smaller than 2,
+      // it means no valid path can be computed
       ROS_ERROR("Unable to generate path.");
       return true;
     }
@@ -141,10 +158,12 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
     res.subpolygons = subPolygonsRet;
 
     ROS_INFO("computing multiple polygon coverage");
-    PointVector gePath = computeMultiplePolygonCoverage(subPolygons, footprintWidth.data, horizontalOverwrap.data);
     ROS_INFO("finish computing multiple polygon coverage");
+    // compute coverage path of subpolygons
+    PointVector multipleCoveragePath =
+        computeMultiplePolygonCoverage(subPolygons, footprintWidth.data, horizontalOverwrap.data);
 
-    res.path = gePath;
+    res.path = multipleCoveragePath;
   }
 
   return true;
