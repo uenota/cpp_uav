@@ -76,6 +76,13 @@ inline double calculateSignedArea(const geometry_msgs::Point& p1, const geometry
   return p1.x * (p2.y - p3.y) - p1.y * (p2.x - p3.x) + (p2.x * p3.y - p2.y * p3.x);
 }
 
+/**
+ * @brief Check equality of two points
+ * @param p1
+ * @param p2
+ * @return bool
+ * @detail See https://stackoverflow.com/questions/4010240/comparing-doubles
+ */
 bool operator==(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
 {
   bool x =
@@ -84,17 +91,36 @@ bool operator==(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
       p1.y == p2.y || std::abs(p1.y - p2.y) < std::abs(std::min(p1.y, p2.y)) * std::numeric_limits<double>::epsilon();
   bool z =
       p1.z == p2.z || std::abs(p1.z - p2.z) < std::abs(std::min(p1.z, p2.z)) * std::numeric_limits<double>::epsilon();
+
   return x and y and z;
 }
 
+/**
+ * @brief Check equality of two points
+ * @param p1
+ * @param p2
+ * @return bool
+ */
 bool operator!=(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
 {
   return !(p1 == p2);
 }
 
+/**
+ * @brief Generate Vector of line segment from given PointVector
+ * @param vec
+ * @param isClosed Set true if the first point and the last are connected
+ * @return LineSegmentVector Vector of line segment a.k.a. std::vector<std::array<geometry_msgs::Point, 2>>
+ */
 LineSegmentVector generateEdgeVector(const PointVector& vec, bool isClosed)
 {
   LineSegmentVector edgeVector;
+
+  // break if vector is empty
+  if (vec.empty() == true)
+  {
+    return edgeVector;
+  }
 
   for (int i = 0; i < vec.size(); ++i)
   {
@@ -104,10 +130,12 @@ LineSegmentVector generateEdgeVector(const PointVector& vec, bool isClosed)
 
     if (i < vec.size() - 1)
     {
+      // except for the last vertex
       edge.at(1) = vec.at(i + 1);
     }
     else
     {
+      // for the last vertex
       edge.at(1) = vec.at(0);
       if (not isClosed)
       {
@@ -345,6 +373,12 @@ bool hasIntersection(const LineSegment& edge1, const LineSegment& edge2)
   }
 }
 
+/**
+ * @brief Checks if given vectors of edges have at least one intersection
+ * @param vec1 Vector of line segments
+ * @param vec2 Vector of line segments
+ * @return True if given two vectors of edges have at least one intersection
+ */
 bool hasIntersection(const LineSegmentVector& vec1, const LineSegmentVector& vec2)
 {
   ROS_INFO("edges1: %d", vec1.size());
@@ -374,14 +408,23 @@ bool hasIntersection(const LineSegmentVector& vec1, const LineSegmentVector& vec
  * @param edge1
  * @param edge2
  * @return geometry_msgs::Point Point of intersection
+ * @detail See http://mf-atelier.sakura.ne.jp/mf-atelier/modules/tips/program/algorithm/a1.html
  */
 geometry_msgs::Point localizeIntersection(const LineSegment& edge1, const LineSegment& edge2)
 {
   geometry_msgs::Point p1, p2, p3, p4;
-  p1 = edge1.at(0);
-  p2 = edge1.at(1);
-  p3 = edge2.at(0);
-  p4 = edge2.at(1);
+
+  try
+  {
+    p1 = edge1.at(0);
+    p2 = edge1.at(1);
+    p3 = edge2.at(0);
+    p4 = edge2.at(1);
+  }
+  catch (const std::out_of_range& ex)
+  {
+    ROS_ERROR("%s", ex.what());
+  }
 
   double xi, eta, delta;
   xi = (p4.y - p3.y) * (p4.x - p1.x) - (p4.x - p3.x) * (p4.y - p1.y);
@@ -441,6 +484,7 @@ std::vector<PointVector> decomposePolygon(const PointVector& polygon)
 {
   std::vector<PointVector> decomposedPolygons;
 
+  // generate Polygon of CGAL from PointVector
   Polygon_2 cgalPolygon;
   for (const auto& vertex : polygon)
   {
@@ -456,6 +500,7 @@ std::vector<PointVector> decomposePolygon(const PointVector& polygon)
   CGAL::optimal_convex_partition_2(cgalPolygon.vertices_begin(), cgalPolygon.vertices_end(),
                                    std::back_inserter(partialCGALPolygons), partitionTraits);
 
+  // generate std::vector<PointVector> from polygon of CGAL
   for (const auto& partialCGALPolygon : partialCGALPolygons)
   {
     PointVector partialPolygon;
