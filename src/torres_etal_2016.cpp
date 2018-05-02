@@ -28,6 +28,56 @@
 #include "cpp_uav/Torres16.h"
 
 /**
+ * @brief Generate vector of polygon from PointVector
+ * @param polygon
+ * @return std::vector<geometry_msgs::Polygon> Vector of subpolygons assumed to be passed to ROS msg
+ */
+std::vector<geometry_msgs::Polygon> generatePolygonVector(const PointVector& polygon)
+{
+  // convert PointVector (a.k.a. std::vector<geometry_msgs::Point>) to geometry_msgs::Polygon
+  // so that polygon is visualized on the window
+  geometry_msgs::Polygon poly;
+  for (const auto& vertex : polygon)
+  {
+    geometry_msgs::Point32 p;
+    p.x = vertex.x;
+    p.y = vertex.y;
+    poly.points.push_back(p);
+  }
+
+  std::vector<geometry_msgs::Polygon> polygons = { poly };
+
+  return polygons;
+}
+
+/**
+ * @brief Generate vector of polygon from std::vector<PointVector>
+ * @param polygon
+ * @return std::vector<geometry_msgs::Polygon> Vector of subpolygons assumed to be passed to ROS msg
+ */
+std::vector<geometry_msgs::Polygon> generatePolygonVector(const std::vector<PointVector>& subPolygons)
+{
+  std::vector<geometry_msgs::Polygon> subPolygonsRet;
+
+  // convert PointVector (a.k.a. std::vector<geometry_msgs::Point>) to geometry_msgs::Polygon
+  // so that polygon is visualized on the window
+  for (const auto& subPolygon : subPolygons)
+  {
+    geometry_msgs::Polygon poly;
+    for (const auto& vertex : subPolygon)
+    {
+      geometry_msgs::Point32 pt;
+      pt.x = vertex.x;
+      pt.y = vertex.y;
+      poly.points.push_back(pt);
+    }
+    subPolygonsRet.push_back(poly);
+  }
+
+  return subPolygonsRet;
+}
+
+/**
  * @brief Plans coverage path
  * @param req[in] Contains values neccesary to plan a path
  * @param res[out] Contains resulting path
@@ -58,20 +108,12 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
 
   if (isOptimal == true)
   {
-    geometry_msgs::Polygon poly;
+    // fill "subpolygon" field of response so that polygon is visualized
+    res.subpolygons = generatePolygonVector(polygon);
 
-    for (const auto& vertex : polygon)
-    {
-      geometry_msgs::Point32 p;
-      p.x = vertex.x;
-      p.y = vertex.y;
-      poly.points.push_back(p);
-    }
-
-    std::vector<geometry_msgs::Polygon> polygons = { poly };
-    res.subpolygons = polygons;
-
-    res.path = identifyOptimalAlternative(polygon, path, start);
+    // set optimal alternative as optimal path
+    // see torres et al. 2016 for Optimal Alternative
+    res.path = identifyOptimalAlternative(polygon, candidatePath, start);
   }
   else
   {
@@ -114,18 +156,8 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
       // set second optimal path as the path
       if (pathLengthSum > calculatePathLength(secondOptimalPath))
       {
-        geometry_msgs::Polygon poly;
-
-        for (const auto& vertex : polygon)
-        {
-          geometry_msgs::Point32 p;
-          p.x = vertex.x;
-          p.y = vertex.y;
-          poly.points.push_back(p);
-        }
-
-        std::vector<geometry_msgs::Polygon> polygons = { poly };
-        res.subpolygons = polygons;
+        // fill "subpolygon" field of response so that polygon is visualized
+        res.subpolygons = generatePolygonVector(polygon);
 
         res.path = secondOptimalPath;
         ROS_INFO("second optimal path is considered as optimal");
@@ -140,22 +172,8 @@ bool plan(cpp_uav::Torres16::Request& req, cpp_uav::Torres16::Response& res)
       return true;
     }
 
-    std::vector<geometry_msgs::Polygon> subPolygonsRet;
-
-    for (const auto& subPolygon : subPolygons)
-    {
-      geometry_msgs::Polygon poly;
-      for (const auto& vertex : subPolygon)
-      {
-        geometry_msgs::Point32 pt;
-        pt.x = vertex.x;
-        pt.y = vertex.y;
-        poly.points.push_back(pt);
-      }
-      subPolygonsRet.push_back(poly);
-    }
-
-    res.subpolygons = subPolygonsRet;
+    // fill "subpolygon" field of response so that polygon is visualized
+    res.subpolygons = generatePolygonVector(subPolygons);
 
     ROS_INFO("computing multiple polygon coverage");
     ROS_INFO("finish computing multiple polygon coverage");
