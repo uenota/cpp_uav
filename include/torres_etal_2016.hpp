@@ -57,7 +57,6 @@ struct Direction
  * @param path
  * @return bool True if path is clockwise
  * @detail the definition of "clockwise" is based on Fig.8 in Torres et al. 2016
- *
  */
 inline bool isClockWise(const PointVector& path)
 {
@@ -131,87 +130,120 @@ Direction identifyOptimalSweepDir(const PointVector& polygon)
   return sweepDirection;
 }
 
-PointVector generateZigzagPath(const PointVector& path, double padding)
+/**
+ * @brief Reshape given path
+ * @param path The sweep lines of path should be horizontal about x axis
+ * @param padding
+ * @return PointVector
+ * @detail Reshape given path so that generated path becomes the sequence of "C" shapes and add padding
+ */
+PointVector reshapePath(const PointVector& path, double padding)
 {
   PointVector zigzagPath;
+
+  // reshape every traverse
   for (int i = 0; i < std::round(path.size() / 2); ++i)
   {
+    // even-numbered traverse
     if (i % 2 == 0)
     {
       try
       {
+        // in case that the first point of the traverse is located on LEFT side
         if (path.at(2 * i).x < path.at(2 * i + 1).x)
         {
           geometry_msgs::Point p1 = path.at(2 * i);
           geometry_msgs::Point p2 = path.at(2 * i + 1);
+
+          // add padding
           p1.x += padding;
           p2.x -= padding;
 
+          // be careful with the order of points
           zigzagPath.push_back(p1);
           zigzagPath.push_back(p2);
         }
+        // in case that the first point of the traverse is located on RIGHT side
         else
         {
           geometry_msgs::Point p1 = path.at(2 * i);
           geometry_msgs::Point p2 = path.at(2 * i + 1);
+
+          // add padding
           p1.x -= padding;
           p2.x += padding;
 
+          // be careful with the order of points
           zigzagPath.push_back(p2);
           zigzagPath.push_back(p1);
         }
       }
+      // in case that the traverse has only one vertex
       catch (std::out_of_range& ex)
       {
         geometry_msgs::Point p = path.at(2 * i);
         if (isClockWise(path))
         {
+          // the first vertex of even-numbered traverse of clockwise path is located on RIGHT side of polygon
           p.x += padding;
           zigzagPath.push_back(p);
         }
         else
         {
+          // the first vertex of even-numbered traverse of counterclockwise path is located on LEFT side of polygon
           p.x -= padding;
           zigzagPath.push_back(p);
         }
         ROS_ERROR("%s", ex.what());
       }
     }
+    // odd-numbered traverse
     else
     {
       try
       {
+        // in case that the first point of the traverse is located on RIGHT side
         if (path.at(2 * i).x > path.at(2 * i + 1).x)
         {
           geometry_msgs::Point p1 = path.at(2 * i);
           geometry_msgs::Point p2 = path.at(2 * i + 1);
+
+          // add padding
           p1.x -= padding;
           p2.x += padding;
 
+          // be careful with the order of points
           zigzagPath.push_back(p1);
           zigzagPath.push_back(p2);
         }
+        // in case that the first point of the traverse is located on LEFT side
         else
         {
           geometry_msgs::Point p1 = path.at(2 * i);
           geometry_msgs::Point p2 = path.at(2 * i + 1);
+
+          // add padding
           p1.x += padding;
           p2.x -= padding;
 
+          // be careful with the order of points
           zigzagPath.push_back(p2);
           zigzagPath.push_back(p1);
         }
       }
+      // in case that the traverse has only one vertex
       catch (std::out_of_range& ex)
       {
         geometry_msgs::Point p = path.at(2 * i);
         if (isClockWise(path))
         {
+          // the first vertex of odd-numbered traverse of clockwise path is located on LEFT side of polygon
           p.x -= padding;
           zigzagPath.push_back(p);
         }
         else
         {
+          // the first vertex of odd-numbered traverse of clockwise path is located on RIGHT side of polygon
           p.x += padding;
           zigzagPath.push_back(p);
         }
@@ -223,21 +255,24 @@ PointVector generateZigzagPath(const PointVector& path, double padding)
 }
 
 /**
- * @brief Calculates coverage path for convex polygon
+ * @brief Compute coverage path for convex polygon
  * @param polygon Coverage path is calculated on this region
  * @param footprintWidth Width of the area taken by one sweep
  * @param horizontalOverwrap Horizontal overwrap of each sweep
+ * @param sweepDirection
  * @param path Path of coverage path
  * @return bool True if path does not intersect with polygon
  */
 bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, double horizontalOverwrap,
                            const Direction& sweepDirection, PointVector& path)
 {
+  // Unable to make polygon with less than 3 points
   if (polygon.size() < 3)
   {
     return false;
   }
 
+  // TODO: Change to configurable
   const double padding = 5.0;
 
   // rotate input polygon so that baseEdge become horizontal
@@ -288,6 +323,7 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
     sweepLines.push_back(ar);
   }
 
+  // Localize intersections of sweeplines and edges of rotated polygon
   LineSegmentVector rotatedEdges = generateEdgeVector(rotatedPolygon, true);
 
   PointVector intersections;
@@ -302,17 +338,20 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
         intersections.push_back(localizeIntersection(edge, sweepLine));
         ++intersectionCount;
       }
-      if (intersectionCount > 3)
+
+      // sweep line in optimal path does not have more than 2 intersections
+      if (intersectionCount >= 3)
       {
         return false;
       }
     }
   }
 
+  // sort points by y coordinate in ascending order
   std::stable_sort(intersections.begin(), intersections.end(),
                    [](const geometry_msgs::Point& p1, const geometry_msgs::Point& p2) { return p1.y < p2.y; });
 
-  PointVector rotatedPath = generateZigzagPath(intersections, padding);
+  PointVector rotatedPath = reshapePath(intersections, padding);
 
   path = rotatePoints(rotatedPath, rotationAngle);
 
@@ -324,6 +363,14 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
   return true;
 }
 
+/**
+ * @brief Compute coverage path for convex polygon
+ * @param polygon Coverage path is calculated on this region
+ * @param footprintWidth Width of the area taken by one sweep
+ * @param horizontalOverwrap Horizontal overwrap of each sweep
+ * @param path Path of coverage path
+ * @return bool True if path does not intersect with polygon
+ */
 bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, double horizontalOverwrap,
                            PointVector& path)
 {
@@ -353,13 +400,14 @@ double calculatePathLength(const PointVector& path)
 
 /**
  * @brief Return counter clock wise-ed path of given path
- * @param path
+ * @param path Clockwise path
  * @return PointVector Counter clock wise version of given path
  */
 PointVector computeCCWPath(PointVector path)
 {
   for (int i = 0; i < std::round(path.size() / 2); ++i)
   {
+    // swap the first point and the last point in each sweep line
     geometry_msgs::Point tmp = path.at(2 * i);
 
     path.at(2 * i) = path.at(2 * i + 1);
@@ -384,6 +432,7 @@ PointVector computeOppositePath(const PointVector& path)
 {
   PointVector oppositePath;
 
+  // inversely iterate given points
   for (int i = path.size() - 1; i >= 0; --i)
   {
     oppositePath.push_back(path.at(i));
@@ -394,8 +443,10 @@ PointVector computeOppositePath(const PointVector& path)
 
 /**
  * @brief Identify optimal path from 4 coverage alternatives
+ * @param polygon
  * @param path
  * @param start Start point
+ * @param end End point
  * @return PointVector Optimal path that minimizes the length of path
  * @detail The naming of the following variable follows torres et al. 2016
  */
@@ -409,15 +460,19 @@ PointVector identifyOptimalAlternative(const PointVector& polygon, const PointVe
   PointVector pathCW = isClockWise(path) ? path : computeCCWPath(path);
   PointVector pathCCW = isClockWise(path) ? computeCCWPath(path) : path;
 
+  // a1: clockwise current path
   a1["SP"] = pathCW.front();
   a1["EP"] = pathCW.back();
 
+  // a2: counterclockwise current path
   a2["SP"] = pathCCW.front();
   a2["EP"] = pathCCW.back();
 
+  // a3: clockwise opposite path
   a3["SP"] = pathCW.back();
   a3["EP"] = pathCW.front();
 
+  // a4: counterclockwise opposite path
   a4["SP"] = pathCCW.back();
   a4["EP"] = pathCCW.front();
 
@@ -431,13 +486,17 @@ PointVector identifyOptimalAlternative(const PointVector& polygon, const PointVe
 
   double minDistance;
   int optimalPath;
+
+  // check which coverage alternative has the shortest path
   for (const auto& coverage : coverageAlternatives | boost::adaptors::indexed())
   {
+    // skip calculating length if the path has intersections
     if ((hasIntersectionCW and coverage.index() % 2 == 0) or (hasIntersectionCCW and coverage.index() % 2 != 0))
     {
       continue;
     }
 
+    // only length of transition need to be considered because the length of coverage is almost same
     double distance = calculateDistance(coverage.value().second.at("SP"), start) +
                       calculateDistance(end, coverage.value().second.at("EP"));
 
@@ -469,12 +528,28 @@ PointVector identifyOptimalAlternative(const PointVector& polygon, const PointVe
   }
 }
 
+/**
+ * @brief Identify optimal path from 4 coverage alternatives
+ * @param polygon
+ * @param path
+ * @param start Start point
+ * @return PointVector Optimal path that minimizes the length of path
+ * @detail The naming of the following variable follows torres et al. 2016
+ */
 PointVector identifyOptimalAlternative(const PointVector& polygon, const PointVector& path,
                                        const geometry_msgs::Point& start)
 {
   return identifyOptimalAlternative(polygon, path, start, start);
 }
 
+/**
+ * @brief Find second optimal path
+ * @param polygon
+ * @param footprintWidth
+ * @param horizontalOverwrap
+ * @param path
+ * @return bool True if second optimal path exists
+ */
 bool findSecondOptimalPath(const PointVector& polygon, double footprintWidth, double horizontalOverwrap,
                            PointVector& path)
 {
@@ -482,6 +557,7 @@ bool findSecondOptimalPath(const PointVector& polygon, double footprintWidth, do
   PointVector convexHull = computeConvexHull(polygon);
   LineSegmentVector edges = generateEdgeVector(convexHull, true);
 
+  // compute optimal sweep directions for each edge
   for (const auto& edge : edges)
   {
     double maxDistance = 0;
@@ -490,6 +566,8 @@ bool findSecondOptimalPath(const PointVector& polygon, double footprintWidth, do
     for (const auto& vertex : convexHull)
     {
       double distance = calculateDistance(edge, vertex);
+
+      // optimal sweep direction for a edge is the direction with the largest distance
       if (distance > maxDistance)
       {
         maxDistance = distance;
@@ -499,12 +577,17 @@ bool findSecondOptimalPath(const PointVector& polygon, double footprintWidth, do
     sweepDirections.push_back(direction);
   }
 
+  // compute second optimal path which has the shortest coverage path
   double pathLength = 0;
   PointVector tempPath;
   for (const auto& sweepDirection : sweepDirections)
   {
     PointVector p;
+
+    // isValidPath is true if computed coverage does not have intersection
     bool isValidPath = computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, sweepDirection, p);
+
+    // second optimal path is the shortest path without intersection
     if (isValidPath and ((calculatePathLength(tempPath) < pathLength) or (pathLength == 0)))
     {
       tempPath = p;
@@ -523,12 +606,19 @@ bool findSecondOptimalPath(const PointVector& polygon, double footprintWidth, do
   }
 }
 
+/**
+ * @brief Check if given two polygons are adjacent
+ * @param polygon1
+ * @param polygon2
+ * @return True if given two polygons are adjacent
+ */
 bool isAdjacent(const PointVector& polygon1, const PointVector& polygon2)
 {
   for (const auto& vertex1 : polygon1)
   {
     for (const auto& vertex2 : polygon2)
     {
+      // consider that two polygons are adjacent if they have at least one point in common
       if (vertex1 == vertex2)
       {
         return true;
@@ -538,6 +628,15 @@ bool isAdjacent(const PointVector& polygon1, const PointVector& polygon2)
   return false;
 }
 
+/**
+ * @brief Compute coverage path for multiple convex polygons
+ * @param subPolygons
+ * @param footprintWidth
+ * @param horizontalOverwrap
+ * @param adjacencyCriteria Ignore paths which have less adjacent polygons than this number
+ * @return PointVector Computed Path
+ * @detail See section 6.2 of torres et al. 2016 for the detail
+ */
 PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons, double footprintWidth,
                                            double horizontalOverwrap, int adjacencyCriteria = 1)
 {
@@ -550,12 +649,13 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
 
   do
   {
-    ROS_INFO("%d", permutation.front());
+    // ignore permutations which do not start from the same polygon as the first one of given subpolygons
     if (permutation.front() != 0)
     {
       continue;
     }
 
+    // count adjacent polygons
     int adjacencyCount = 0;
     for (auto itr = permutation.begin(); itr != permutation.end() - 1; ++itr)
     {
@@ -564,6 +664,8 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
         ++adjacencyCount;
       }
     }
+
+    // ignore if enough number of polygons do not exist
     if (adjacencyCount < adjacencyCriteria)
     {
       continue;
@@ -574,20 +676,21 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
 
     for (auto itr = permutation.begin(); itr != permutation.end(); ++itr)
     {
-      ROS_INFO("itr: %d", *itr);
       PointVector partPath, optimalAlternative;
+      // first polygon of given subpolygon
       if (itr == permutation.begin())
       {
-        ROS_INFO("1");
         try
         {
+          // start point and end point of first subpolygon are ...
+          // start point: the last point of coverage of the last subpolygon
+          // end point  : the first point of coverage of the second subpolygon
           geometry_msgs::Point start = subPolygons.at(*(permutation.end() - 1)).back();
           geometry_msgs::Point end;
           PointVector polygon = subPolygons.at(*itr);
-
           if (permutation.size() == 1)
           {
-            // in case that subPolygons.at(*(itr+1)) is out of range
+            // end point is the same as start point if subPolygons.at(*(itr+1)) is out of range
             end = start;
           }
           else
@@ -595,12 +698,17 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
             end = subPolygons.at(*(itr + 1)).front();
           }
 
+          // break if computed path has intersections
           if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath) == false)
           {
             break;
           }
+
+          // set optimal alternative as candidate
           optimalAlternative = identifyOptimalAlternative(polygon, partPath, start, end);
           candidatePath.push_back(optimalAlternative);
+
+          // calculate the length of candidate path
           pathLength += calculatePathLength(optimalAlternative);
         }
         catch (std::out_of_range& ex)
@@ -608,20 +716,29 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
           ROS_ERROR("%s", ex.what());
         }
       }
+      // the last polygon of the given subpolygons
       else if (itr == permutation.end() - 1)
       {
-        ROS_INFO("2");
         try
         {
+          // start point and end point of the last subpolygon are ...
+          // start point: the last point of coverage of the previous subpolygon
+          // end point  : the first point of coverage of the first subpolygon
           geometry_msgs::Point start = subPolygons.at(*(itr - 1)).back();
           geometry_msgs::Point end = subPolygons.at(*permutation.begin()).front();
           PointVector polygon = subPolygons.at(*itr);
+
+          // break if computed path has intersections
           if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath) == false)
           {
             break;
           }
+
+          // set optimal alternative as candidate
           optimalAlternative = identifyOptimalAlternative(polygon, partPath, start, end);
           candidatePath.push_back(optimalAlternative);
+
+          // calculate the length of candidate path
           pathLength += calculatePathLength(optimalAlternative);
         }
         catch (std::out_of_range& ex)
@@ -629,20 +746,29 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
           ROS_ERROR("%s", ex.what());
         }
       }
+      // middle polygons
       else
       {
-        ROS_INFO("3");
         try
         {
+          // start point and end point of middle subpolygons are ...
+          // start point: the last point of coverage of the previous subpolygon
+          // end point  : the first point of coverage of the next subpolygon
           geometry_msgs::Point start = subPolygons.at(*(itr - 1)).back();
           geometry_msgs::Point end = subPolygons.at(*(itr + 1)).front();
           PointVector polygon = subPolygons.at(*itr);
+
+          // break if computed path has intersections
           if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath) == false)
           {
             break;
           }
+
+          // set optimal alternative as candidate
           optimalAlternative = identifyOptimalAlternative(polygon, partPath, start, end);
           candidatePath.push_back(optimalAlternative);
+
+          // calculate the length of candidate path
           pathLength += calculatePathLength(optimalAlternative);
         }
         catch (std::out_of_range& ex)
@@ -661,6 +787,7 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
         path.clear();
       }
 
+      // insert coverages of subpolygons
       for (const auto& part : candidatePath)
       {
         path.insert(path.begin(), part.begin(), part.end());
