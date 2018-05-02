@@ -341,14 +341,6 @@ bool hasIntersection(const LineSegment& edge1, const LineSegment& edge2)
     p2 = edge1.at(1);
     p3 = edge2.at(0);
     p4 = edge2.at(1);
-
-    ROS_INFO("p1.x: %f", p1.x);
-
-    ROS_INFO("p2.x: %f", p2.x);
-
-    ROS_INFO("p3.x: %f", p3.x);
-
-    ROS_INFO("p4.x: %f", p4.x);
   }
   catch (std::out_of_range& ex)
   {
@@ -381,23 +373,15 @@ bool hasIntersection(const LineSegment& edge1, const LineSegment& edge2)
  */
 bool hasIntersection(const LineSegmentVector& vec1, const LineSegmentVector& vec2)
 {
-  ROS_INFO("edges1: %d", vec1.size());
-  ROS_INFO("edges2: %d", vec2.size());
-
-  int i = 0;
-
   for (const auto& segment1 : vec1)
   {
-    ROS_INFO("vec1: %d", i);
     for (const auto& segment2 : vec2)
     {
       if (hasIntersection(segment1, segment2) == true)
       {
-        ROS_INFO("has intersection");
         return true;
       }
     }
-    ++i;
   }
 
   return false;

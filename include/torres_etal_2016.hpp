@@ -649,7 +649,6 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
 
   do
   {
-    ROS_INFO("%d", permutation.front());
     // ignore permutations which do not start from the same polygon as the first one of given subpolygons
     if (permutation.front() != 0)
     {
@@ -677,12 +676,10 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
 
     for (auto itr = permutation.begin(); itr != permutation.end(); ++itr)
     {
-      ROS_INFO("itr: %d", *itr);
       PointVector partPath, optimalAlternative;
       // first polygon of given subpolygon
       if (itr == permutation.begin())
       {
-        ROS_INFO("1");
         try
         {
           // start point and end point of first subpolygon are ...
@@ -722,7 +719,6 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
       // the last polygon of the given subpolygons
       else if (itr == permutation.end() - 1)
       {
-        ROS_INFO("2");
         try
         {
           // start point and end point of the last subpolygon are ...
@@ -753,7 +749,6 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
       // middle polygons
       else
       {
-        ROS_INFO("3");
         try
         {
           // start point and end point of middle subpolygons are ...
