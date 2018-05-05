@@ -11,26 +11,16 @@ This module offers GUI to specify a polygon for coverage path planning.
 from __future__ import print_function
 
 # python libraries
-import math
+from math import tan
 
 import numpy as np
-
-# Import urllib considering version of Python
-try:
-    from urllib.request import urlopen, HTTPError
-except ImportError:
-    from urllib2 import urlopen, HTTPError
-
-# PIL
-from PIL import Image
 
 # rospy
 import rospy
 
 # messages
-from geometry_msgs.msg import Point, Polygon
+from geometry_msgs.msg import Point
 from std_msgs.msg import Float64
-from sensor_msgs.msg import NavSatFix
 
 # service
 from cpp_uav.srv import Torres16
@@ -45,7 +35,6 @@ if matplotlib.__version__ >= "2.1.0":
     from matplotlib.patches import Polygon
     from matplotlib.widgets import Button
     from matplotlib.widgets import TextBox
-    from matplotlib.widgets import RadioButtons
 else:
     print("Matplotlib 2.1.0 or newer is required to run this node.")
     print("Please update or install Matplotlib.")
@@ -72,9 +61,6 @@ class PolygonBuilder(object):
         # adjust the size of graph
         self.axis.set_ylim([-100, 100])
         self.axis.set_xlim([-100, 100])
-
-        # disable ticks of axis
-        self.axis.axis('off')
 
         # set aspect ratio so that aspect ration of graph become 1
         self.axis.set_aspect('equal', adjustable="box")
@@ -130,7 +116,7 @@ class PolygonBuilder(object):
                               "height": 30.0}
 
         footprint_width = Float64(2 * self.shooting_cond["height"] *
-                                  math.tan(self.shooting_cond["angle_of_view"] / 2))
+                                  tan(self.shooting_cond["angle_of_view"] / 2))
         aspect_ratio = \
             float(self.shooting_cond["image_resolution_w"]) \
             / self.shooting_cond["image_resolution_h"]
@@ -153,21 +139,6 @@ class PolygonBuilder(object):
                                 "horizontal_overwrap": Float64(0.3),
                                 "vertical_overwrap": Float64(0.2)}
 
-        # @var map_param
-        #  Dictionary of map params
-        #  This program uses Google Static Map API.
-        #  See the following links for the details of fields of this dictionary
-        #  - https://developers.google.com/maps/documentation/static-maps/intro?hl=ja#Usage
-        #  - https://www.ajaxtower.jp/googlestaticmaps/
-        self.map_param = {"url": "https://maps.google.com/maps/api/staticmap",
-                          "zoom": 10,
-                          "size": self.get_canvas_size(),
-                          "sensor": "false",
-                          "maptype": "hybrid",
-                          "latitude": 43.042827,
-                          "longitude": 141.202698,
-                          "background_image": None}
-
         # @var buttons
         #  Dictionary of buttons
         #  - draw_button: Button object to evoke draw_polygon method
@@ -181,30 +152,12 @@ class PolygonBuilder(object):
                                    'Calculate CP'),
                         "clear_button":
                             Button(plt.axes([0.8, 0.58, 0.15, 0.075]),
-                                   'Clear'),
-                        "zoom_in_button":
-                            Button(plt.axes([0.15, 0.425, 0.05, 0.05]),
-                                   '+'),
-                        "zoom_out_button":
-                            Button(plt.axes([0.15, 0.35, 0.05, 0.05]),
-                                   '-')}
+                                   'Clear')}
 
         # Register callback functions for buttons
         self.buttons["draw_button"].on_clicked(self.draw_polygon)
         self.buttons["calc_button"].on_clicked(self.calculate_path)
         self.buttons["clear_button"].on_clicked(self.clear_figure)
-        self.buttons["zoom_in_button"].on_clicked(self.zoom_in)
-        self.buttons["zoom_out_button"].on_clicked(self.zoom_out)
-
-        # @var maptype_rdbutton
-        #  Radio Button for selecting type of map
-        #  See the following link for the details of map type
-        #  https://developers.google.com/maps/documentation/static-maps/intro?hl=ja#MapTypes
-        self.maptype_rdbutton = RadioButtons(plt.axes([0.07, 0.5, 0.13, 0.2]),
-                                             ("roadmap", "satellite",
-                                              "terrain", "hybrid"),
-                                             active=3)
-        self.maptype_rdbutton.on_clicked(self.maptype_update)
 
         # Create textboxes
         # @var text_boxes
@@ -238,15 +191,7 @@ class PolygonBuilder(object):
                            "vertical_overwrap_box":
                                TextBox(plt.axes([0.6, 0.1, 0.1, 0.05]),
                                        "Vertical Overwrap [%]",
-                                       initial=str(self.coverage_params["vertical_overwrap"].data)),
-                           "latitude_box":
-                               TextBox(plt.axes([0.85, 0.175, 0.1, 0.05]),
-                                       "Latitude",
-                                       initial=str(self.map_param["latitude"])),
-                           "longitude_box":
-                               TextBox(plt.axes([0.85, 0.25, 0.1, 0.05]),
-                                       "Longitude",
-                                       initial=str(self.map_param["longitude"]))}
+                                       initial=str(self.coverage_params["vertical_overwrap"].data))}
 
         # Register callback functions for textboxes
         self.text_boxes["image_resolution_h_box"].on_submit(
@@ -260,8 +205,6 @@ class PolygonBuilder(object):
             self.horizontal_overwrap_update)
         self.text_boxes["vertical_overwrap_box"].on_submit(
             self.vertical_overwrap_update)
-        self.text_boxes["latitude_box"].on_submit(self.latitude_update)
-        self.text_boxes["longitude_box"].on_submit(self.longitude_update)
 
         # @var labels
         #  Dictionary of labels on figure
@@ -273,31 +216,19 @@ class PolygonBuilder(object):
         #  - SP: Start of waypoints
         #  - EP: End of waypoints
         self.labels = {"aspect_ratio_text":
-                       plt.text(-0.5, 5,
+                       plt.text(2, 5,
                                 "Aspect ratio:\n    " + str(self.coverage_params["aspect_ratio"])),
                        "footprint_length_text":
-                           plt.text(-0.5, 4,
+                           plt.text(2, 4,
                                     "Footprint Length [m]:\n    " +
                                     str(round(self.coverage_params["footprint_length"].data, 2))),
                        "footprint_width_text":
-                           plt.text(-0.5, 3,
+                           plt.text(2, 3,
                                     "Footprint Width [m]:\n    " +
                                     str(round(self.coverage_params["footprint_width"].data, 2))),
                        "start_point": None,
                        "SP": None,
                        "EP": None}
-
-        # wait for the position of drone
-        rospy.loginfo("Waiting for mavros/global_position/global.")
-        try:
-            initial_global_pos = rospy.client.wait_for_message(
-                "mavros/global_position/global", NavSatFix, timeout=3)
-            self.map_param["latitude"] = initial_global_pos.latitude
-            self.map_param["longitude"] = initial_global_pos.longitude
-        except rospy.ROSException:
-            pass
-
-        self.draw_map()
 
         # plot a figure
         plt.show()
@@ -334,43 +265,6 @@ class PolygonBuilder(object):
         else:
             rospy.logwarn("Unable to register points anymore.")
 
-    def get_canvas_size(self):
-        """!
-        Return current canvas size
-        """
-        bbox = self.axis.get_window_extent().transformed(
-            self.fig.dpi_scale_trans.inverted())
-        width, height = bbox.width, bbox.height
-        width *= self.fig.dpi
-        height *= self.fig.dpi
-        return int(width), int(height)
-
-    def draw_map(self):
-        """!
-        Draw map using current parameters
-        """
-        try:
-            # create url request with the shape like the following
-            # https://maps.google.com/maps/api/staticmap?center=latitude,longitude&zoom=zoom&size=widthxheight&sensor=sensor&maptype=maptype
-            image_responce = urlopen(self.map_param["url"]
-                                     + "?center=" +
-                                     str(self.map_param["latitude"]) +
-                                     "," + str(self.map_param["longitude"])
-                                     + "&zoom=" + str(self.map_param["zoom"])
-                                     + "&size=" +
-                                     str(self.map_param["size"][0]) +
-                                     "x" + str(self.map_param["size"][1])
-                                     + "&sensor=" + self.map_param["sensor"]
-                                     + "&maptype=" + self.map_param["maptype"])
-            self.map_param["background_image"] = Image.open(image_responce)
-            self.axis.imshow(self.map_param["background_image"],
-                             extent=[self.axis.get_xlim()[0],
-                                     self.axis.get_xlim()[1],
-                                     self.axis.get_ylim()[0],
-                                     self.axis.get_ylim()[1]])
-        except HTTPError:
-            return
-
     def update_params(self):
         """!
         Update values of coverage parameters
@@ -378,7 +272,7 @@ class PolygonBuilder(object):
         self.coverage_params["aspect_ratio"] = float(
             self.shooting_cond["image_resolution_w"]) / self.shooting_cond["image_resolution_h"]
         self.coverage_params["footprint_width"] = Float64(
-            2 * self.shooting_cond["height"] * math.tan(self.shooting_cond["angle_of_view"] / 2))
+            2 * self.shooting_cond["height"] * tan(self.shooting_cond["angle_of_view"] / 2))
         self.coverage_params["footprint_length"] = Float64(
             self.coverage_params["footprint_width"].data / self.coverage_params["aspect_ratio"])
 
@@ -478,11 +372,11 @@ class PolygonBuilder(object):
                     self.labels["EP"] = self.axis.text(
                         point.x, point.y, "EP", color="red", fontsize=16)
             for subpolygon in self.subpolygons:
-                ar = np.ndarray([len(subpolygon.points), 2])
+                arr = np.ndarray([len(subpolygon.points), 2])
                 for num, point in enumerate(subpolygon.points):
-                    ar[num][0] = point.x
-                    ar[num][1] = point.y
-                patch = Polygon(xy=ar, alpha=0.5, edgecolor="navy")
+                    arr[num][0] = point.x
+                    arr[num][1] = point.y
+                patch = Polygon(xy=arr, alpha=0.5, edgecolor="navy")
                 self.axis.add_patch(patch)
                 self.patches.append(patch)
             self.lines["path"].set_data(waypoint_xs, waypoint_ys)
@@ -522,7 +416,7 @@ class PolygonBuilder(object):
             try:
                 self.labels["SP"].remove()
                 self.labels["EP"].remove()
-            except ValueError as e:
+            except ValueError:
                 pass
 
         for patch in self.patches:
@@ -614,86 +508,6 @@ class PolygonBuilder(object):
         else:
             self.text_boxes["vertical_overwrap_box"].\
                 set_val(str(self.coverage_params["vertical_overwrap"]))
-
-    def latitude_update(self, val):
-        """!
-        Called when content of "Latitude" is submitted
-        @param val Content of TextBox
-        """
-        try:
-            if -90 <= float(val) <= 90:
-                self.map_param["latitude"] = float(val)
-                text = plt.text(-5, 7.5, "Loading Map...",
-                                fontsize=24, color="magenta")
-                text.figure.canvas.draw()
-                self.draw_map()
-                text.remove()
-            else:
-                self.text_boxes["latitude_box"].\
-                    set_val(str(self.map_param["latitude"]))
-        except ValueError:
-            self.text_boxes["latitude_box"].\
-                set_val(str(self.map_param["latitude"]))
-
-    def longitude_update(self, val):
-        """!
-        Called when content of "Longitude" is submitted
-        @param val Content of TextBox
-        """
-        try:
-            if -180 <= float(val) <= 180:
-                self.map_param["longitude"] = float(val)
-                text = plt.text(-5, 7.5, "Loading Map...",
-                                fontsize=24, color="magenta")
-                text.figure.canvas.draw()
-                self.draw_map()
-                text.remove()
-            else:
-                self.text_boxes["longitude_box"].\
-                    set_val(str(self.map_param["longitude"]))
-        except ValueError:
-            self.text_boxes["longitude_box"].\
-                set_val(str(self.map_param["longitude"]))
-
-    def zoom_in(self, event):
-        """!
-        Callback function for "+" button
-        @param event MouseEvent object
-        """
-        if self.map_param["zoom"] == 21:
-            return
-        text = plt.text(-5, 7.5, "Loading Map...",
-                        fontsize=24, color="magenta")
-        text.figure.canvas.draw()
-        self.map_param["zoom"] += 1
-        self.draw_map()
-        text.remove()
-
-    def zoom_out(self, event):
-        """!
-        Callback function for "-" button
-        @param event MouseEvent object
-        """
-        if self.map_param["zoom"] == 2:
-            return
-        text = plt.text(-5, 7.5, "Loading Map...",
-                        fontsize=24, color="magenta")
-        text.figure.canvas.draw()
-        self.map_param["zoom"] -= 1
-        self.draw_map()
-        text.remove()
-
-    def maptype_update(self, event):
-        """!
-        Called when the selection of radiobutton is changed
-        @param event Label of selected button
-        """
-        self.map_param["maptype"] = event
-        text = plt.text(-5, 7.5, "Loading Map...",
-                        fontsize=24, color="magenta")
-        text.figure.canvas.draw()
-        self.draw_map()
-        text.remove()
 
 
 def init_node():
