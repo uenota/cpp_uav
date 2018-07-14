@@ -12,6 +12,14 @@ Coverage path planner based on [1]
 - cpp_uav.launch  
 Launches specify_rect.py and torres_etal_2016.
 
+## Document
+You can build documents by running 
+```
+doxygen Doxyfile
+```
+at the root of `cpp_uav` repository.
+And the documents will be build in `doc` directory.
+
 ## Reference
 [1] Marina Torres, David A. Pelta, José L. Verdegay, Juan C. Torres,  
     Coverage path planning with unmanned aerial vehicles for 3D terrain reconstruction,  
