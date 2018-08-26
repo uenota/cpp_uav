@@ -1,0 +1,447 @@
+\hypertarget{cgutil_8hpp}{}\section{include/cgutil.hpp File Reference}
+\label{cgutil_8hpp}\index{include/cgutil.\+hpp@{include/cgutil.\+hpp}}
+{\ttfamily \#include $<$algorithm$>$}\\*
+{\ttfamily \#include $<$cmath$>$}\\*
+{\ttfamily \#include $<$list$>$}\\*
+{\ttfamily \#include $<$stack$>$}\\*
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$C\+G\+A\+L/\+Exact\+\_\+predicates\+\_\+inexact\+\_\+constructions\+\_\+kernel.\+h$>$}\\*
+{\ttfamily \#include $<$C\+G\+A\+L/\+Partition\+\_\+is\+\_\+valid\+\_\+traits\+\_\+2.\+h$>$}\\*
+{\ttfamily \#include $<$C\+G\+A\+L/\+Partition\+\_\+traits\+\_\+2.\+h$>$}\\*
+{\ttfamily \#include $<$C\+G\+A\+L/partition\+\_\+2.\+h$>$}\\*
+{\ttfamily \#include $<$C\+G\+A\+L/point\+\_\+generators\+\_\+2.\+h$>$}\\*
+{\ttfamily \#include $<$C\+G\+A\+L/polygon\+\_\+function\+\_\+objects.\+h$>$}\\*
+{\ttfamily \#include $<$C\+G\+A\+L/random\+\_\+polygon\+\_\+2.\+h$>$}\\*
+{\ttfamily \#include $<$ros/ros.\+h$>$}\\*
+{\ttfamily \#include $<$geometry\+\_\+msgs/\+Point.\+h$>$}\\*
+Include dependency graph for cgutil.\+hpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{cgutil_8hpp__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{cgutil_8hpp__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+using \hyperlink{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{Point\+Vector} = std\+::vector$<$ geometry\+\_\+msgs\+::\+Point $>$
+\item 
+using \hyperlink{cgutil_8hpp_a7634fe1379961a22350dbd7047b2e8c1}{Line\+Segment} = std\+::array$<$ geometry\+\_\+msgs\+::\+Point, 2 $>$
+\item 
+using \hyperlink{cgutil_8hpp_a1b95586556e66ecbe3e4c552548d1027}{Line\+Segment\+Vector} = std\+::vector$<$ \hyperlink{cgutil_8hpp_a7634fe1379961a22350dbd7047b2e8c1}{Line\+Segment} $>$
+\item 
+using \hyperlink{cgutil_8hpp_ab351a84f2421d5f971fbab843bbc3a62}{K} = C\+G\+A\+L\+::\+Exact\+\_\+predicates\+\_\+inexact\+\_\+constructions\+\_\+kernel
+\item 
+using \hyperlink{cgutil_8hpp_a2d5e465898a6048af613458eb4b53887}{Traits} = C\+G\+A\+L\+::\+Partition\+\_\+traits\+\_\+2$<$ \hyperlink{cgutil_8hpp_ab351a84f2421d5f971fbab843bbc3a62}{K} $>$
+\item 
+using \hyperlink{cgutil_8hpp_a291b377e05c6893b01dfbbb4b2a383e9}{Polygon\+\_\+2} = Traits\+::\+Polygon\+\_\+2
+\item 
+using \hyperlink{cgutil_8hpp_a0363257d096a4b8d90de56eb63a8116e}{Point\+\_\+2} = Traits\+::\+Point\+\_\+2
+\item 
+using \hyperlink{cgutil_8hpp_a2f76d090b6d4623f1e9122a390d0e100}{Vertex\+\_\+iterator} = Polygon\+\_\+2\+::\+Vertex\+\_\+const\+\_\+iterator
+\item 
+using \hyperlink{cgutil_8hpp_a9d41026f74ac445636b2f70715c9409b}{Polygon\+\_\+list} = std\+::list$<$ \hyperlink{cgutil_8hpp_a291b377e05c6893b01dfbbb4b2a383e9}{Polygon\+\_\+2} $>$
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{cgutil_8hpp_a40332df049e2bbeebbe8c423bf33c50f}{calculate\+Signed\+Area} (const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2, const geometry\+\_\+msgs\+::\+Point \&p3)
+\begin{DoxyCompactList}\small\item\em Calculates signed area of given triangle. \end{DoxyCompactList}\item 
+bool \hyperlink{cgutil_8hpp_a518392bbc6246712757593c4ac6e6200}{operator==} (const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2)
+\begin{DoxyCompactList}\small\item\em Check equality of two points. \end{DoxyCompactList}\item 
+bool \hyperlink{cgutil_8hpp_a287adf4900c7afd5047c92bb2cd68f32}{operator!=} (const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2)
+\begin{DoxyCompactList}\small\item\em Check equality of two points. \end{DoxyCompactList}\item 
+\hyperlink{cgutil_8hpp_a1b95586556e66ecbe3e4c552548d1027}{Line\+Segment\+Vector} \hyperlink{cgutil_8hpp_acad3dc75730cb58a33626f0b922d1651}{generate\+Edge\+Vector} (const \hyperlink{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{Point\+Vector} \&vec, bool is\+Closed)
+\begin{DoxyCompactList}\small\item\em Generate Vector of line segment from given Point\+Vector. \end{DoxyCompactList}\item 
+double \hyperlink{cgutil_8hpp_ab181ca10297ad069ba0a181734a2f4a4}{calculate\+Distance} (const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2)
+\begin{DoxyCompactList}\small\item\em Calculates distance between given two points. \end{DoxyCompactList}\item 
+double \hyperlink{cgutil_8hpp_a506da6ea8a7fafd477dd670de1d307de}{calculate\+Vertex\+Angle} (const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2, const geometry\+\_\+msgs\+::\+Point \&p3)
+\begin{DoxyCompactList}\small\item\em Calculates angle between segment p1p2 and p1p3. \end{DoxyCompactList}\item 
+double \hyperlink{cgutil_8hpp_ac682b461698a0048aa10e57b2946b34f}{calculate\+Horizontal\+Angle} (const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2)
+\begin{DoxyCompactList}\small\item\em Calculates angle between segment p1p2 and horizontal line. \end{DoxyCompactList}\item 
+double \hyperlink{cgutil_8hpp_a2603bc58792b4f2935d5462161af0cbd}{calculate\+Distance} (const \hyperlink{cgutil_8hpp_a7634fe1379961a22350dbd7047b2e8c1}{Line\+Segment} \&edge, const geometry\+\_\+msgs\+::\+Point \&vertex)
+\begin{DoxyCompactList}\small\item\em Calculates distance between given edge and vertex. \end{DoxyCompactList}\item 
+\hyperlink{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{Point\+Vector} \hyperlink{cgutil_8hpp_a6be4127646660492844b003736100443}{compute\+Convex\+Hull} (\hyperlink{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{Point\+Vector} points)
+\begin{DoxyCompactList}\small\item\em Returns convex hull of given points. \end{DoxyCompactList}\item 
+bool \hyperlink{cgutil_8hpp_ab3a4215076312a2435642bff1373ad40}{is\+Convex} (\hyperlink{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{Point\+Vector} points)
+\begin{DoxyCompactList}\small\item\em Checks if given polygon is convex or not. \end{DoxyCompactList}\item 
+bool \hyperlink{cgutil_8hpp_ad3cb912330f862ac85f7ab72d121e80a}{has\+Intersection} (const \hyperlink{cgutil_8hpp_a7634fe1379961a22350dbd7047b2e8c1}{Line\+Segment} \&edge1, const \hyperlink{cgutil_8hpp_a7634fe1379961a22350dbd7047b2e8c1}{Line\+Segment} \&edge2)
+\begin{DoxyCompactList}\small\item\em Checks if given edges intersect each other. \end{DoxyCompactList}\item 
+bool \hyperlink{cgutil_8hpp_a75e1826df2b31502ed4961e4ec3b9058}{has\+Intersection} (const \hyperlink{cgutil_8hpp_a1b95586556e66ecbe3e4c552548d1027}{Line\+Segment\+Vector} \&vec1, const \hyperlink{cgutil_8hpp_a1b95586556e66ecbe3e4c552548d1027}{Line\+Segment\+Vector} \&vec2)
+\begin{DoxyCompactList}\small\item\em Checks if given vectors of edges have at least one intersection. \end{DoxyCompactList}\item 
+geometry\+\_\+msgs\+::\+Point \hyperlink{cgutil_8hpp_a1cdc17f2ebbabc6d236cfd1c45469e6e}{localize\+Intersection} (const \hyperlink{cgutil_8hpp_a7634fe1379961a22350dbd7047b2e8c1}{Line\+Segment} \&edge1, const \hyperlink{cgutil_8hpp_a7634fe1379961a22350dbd7047b2e8c1}{Line\+Segment} \&edge2)
+\begin{DoxyCompactList}\small\item\em Find the location where given edges intersect each other. \end{DoxyCompactList}\item 
+\hyperlink{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{Point\+Vector} \hyperlink{cgutil_8hpp_af7715f8d7b828ee3f6412b2e311bd65a}{rotate\+Points} (const \hyperlink{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{Point\+Vector} \&points, double angle\+\_\+rad)
+\begin{DoxyCompactList}\small\item\em Rotate points by given angle around the origin. \end{DoxyCompactList}\item 
+std\+::vector$<$ \hyperlink{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{Point\+Vector} $>$ \hyperlink{cgutil_8hpp_a3b7a6668da8052d768b8700b096b7287}{decompose\+Polygon} (const \hyperlink{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{Point\+Vector} \&polygon)
+\begin{DoxyCompactList}\small\item\em Decompose given polygon. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Typedef Documentation}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!K@{K}}
+\index{K@{K}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{K}{K}}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf K} =  C\+G\+A\+L\+::\+Exact\+\_\+predicates\+\_\+inexact\+\_\+constructions\+\_\+kernel}\hypertarget{cgutil_8hpp_ab351a84f2421d5f971fbab843bbc3a62}{}\label{cgutil_8hpp_ab351a84f2421d5f971fbab843bbc3a62}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!Line\+Segment@{Line\+Segment}}
+\index{Line\+Segment@{Line\+Segment}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{Line\+Segment}{LineSegment}}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf Line\+Segment} =  std\+::array$<$geometry\+\_\+msgs\+::\+Point, 2$>$}\hypertarget{cgutil_8hpp_a7634fe1379961a22350dbd7047b2e8c1}{}\label{cgutil_8hpp_a7634fe1379961a22350dbd7047b2e8c1}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!Line\+Segment\+Vector@{Line\+Segment\+Vector}}
+\index{Line\+Segment\+Vector@{Line\+Segment\+Vector}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{Line\+Segment\+Vector}{LineSegmentVector}}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf Line\+Segment\+Vector} =  std\+::vector$<${\bf Line\+Segment}$>$}\hypertarget{cgutil_8hpp_a1b95586556e66ecbe3e4c552548d1027}{}\label{cgutil_8hpp_a1b95586556e66ecbe3e4c552548d1027}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!Point\+\_\+2@{Point\+\_\+2}}
+\index{Point\+\_\+2@{Point\+\_\+2}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{Point\+\_\+2}{Point_2}}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf Point\+\_\+2} =  Traits\+::\+Point\+\_\+2}\hypertarget{cgutil_8hpp_a0363257d096a4b8d90de56eb63a8116e}{}\label{cgutil_8hpp_a0363257d096a4b8d90de56eb63a8116e}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!Point\+Vector@{Point\+Vector}}
+\index{Point\+Vector@{Point\+Vector}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{Point\+Vector}{PointVector}}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf Point\+Vector} =  std\+::vector$<$geometry\+\_\+msgs\+::\+Point$>$}\hypertarget{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}{}\label{cgutil_8hpp_a23afdbfcb523553a73b329d7a91a7489}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!Polygon\+\_\+2@{Polygon\+\_\+2}}
+\index{Polygon\+\_\+2@{Polygon\+\_\+2}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{Polygon\+\_\+2}{Polygon_2}}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf Polygon\+\_\+2} =  Traits\+::\+Polygon\+\_\+2}\hypertarget{cgutil_8hpp_a291b377e05c6893b01dfbbb4b2a383e9}{}\label{cgutil_8hpp_a291b377e05c6893b01dfbbb4b2a383e9}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!Polygon\+\_\+list@{Polygon\+\_\+list}}
+\index{Polygon\+\_\+list@{Polygon\+\_\+list}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{Polygon\+\_\+list}{Polygon_list}}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf Polygon\+\_\+list} =  std\+::list$<${\bf Polygon\+\_\+2}$>$}\hypertarget{cgutil_8hpp_a9d41026f74ac445636b2f70715c9409b}{}\label{cgutil_8hpp_a9d41026f74ac445636b2f70715c9409b}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!Traits@{Traits}}
+\index{Traits@{Traits}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{Traits}{Traits}}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf Traits} =  C\+G\+A\+L\+::\+Partition\+\_\+traits\+\_\+2$<${\bf K}$>$}\hypertarget{cgutil_8hpp_a2d5e465898a6048af613458eb4b53887}{}\label{cgutil_8hpp_a2d5e465898a6048af613458eb4b53887}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!Vertex\+\_\+iterator@{Vertex\+\_\+iterator}}
+\index{Vertex\+\_\+iterator@{Vertex\+\_\+iterator}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{Vertex\+\_\+iterator}{Vertex_iterator}}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf Vertex\+\_\+iterator} =  Polygon\+\_\+2\+::\+Vertex\+\_\+const\+\_\+iterator}\hypertarget{cgutil_8hpp_a2f76d090b6d4623f1e9122a390d0e100}{}\label{cgutil_8hpp_a2f76d090b6d4623f1e9122a390d0e100}
+
+
+\subsection{Function Documentation}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!calculate\+Distance@{calculate\+Distance}}
+\index{calculate\+Distance@{calculate\+Distance}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{calculate\+Distance(const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2)}{calculateDistance(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)}}]{\setlength{\rightskip}{0pt plus 5cm}double calculate\+Distance (
+\begin{DoxyParamCaption}
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p1, }
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p2}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\hypertarget{cgutil_8hpp_ab181ca10297ad069ba0a181734a2f4a4}{}\label{cgutil_8hpp_ab181ca10297ad069ba0a181734a2f4a4}
+
+
+Calculates distance between given two points. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p1} & \\
+\hline
+{\em p2} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+double Distance between two points 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!calculate\+Distance@{calculate\+Distance}}
+\index{calculate\+Distance@{calculate\+Distance}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{calculate\+Distance(const Line\+Segment \&edge, const geometry\+\_\+msgs\+::\+Point \&vertex)}{calculateDistance(const LineSegment &edge, const geometry_msgs::Point &vertex)}}]{\setlength{\rightskip}{0pt plus 5cm}double calculate\+Distance (
+\begin{DoxyParamCaption}
+\item[{const {\bf Line\+Segment} \&}]{edge, }
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{vertex}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_a2603bc58792b4f2935d5462161af0cbd}{}\label{cgutil_8hpp_a2603bc58792b4f2935d5462161af0cbd}
+
+
+Calculates distance between given edge and vertex. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em edge} & An edge of given polygon \\
+\hline
+{\em vertex} & A vertex of given polygon \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+double Distance between edge and vertex 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!calculate\+Horizontal\+Angle@{calculate\+Horizontal\+Angle}}
+\index{calculate\+Horizontal\+Angle@{calculate\+Horizontal\+Angle}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{calculate\+Horizontal\+Angle(const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2)}{calculateHorizontalAngle(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)}}]{\setlength{\rightskip}{0pt plus 5cm}double calculate\+Horizontal\+Angle (
+\begin{DoxyParamCaption}
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p1, }
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p2}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_ac682b461698a0048aa10e57b2946b34f}{}\label{cgutil_8hpp_ac682b461698a0048aa10e57b2946b34f}
+
+
+Calculates angle between segment p1p2 and horizontal line. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p1} & A vertex which is the origin of segment p1p2 \\
+\hline
+{\em p2} & The other vertex of segment p1p2 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Vertex angle of p1 in radian \mbox{[}-\/pi, pi\mbox{]} 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!calculate\+Signed\+Area@{calculate\+Signed\+Area}}
+\index{calculate\+Signed\+Area@{calculate\+Signed\+Area}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{calculate\+Signed\+Area(const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2, const geometry\+\_\+msgs\+::\+Point \&p3)}{calculateSignedArea(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2, const geometry_msgs::Point &p3)}}]{\setlength{\rightskip}{0pt plus 5cm}double calculate\+Signed\+Area (
+\begin{DoxyParamCaption}
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p1, }
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p2, }
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p3}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\hypertarget{cgutil_8hpp_a40332df049e2bbeebbe8c423bf33c50f}{}\label{cgutil_8hpp_a40332df049e2bbeebbe8c423bf33c50f}
+
+
+Calculates signed area of given triangle. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p1} & The origin of vector $ \vec{p_1p_2} $ and $ \vec{p_1p_3} $ \\
+\hline
+{\em p2} & The end point of vector $ \vec{p_1p_2} $ \\
+\hline
+{\em p3} & The end point of vector $ \vec{p_1p_3} $ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Signed area of given triangle
+\end{DoxyReturn}
+Signed area of triangle $ S(p1, p2, p3) $ is half of the outer product of vector $ \vec{p_1p_2} $ and $ \vec{p_1p_3} $.~\newline
+ \[ S(p_1, p_2, p_3) = \frac{1}{2} \vec{p_1p_2} \times \vec{p_1p_3}\] ~\newline
+And that can be written as follows,~\newline
+ \begin{eqnarray*} S(p_1, p_2, p_3) & = & \frac{1}{2} \left| \begin{array}{ccc} p_1.x & p_1.y & 1 \\ p_2.x & p_2.y & 1 \\ p_3.x & p_3.y & 1 \end{array} \right| \\ & = & p_1.x(p_2.y - p_3.y) - p_1.y(p_2.x - p_3.x) - (p_2.x\times p_3.y - p_2.y\times p_3.x) \end{eqnarray*} \index{cgutil.\+hpp@{cgutil.\+hpp}!calculate\+Vertex\+Angle@{calculate\+Vertex\+Angle}}
+\index{calculate\+Vertex\+Angle@{calculate\+Vertex\+Angle}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{calculate\+Vertex\+Angle(const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2, const geometry\+\_\+msgs\+::\+Point \&p3)}{calculateVertexAngle(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2, const geometry_msgs::Point &p3)}}]{\setlength{\rightskip}{0pt plus 5cm}double calculate\+Vertex\+Angle (
+\begin{DoxyParamCaption}
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p1, }
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p2, }
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p3}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_a506da6ea8a7fafd477dd670de1d307de}{}\label{cgutil_8hpp_a506da6ea8a7fafd477dd670de1d307de}
+
+
+Calculates angle between segment p1p2 and p1p3. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p1} & A vertex which is the origin of segment p1p2 and p1p3 \\
+\hline
+{\em p2} & The other point of segment p1p2 \\
+\hline
+{\em p3} & The other point of segment p1p3 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Angle between segment p1p2 and p1p3 in radian \mbox{[}0, pi) 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!compute\+Convex\+Hull@{compute\+Convex\+Hull}}
+\index{compute\+Convex\+Hull@{compute\+Convex\+Hull}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{compute\+Convex\+Hull(\+Point\+Vector points)}{computeConvexHull(PointVector points)}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Point\+Vector} compute\+Convex\+Hull (
+\begin{DoxyParamCaption}
+\item[{{\bf Point\+Vector}}]{points}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_a6be4127646660492844b003736100443}{}\label{cgutil_8hpp_a6be4127646660492844b003736100443}
+
+
+Returns convex hull of given points. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em points} & A set of points in the plane \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Convex hull of given points
+\end{DoxyReturn}
+This function is based on graham scan algorithm \index{cgutil.\+hpp@{cgutil.\+hpp}!decompose\+Polygon@{decompose\+Polygon}}
+\index{decompose\+Polygon@{decompose\+Polygon}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{decompose\+Polygon(const Point\+Vector \&polygon)}{decomposePolygon(const PointVector &polygon)}}]{\setlength{\rightskip}{0pt plus 5cm}std\+::vector$<${\bf Point\+Vector}$>$ decompose\+Polygon (
+\begin{DoxyParamCaption}
+\item[{const {\bf Point\+Vector} \&}]{polygon}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_a3b7a6668da8052d768b8700b096b7287}{}\label{cgutil_8hpp_a3b7a6668da8052d768b8700b096b7287}
+
+
+Decompose given polygon. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em polygon} & Polygon to be decomposed \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+std\+::vector$<$\+Point\+Vector$>$ Decomposed polygons  This function uses C\+G\+A\+L\+::optimal\+\_\+convex\+\_\+partition\+\_\+2 in order to perform optimal polygon decomposition. Note that this function has O(n$^\wedge$4) time complexity and O(n$^\wedge$3) space complexity. Use approx\+\_\+convex\+\_\+partition\+\_\+2 instead if the number of vertices are big because its time complexity is O(n). But apptox\+\_\+convex\+\_\+partition\+\_\+2 generates more polygons. For detail, see \href{https://doc.cgal.org/latest/Partition_2/index.html}{\tt https\+://doc.\+cgal.\+org/latest/\+Partition\+\_\+2/index.\+html} 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!generate\+Edge\+Vector@{generate\+Edge\+Vector}}
+\index{generate\+Edge\+Vector@{generate\+Edge\+Vector}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{generate\+Edge\+Vector(const Point\+Vector \&vec, bool is\+Closed)}{generateEdgeVector(const PointVector &vec, bool isClosed)}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Line\+Segment\+Vector} generate\+Edge\+Vector (
+\begin{DoxyParamCaption}
+\item[{const {\bf Point\+Vector} \&}]{vec, }
+\item[{bool}]{is\+Closed}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_acad3dc75730cb58a33626f0b922d1651}{}\label{cgutil_8hpp_acad3dc75730cb58a33626f0b922d1651}
+
+
+Generate Vector of line segment from given Point\+Vector. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec} & \\
+\hline
+{\em is\+Closed} & Set true if the first point and the last are connected \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Line\+Segment\+Vector Vector of line segment a.\+k.\+a. std\+::vector$<$std\+::array$<$geometry\+\_\+msgs\+::\+Point, 2$>$$>$ 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!has\+Intersection@{has\+Intersection}}
+\index{has\+Intersection@{has\+Intersection}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{has\+Intersection(const Line\+Segment \&edge1, const Line\+Segment \&edge2)}{hasIntersection(const LineSegment &edge1, const LineSegment &edge2)}}]{\setlength{\rightskip}{0pt plus 5cm}bool has\+Intersection (
+\begin{DoxyParamCaption}
+\item[{const {\bf Line\+Segment} \&}]{edge1, }
+\item[{const {\bf Line\+Segment} \&}]{edge2}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_ad3cb912330f862ac85f7ab72d121e80a}{}\label{cgutil_8hpp_ad3cb912330f862ac85f7ab72d121e80a}
+
+
+Checks if given edges intersect each other. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em edge1} & An edge \\
+\hline
+{\em edge2} & An edge \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if two edges intersect 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!has\+Intersection@{has\+Intersection}}
+\index{has\+Intersection@{has\+Intersection}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{has\+Intersection(const Line\+Segment\+Vector \&vec1, const Line\+Segment\+Vector \&vec2)}{hasIntersection(const LineSegmentVector &vec1, const LineSegmentVector &vec2)}}]{\setlength{\rightskip}{0pt plus 5cm}bool has\+Intersection (
+\begin{DoxyParamCaption}
+\item[{const {\bf Line\+Segment\+Vector} \&}]{vec1, }
+\item[{const {\bf Line\+Segment\+Vector} \&}]{vec2}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_a75e1826df2b31502ed4961e4ec3b9058}{}\label{cgutil_8hpp_a75e1826df2b31502ed4961e4ec3b9058}
+
+
+Checks if given vectors of edges have at least one intersection. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em vec1} & Vector of line segments \\
+\hline
+{\em vec2} & Vector of line segments \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if given two vectors of edges have at least one intersection 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!is\+Convex@{is\+Convex}}
+\index{is\+Convex@{is\+Convex}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{is\+Convex(\+Point\+Vector points)}{isConvex(PointVector points)}}]{\setlength{\rightskip}{0pt plus 5cm}bool is\+Convex (
+\begin{DoxyParamCaption}
+\item[{{\bf Point\+Vector}}]{points}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\hypertarget{cgutil_8hpp_ab3a4215076312a2435642bff1373ad40}{}\label{cgutil_8hpp_ab3a4215076312a2435642bff1373ad40}
+
+
+Checks if given polygon is convex or not. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em points} & Points consisting of polygon is to be checked \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if given polygon is convex, false if it\textquotesingle{}s not convex 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!localize\+Intersection@{localize\+Intersection}}
+\index{localize\+Intersection@{localize\+Intersection}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{localize\+Intersection(const Line\+Segment \&edge1, const Line\+Segment \&edge2)}{localizeIntersection(const LineSegment &edge1, const LineSegment &edge2)}}]{\setlength{\rightskip}{0pt plus 5cm}geometry\+\_\+msgs\+::\+Point localize\+Intersection (
+\begin{DoxyParamCaption}
+\item[{const {\bf Line\+Segment} \&}]{edge1, }
+\item[{const {\bf Line\+Segment} \&}]{edge2}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_a1cdc17f2ebbabc6d236cfd1c45469e6e}{}\label{cgutil_8hpp_a1cdc17f2ebbabc6d236cfd1c45469e6e}
+
+
+Find the location where given edges intersect each other. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em edge1} & \\
+\hline
+{\em edge2} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+geometry\+\_\+msgs\+::\+Point Point of intersection  See \href{http://mf-atelier.sakura.ne.jp/mf-atelier/modules/tips/program/algorithm/a1.html}{\tt http\+://mf-\/atelier.\+sakura.\+ne.\+jp/mf-\/atelier/modules/tips/program/algorithm/a1.\+html} 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!operator"!=@{operator"!=}}
+\index{operator"!=@{operator"!=}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{operator"!=(const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2)}{operator!=(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)}}]{\setlength{\rightskip}{0pt plus 5cm}bool operator!= (
+\begin{DoxyParamCaption}
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p1, }
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p2}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_a287adf4900c7afd5047c92bb2cd68f32}{}\label{cgutil_8hpp_a287adf4900c7afd5047c92bb2cd68f32}
+
+
+Check equality of two points. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p1} & \\
+\hline
+{\em p2} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!operator==@{operator==}}
+\index{operator==@{operator==}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{operator==(const geometry\+\_\+msgs\+::\+Point \&p1, const geometry\+\_\+msgs\+::\+Point \&p2)}{operator==(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)}}]{\setlength{\rightskip}{0pt plus 5cm}bool operator== (
+\begin{DoxyParamCaption}
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p1, }
+\item[{const geometry\+\_\+msgs\+::\+Point \&}]{p2}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_a518392bbc6246712757593c4ac6e6200}{}\label{cgutil_8hpp_a518392bbc6246712757593c4ac6e6200}
+
+
+Check equality of two points. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p1} & \\
+\hline
+{\em p2} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool  See \href{https://stackoverflow.com/questions/4010240/comparing-doubles}{\tt https\+://stackoverflow.\+com/questions/4010240/comparing-\/doubles} 
+\end{DoxyReturn}
+\index{cgutil.\+hpp@{cgutil.\+hpp}!rotate\+Points@{rotate\+Points}}
+\index{rotate\+Points@{rotate\+Points}!cgutil.\+hpp@{cgutil.\+hpp}}
+\subsubsection[{\texorpdfstring{rotate\+Points(const Point\+Vector \&points, double angle\+\_\+rad)}{rotatePoints(const PointVector &points, double angle_rad)}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Point\+Vector} rotate\+Points (
+\begin{DoxyParamCaption}
+\item[{const {\bf Point\+Vector} \&}]{points, }
+\item[{double}]{angle\+\_\+rad}
+\end{DoxyParamCaption}
+)}\hypertarget{cgutil_8hpp_af7715f8d7b828ee3f6412b2e311bd65a}{}\label{cgutil_8hpp_af7715f8d7b828ee3f6412b2e311bd65a}
+
+
+Rotate points by given angle around the origin. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em points} & Points to be rotated \\
+\hline
+{\em angle\+\_\+rad} & Rotation angle in radian \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Point\+Vector Rotated points 
+\end{DoxyReturn}

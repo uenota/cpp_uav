@@ -1,0 +1,164 @@
+\hypertarget{test__cgutil_8cpp}{}\section{test/test\+\_\+cgutil.cpp File Reference}
+\label{test__cgutil_8cpp}\index{test/test\+\_\+cgutil.\+cpp@{test/test\+\_\+cgutil.\+cpp}}
+
+
+Test program for \hyperlink{cgutil_8hpp}{cgutil.\+hpp}.  
+
+
+{\ttfamily \#include $<$cgutil.\+hpp$>$}\\*
+{\ttfamily \#include $<$gtest/gtest.\+h$>$}\\*
+{\ttfamily \#include $<$array$>$}\\*
+{\ttfamily \#include $<$cmath$>$}\\*
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$geometry\+\_\+msgs/\+Point.\+h$>$}\\*
+Include dependency graph for test\+\_\+cgutil.\+cpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{test__cgutil_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{test__cgutil_8cpp_a3d80ca900d90c35434f51286306329f0}{T\+E\+ST} (C\+G\+Util\+Test, Intersect\+Test1)
+\item 
+\hyperlink{test__cgutil_8cpp_a466bdeb395a53f1cfe4450e7b9014eaf}{T\+E\+ST} (C\+G\+Util\+Test, Intersect\+Test2)
+\item 
+\hyperlink{test__cgutil_8cpp_a9108fede978c27516f50d85b66edccdd}{T\+E\+ST} (C\+G\+Util\+Test, In\+Between\+Test)
+\item 
+\hyperlink{test__cgutil_8cpp_ae84f1cbf8c083cc8b850e1a54f3d506b}{T\+E\+ST} (C\+G\+Util\+Test, Calc\+Distance\+Test)
+\begin{DoxyCompactList}\small\item\em Test for distance() \end{DoxyCompactList}\item 
+\hyperlink{test__cgutil_8cpp_a5743d392382f065cbac9cad16f4e53d3}{T\+E\+ST} (C\+G\+Util\+Test, Calc\+Vertex\+Angle\+Test)
+\begin{DoxyCompactList}\small\item\em Test for vertex\+Angle() \end{DoxyCompactList}\item 
+\hyperlink{test__cgutil_8cpp_a41727e040608b62aecf2e9c24725d539}{T\+E\+ST} (C\+G\+Util\+Test, Calc\+Horizontal\+Angle\+Test)
+\begin{DoxyCompactList}\small\item\em Test for horizontal\+Angle() \end{DoxyCompactList}\item 
+\hyperlink{test__cgutil_8cpp_a5118c2ccdf0885b57f278b8e6d5d077d}{T\+E\+ST} (C\+G\+Util\+Test, Calcsigned\+Area\+Test)
+\begin{DoxyCompactList}\small\item\em Test for signed\+Area() \end{DoxyCompactList}\item 
+\hyperlink{test__cgutil_8cpp_ab5f334a769ed6522dc8523148e5b28af}{T\+E\+ST} (C\+G\+Util\+Test, Graham\+Scan\+Test)
+\begin{DoxyCompactList}\small\item\em Test for graham\+Scan() \end{DoxyCompactList}\item 
+\hyperlink{test__cgutil_8cpp_a409ac13056c7f1294c10fcfbd7df897f}{T\+E\+ST} (C\+G\+Util\+Test, Is\+Convex\+Test1)
+\item 
+\hyperlink{test__cgutil_8cpp_ae2669ba09313fbcf0912a9344f5cd7cc}{T\+E\+ST} (C\+G\+Util\+Test, Is\+Convex\+Test2)
+\item 
+int \hyperlink{test__cgutil_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{main} (int argc, char $\ast$$\ast$argv)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Test program for \hyperlink{cgutil_8hpp}{cgutil.\+hpp}. 
+
+\begin{DoxyAuthor}{Author}
+Takaki Ueno 
+\end{DoxyAuthor}
+
+
+\subsection{Function Documentation}
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!main@{main}}
+\index{main@{main}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{main(int argc, char $\ast$$\ast$argv)}{main(int argc, char **argv)}}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$$\ast$}]{argv}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{}\label{test__cgutil_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, Intersect\+Test1)}{TEST(CGUtilTest, IntersectTest1)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{Intersect\+Test1}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_a3d80ca900d90c35434f51286306329f0}{}\label{test__cgutil_8cpp_a3d80ca900d90c35434f51286306329f0}
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, Intersect\+Test2)}{TEST(CGUtilTest, IntersectTest2)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{Intersect\+Test2}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_a466bdeb395a53f1cfe4450e7b9014eaf}{}\label{test__cgutil_8cpp_a466bdeb395a53f1cfe4450e7b9014eaf}
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, In\+Between\+Test)}{TEST(CGUtilTest, InBetweenTest)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{In\+Between\+Test}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_a9108fede978c27516f50d85b66edccdd}{}\label{test__cgutil_8cpp_a9108fede978c27516f50d85b66edccdd}
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, Calc\+Distance\+Test)}{TEST(CGUtilTest, CalcDistanceTest)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{Calc\+Distance\+Test}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_ae84f1cbf8c083cc8b850e1a54f3d506b}{}\label{test__cgutil_8cpp_ae84f1cbf8c083cc8b850e1a54f3d506b}
+
+
+Test for distance() 
+
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, Calc\+Vertex\+Angle\+Test)}{TEST(CGUtilTest, CalcVertexAngleTest)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{Calc\+Vertex\+Angle\+Test}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_a5743d392382f065cbac9cad16f4e53d3}{}\label{test__cgutil_8cpp_a5743d392382f065cbac9cad16f4e53d3}
+
+
+Test for vertex\+Angle() 
+
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, Calc\+Horizontal\+Angle\+Test)}{TEST(CGUtilTest, CalcHorizontalAngleTest)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{Calc\+Horizontal\+Angle\+Test}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_a41727e040608b62aecf2e9c24725d539}{}\label{test__cgutil_8cpp_a41727e040608b62aecf2e9c24725d539}
+
+
+Test for horizontal\+Angle() 
+
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, Calcsigned\+Area\+Test)}{TEST(CGUtilTest, CalcsignedAreaTest)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{Calcsigned\+Area\+Test}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_a5118c2ccdf0885b57f278b8e6d5d077d}{}\label{test__cgutil_8cpp_a5118c2ccdf0885b57f278b8e6d5d077d}
+
+
+Test for signed\+Area() 
+
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, Graham\+Scan\+Test)}{TEST(CGUtilTest, GrahamScanTest)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{Graham\+Scan\+Test}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_ab5f334a769ed6522dc8523148e5b28af}{}\label{test__cgutil_8cpp_ab5f334a769ed6522dc8523148e5b28af}
+
+
+Test for graham\+Scan() 
+
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, Is\+Convex\+Test1)}{TEST(CGUtilTest, IsConvexTest1)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{Is\+Convex\+Test1}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_a409ac13056c7f1294c10fcfbd7df897f}{}\label{test__cgutil_8cpp_a409ac13056c7f1294c10fcfbd7df897f}
+\index{test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}!T\+E\+ST@{T\+E\+ST}}
+\index{T\+E\+ST@{T\+E\+ST}!test\+\_\+cgutil.\+cpp@{test\+\_\+cgutil.\+cpp}}
+\subsubsection[{\texorpdfstring{T\+E\+S\+T(\+C\+G\+Util\+Test, Is\+Convex\+Test2)}{TEST(CGUtilTest, IsConvexTest2)}}]{\setlength{\rightskip}{0pt plus 5cm}T\+E\+ST (
+\begin{DoxyParamCaption}
+\item[{C\+G\+Util\+Test}]{, }
+\item[{Is\+Convex\+Test2}]{}
+\end{DoxyParamCaption}
+)}\hypertarget{test__cgutil_8cpp_ae2669ba09313fbcf0912a9344f5cd7cc}{}\label{test__cgutil_8cpp_ae2669ba09313fbcf0912a9344f5cd7cc}
