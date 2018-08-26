@@ -20,6 +20,8 @@ doxygen Doxyfile
 at the root of `cpp_uav` repository.
 And the documents will be build in `doc` directory.
 
+The document is also available on https://uenota.github.io/cpp_uav/.
+
 ## Reference
 [1] Marina Torres, David A. Pelta, José L. Verdegay, Juan C. Torres,  
     Coverage path planning with unmanned aerial vehicles for 3D terrain reconstruction,  
