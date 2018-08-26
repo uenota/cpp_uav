@@ -18,7 +18,7 @@ You can build documents by running
 doxygen Doxyfile
 ```
 at the root of `cpp_uav` repository.
-And the documents will be build in `doc` directory.
+And the documents will be build in `docs` directory.
 
 The document is also available on https://uenota.github.io/cpp_uav/.
 
