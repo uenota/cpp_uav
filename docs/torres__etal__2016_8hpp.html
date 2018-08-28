@@ -87,7 +87,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">torres_etal_2016.hpp File Reference</div>  </div>
@@ -97,23 +96,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>Utility for computational geometry.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;<a class="el" href="cgutil_8hpp_source.html">cgutil.hpp</a>&gt;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
-<code>#include &lt;cmath&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;unordered_map&gt;</code><br />
-<code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;boost/range/adaptor/indexed.hpp&gt;</code><br />
 <code>#include &lt;boost/range/adaptor/reversed.hpp&gt;</code><br />
-<code>#include &lt;ros/ros.h&gt;</code><br />
 <code>#include &lt;std_msgs/Float64.h&gt;</code><br />
-<code>#include &lt;geometry_msgs/Point.h&gt;</code><br />
+<code>#include &lt;geometry_msgs/Point32.h&gt;</code><br />
+<code>#include &lt;geometry_msgs/Polygon.h&gt;</code><br />
+<code>#include &quot;cpp_uav/Torres16.h&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for torres_etal_2016.hpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="torres__etal__2016_8hpp__incl.png" border="0" usemap="#include_2torres__etal__2016_8hpp" alt=""/></div>
 <map name="include_2torres__etal__2016_8hpp" id="include_2torres__etal__2016_8hpp">
-<area shape="rect" id="node2" href="cgutil_8hpp.html" title="cgutil.hpp" alt="" coords="849,102,927,129"/>
+<area shape="rect" id="node2" href="cgutil_8hpp.html" title="cgutil.hpp" alt="" coords="734,102,813,129"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -133,15 +130,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_direction.html">Direction</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for line sweep direction.  <a href="struct_direction.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a23afdbfcb523553a73b329d7a91a7489"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="torres__etal__2016_8hpp.html#a23afdbfcb523553a73b329d7a91a7489">PointVector</a> = std::vector&lt; geometry_msgs::Point &gt;</td></tr>
-<tr class="separator:a23afdbfcb523553a73b329d7a91a7489"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7634fe1379961a22350dbd7047b2e8c1"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="torres__etal__2016_8hpp.html#a7634fe1379961a22350dbd7047b2e8c1">LineSegment</a> = std::array&lt; geometry_msgs::Point, 2 &gt;</td></tr>
-<tr class="separator:a7634fe1379961a22350dbd7047b2e8c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b95586556e66ecbe3e4c552548d1027"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="torres__etal__2016_8hpp.html#a1b95586556e66ecbe3e4c552548d1027">LineSegmentVector</a> = std::vector&lt; <a class="el" href="cgutil_8hpp.html#a7634fe1379961a22350dbd7047b2e8c1">LineSegment</a> &gt;</td></tr>
-<tr class="separator:a1b95586556e66ecbe3e4c552548d1027"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -189,44 +177,9 @@ Functions</h2></td></tr>
 <div class="textblock"><p>Utility for computational geometry. </p>
 <p>Header file for <a class="el" href="torres__etal__2016_8cpp.html" title="Coverage path planner based on M. Torres et al, 2016. ">torres_etal_2016.cpp</a>.</p>
 <dl class="section author"><dt>Author</dt><dd>Takaki Ueno </dd></dl>
-</div><h2 class="groupheader">Typedef Documentation</h2>
-<a class="anchor" id="a7634fe1379961a22350dbd7047b2e8c1"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="cgutil_8hpp.html#a7634fe1379961a22350dbd7047b2e8c1">LineSegment</a> =  std::array&lt;geometry_msgs::Point, 2&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
-</div>
-</div>
-<a class="anchor" id="a1b95586556e66ecbe3e4c552548d1027"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="cgutil_8hpp.html#a1b95586556e66ecbe3e4c552548d1027">LineSegmentVector</a> =  std::vector&lt;<a class="el" href="cgutil_8hpp.html#a7634fe1379961a22350dbd7047b2e8c1">LineSegment</a>&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a23afdbfcb523553a73b329d7a91a7489"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="cgutil_8hpp.html#a23afdbfcb523553a73b329d7a91a7489">PointVector</a> =  std::vector&lt;geometry_msgs::Point&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
+<p>Definition in file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
+</div><h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="a03113b9a489d4c5846eadfa4576ce7e3"></a>
 <div class="memitem">
 <div class="memproto">
@@ -249,6 +202,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>double Length of path </dd></dl>
+
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00380">380</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
 
 </div>
 </div>
@@ -274,6 +229,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>PointVector Counter clock wise version of given path </dd></dl>
+
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00400">400</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
 
 </div>
 </div>
@@ -332,6 +289,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>bool True if path does not intersect with polygon </dd></dl>
 
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00260">260</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a10cafc27ed2f11edf912c94e7f30107e"></a>
@@ -381,6 +340,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>bool True if path does not intersect with polygon </dd></dl>
+
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00368">368</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
 
 </div>
 </div>
@@ -432,6 +393,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>PointVector Computed Path  See section 6.2 of torres et al. 2016 for the detail </dd></dl>
 
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00634">634</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="afa4eb774c5f34b95abf1e450602f9ada"></a>
@@ -456,6 +419,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>PointVector Path with points of reversed order of given path </dd></dl>
+
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00425">425</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
 
 </div>
 </div>
@@ -507,6 +472,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>bool True if second optimal path exists </dd></dl>
 
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00547">547</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="af347c57b74f9db063c89d01151933e29"></a>
@@ -557,6 +524,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>PointVector Optimal path that minimizes the length of path  The naming of the following variable follows torres et al. 2016 </dd></dl>
 
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00447">447</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a012334ffd93ffb76acb1a8d31984721e"></a>
@@ -600,6 +569,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>PointVector Optimal path that minimizes the length of path  The naming of the following variable follows torres et al. 2016 </dd></dl>
 
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00533">533</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ac84e8199494b1bbdec441cf3cf5db0db"></a>
@@ -624,6 +595,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>direction Struct containing edge and vertex </dd></dl>
+
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00065">65</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
 
 </div>
 </div>
@@ -661,6 +634,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if given two polygons are adjacent </dd></dl>
 
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00609">609</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="adc3d848b997fd331da7d3d405b6e3c36"></a>
@@ -693,6 +668,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>bool True if path is clockwise  the definition of "clockwise" is based on Fig.8 in Torres et al. 2016 </dd></dl>
+
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00055">55</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
 
 </div>
 </div>
@@ -729,6 +706,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>PointVector  Reshape given path so that generated path becomes the sequence of "C" shapes and add padding </dd></dl>
+
+<p>Definition at line <a class="el" href="torres__etal__2016_8hpp_source.html#l00134">134</a> of file <a class="el" href="torres__etal__2016_8hpp_source.html">torres_etal_2016.hpp</a>.</p>
 
 </div>
 </div>
