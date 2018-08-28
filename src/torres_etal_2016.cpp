@@ -12,21 +12,6 @@
 // header
 #include <torres_etal_2016.hpp>
 
-// cpp standard libraries
-#include <array>
-#include <vector>
-
-// roscpp
-#include <ros/ros.h>
-
-// geometry_msgs
-#include <geometry_msgs/Point.h>
-#include <geometry_msgs/Point32.h>
-#include <geometry_msgs/Polygon.h>
-
-// Service
-#include "cpp_uav/Torres16.h"
-
 /**
  * @brief Generate vector of polygon from PointVector
  * @param polygon

@@ -16,29 +16,23 @@
 #include <cgutil.hpp>
 
 // cpp standard libraries
-#include <algorithm>
 #include <array>
-#include <cmath>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 // Boost
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
-// roscpp
-#include <ros/ros.h>
-
 // std_msgs
 #include <std_msgs/Float64.h>
 
 // geometry_msgs
-#include <geometry_msgs/Point.h>
+#include <geometry_msgs/Point32.h>
+#include <geometry_msgs/Polygon.h>
 
-using PointVector = std::vector<geometry_msgs::Point>;
-using LineSegment = std::array<geometry_msgs::Point, 2>;
-using LineSegmentVector = std::vector<LineSegment>;
+// Service
+#include "cpp_uav/Torres16.h"
 
 /**
  * @struct Direction
