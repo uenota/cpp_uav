@@ -50,7 +50,7 @@ struct Direction
  * @brief Checks if given path is clockwise (the first turn made to the left) or not
  * @param path
  * @return bool True if path is clockwise
- * @detail the definition of "clockwise" is based on Fig.8 in Torres et al. 2016
+ * @details the definition of "clockwise" is based on Fig.8 in Torres et al. 2016
  */
 inline bool isClockWise(const PointVector& path)
 {
@@ -129,7 +129,7 @@ Direction identifyOptimalSweepDir(const PointVector& polygon)
  * @param path The sweep lines of path should be horizontal about x axis
  * @param padding
  * @return PointVector
- * @detail Reshape given path so that generated path becomes the sequence of "C" shapes and add padding
+ * @details Reshape given path so that generated path becomes the sequence of "C" shapes and add padding
  */
 PointVector reshapePath(const PointVector& path, double padding)
 {
@@ -442,7 +442,7 @@ PointVector computeOppositePath(const PointVector& path)
  * @param start Start point
  * @param end End point
  * @return PointVector Optimal path that minimizes the length of path
- * @detail The naming of the following variable follows torres et al. 2016
+ * @details The naming of the following variable follows torres et al. 2016
  */
 PointVector identifyOptimalAlternative(const PointVector& polygon, const PointVector& path,
                                        const geometry_msgs::Point& start, const geometry_msgs::Point& end)
@@ -528,7 +528,7 @@ PointVector identifyOptimalAlternative(const PointVector& polygon, const PointVe
  * @param path
  * @param start Start point
  * @return PointVector Optimal path that minimizes the length of path
- * @detail The naming of the following variable follows torres et al. 2016
+ * @details The naming of the following variable follows torres et al. 2016
  */
 PointVector identifyOptimalAlternative(const PointVector& polygon, const PointVector& path,
                                        const geometry_msgs::Point& start)
@@ -629,7 +629,7 @@ bool isAdjacent(const PointVector& polygon1, const PointVector& polygon2)
  * @param horizontalOverwrap
  * @param adjacencyCriteria Ignore paths which have less adjacent polygons than this number
  * @return PointVector Computed Path
- * @detail See section 6.2 of torres et al. 2016 for the detail
+ * @details See section 6.2 of torres et al. 2016 for the detail
  */
 PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons, double footprintWidth,
                                            double horizontalOverwrap, int adjacencyCriteria = 1)

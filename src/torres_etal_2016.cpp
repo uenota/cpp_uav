@@ -37,7 +37,7 @@ std::vector<geometry_msgs::Polygon> generatePolygonVector(const PointVector& pol
 
 /**
  * @brief Generate vector of polygon from std::vector<PointVector>
- * @param polygon
+ * @param subPolygons
  * @return std::vector<geometry_msgs::Polygon> Vector of subpolygons assumed to be passed to ROS msg
  */
 std::vector<geometry_msgs::Polygon> generatePolygonVector(const std::vector<PointVector>& subPolygons)
@@ -64,8 +64,8 @@ std::vector<geometry_msgs::Polygon> generatePolygonVector(const std::vector<Poin
 
 /**
  * @brief Plans coverage path
- * @param req[in] Contains values neccesary to plan a path
- * @param res[out] Contains resulting path
+ * @param req Contains values neccesary to plan a path
+ * @param res Contains resulting path
  * @return bool
  * @details For details of this service, cf. srv/Torres16.srv
  */

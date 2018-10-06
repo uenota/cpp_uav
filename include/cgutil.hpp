@@ -53,7 +53,7 @@ using Polygon_list = std::list<Polygon_2>;
  * @param p3 The end point of vector \f$ \vec{p_1p_3} \f$
  * @return Signed area of given triangle
  *
- * @detail
+ * @details
  * Signed area of triangle \f$ S(p1, p2, p3) \f$ is
  * half of the outer product of vector \f$ \vec{p_1p_2} \f$ and \f$ \vec{p_1p_3}
  * \f$.\n
@@ -82,7 +82,7 @@ inline double calculateSignedArea(const geometry_msgs::Point& p1, const geometry
  * @param p1
  * @param p2
  * @return bool
- * @detail See https://stackoverflow.com/questions/4010240/comparing-doubles
+ * @details See https://stackoverflow.com/questions/4010240/comparing-doubles
  */
 bool operator==(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
 {
@@ -393,7 +393,7 @@ bool hasIntersection(const LineSegmentVector& vec1, const LineSegmentVector& vec
  * @param edge1
  * @param edge2
  * @return geometry_msgs::Point Point of intersection
- * @detail See http://mf-atelier.sakura.ne.jp/mf-atelier/modules/tips/program/algorithm/a1.html
+ * @details See http://mf-atelier.sakura.ne.jp/mf-atelier/modules/tips/program/algorithm/a1.html
  */
 geometry_msgs::Point localizeIntersection(const LineSegment& edge1, const LineSegment& edge2)
 {
@@ -458,7 +458,7 @@ PointVector rotatePoints(const PointVector& points, double angle_rad)
  * @brief Decompose given polygon
  * @param polygon Polygon to be decomposed
  * @return std::vector<PointVector> Decomposed polygons
- * @detail
+ * @details
  * This function uses CGAL::optimal_convex_partition_2 in order to perform optimal polygon decomposition.
  * Note that this function has O(n^4) time complexity and O(n^3) space complexity.
  * Use approx_convex_partition_2 instead if the number of vertices are big because its time complexity is O(n).
