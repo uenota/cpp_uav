@@ -57,12 +57,3 @@ catkin_add_gtest(test_cgutil test/test_cgutil.cpp)
 
 target_link_libraries(test_torres_etal_2016 ${catkin_LIBRARIES})
 target_link_libraries(test_cgutil ${catkin_LIBRARIES})
-
-# Doxygen document generation
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
-add_custom_target(gen_doc ALL
-        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        VERBATIM )
-endif()
