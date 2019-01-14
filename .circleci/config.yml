@@ -1,0 +1,43 @@
+version: 2
+jobs:
+  build:
+    branches:
+      only:
+        - master
+    docker:
+      - image: ubuntu:16.04
+    steps:
+      - checkout
+      - run:
+          name: apt upgrade
+          command: apt update && apt -y upgrade
+      - run:
+          name: install doxygen and git
+          command: apt install doxygen git -y
+      - run:
+          name: build pdf
+          command: doxygen Doxyfile
+          working_directory: ~/project
+      - run:
+          name: remove all
+          command: ls | grep -v -E "docs" | xargs rm -rf
+          working_directory: ~/project
+      - run:
+          name: move docs and remove dir
+          command: mv docs/* . && rmdir docs
+          working_directory: ~/project
+      - run:
+          name: skip fingerprint check
+          command: |
+            mkdir ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
+          name: deploy to gh-pages branch
+          command: |
+            git config --global user.name "CircleCI"
+            git config --global user.email "circleci@ghpages.com"
+            git add .
+            git commit -m "Build doc"
+            git checkout -B gh-pages
+            git push -u origin gh-pages --force
+          working_directory: ~/project
