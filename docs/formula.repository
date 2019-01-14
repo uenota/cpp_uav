@@ -1,5 +1,0 @@
-\form#0:$ \vec{p_1p_2} $
-\form#1:$ \vec{p_1p_3} $
-\form#2:$ S(p1, p2, p3) $
-\form#3:\[ S(p_1, p_2, p_3) = \frac{1}{2} \vec{p_1p_2} \times \vec{p_1p_3}\]
-\form#4:\begin{eqnarray*} S(p_1, p_2, p_3) & = & \frac{1}{2} \left| \begin{array}{ccc} p_1.x & p_1.y & 1 \\ p_2.x & p_2.y & 1 \\ p_3.x & p_3.y & 1 \end{array} \right| \\ & = & p_1.x(p_2.y - p_3.y) - p_1.y(p_2.x - p_3.x) - (p_2.x\times p_3.y - p_2.y\times p_3.x) \end{eqnarray*}
