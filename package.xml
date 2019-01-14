@@ -7,6 +7,8 @@
   <maintainer email="t_ueno@eis.hokudai.ac.jp">Takaki Ueno</maintainer>
 
   <license>MIT</license>
+  <url type="website">https://github.com/uenota/cpp_uav</url>
+  <url type="bugtracker">https://github.com/uenota/cpp_uav/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
