@@ -303,8 +303,6 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
 
   int stepNum = std::ceil(calculateDistance(rotatedDir.baseEdge, rotatedDir.opposedVertex) / stepWidth);
 
-  ROS_INFO("Num of steps: %d", stepNum);
-
   LineSegmentVector sweepLines;
 
   // generate list of sweep lines which is horizontal against the base edge
@@ -355,6 +353,7 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
 
   path = rotatePoints(rotatedPath, rotationAngle);
 
+  ROS_INFO("Num of vertices: %ld", path.size());
   for(auto p : path)
   {
     ROS_INFO("  Vertex: %f, %f", p.x, p.y);
@@ -651,6 +650,10 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
   std::iota(permutation.begin(), permutation.end(), 0);
 
   double minPathLength = -1;
+  bool hasIntersection = false;
+
+  int numPermutation = 0;
+  int numIntersectSets = 0;
 
   do
   {
@@ -679,6 +682,7 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
     double pathLength = 0;
     std::vector<PointVector> candidatePath;
 
+    // computes coverage path for each polygons and connect them
     for (auto itr = permutation.begin(); itr != permutation.end(); ++itr)
     {
       PointVector partPath, optimalAlternative;
@@ -688,8 +692,8 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
         try
         {
           // start point and end point of first subpolygon are ...
-          // start point: the last point of coverage of the last subpolygon
-          // end point  : the first point of coverage of the second subpolygon
+          //    start point: the last point of coverage of the last subpolygon
+          //    end point  : the first point of coverage of the second subpolygon
           geometry_msgs::Point start = subPolygons.at(*(permutation.end() - 1)).back();
           geometry_msgs::Point end;
           PointVector polygon = subPolygons.at(*itr);
@@ -706,6 +710,7 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
           // break if computed path has intersections
           if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath) == false)
           {
+            hasIntersection = true;
             break;
           }
 
@@ -727,8 +732,8 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
         try
         {
           // start point and end point of the last subpolygon are ...
-          // start point: the last point of coverage of the previous subpolygon
-          // end point  : the first point of coverage of the first subpolygon
+          //    start point: the last point of coverage of the previous subpolygon
+          //    end point  : the first point of coverage of the first subpolygon
           geometry_msgs::Point start = subPolygons.at(*(itr - 1)).back();
           geometry_msgs::Point end = subPolygons.at(*permutation.begin()).front();
           PointVector polygon = subPolygons.at(*itr);
@@ -736,6 +741,7 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
           // break if computed path has intersections
           if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath) == false)
           {
+            hasIntersection = true;
             break;
           }
 
@@ -757,8 +763,8 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
         try
         {
           // start point and end point of middle subpolygons are ...
-          // start point: the last point of coverage of the previous subpolygon
-          // end point  : the first point of coverage of the next subpolygon
+          //    start point: the last point of coverage of the previous subpolygon
+          //    end point  : the first point of coverage of the next subpolygon
           geometry_msgs::Point start = subPolygons.at(*(itr - 1)).back();
           geometry_msgs::Point end = subPolygons.at(*(itr + 1)).front();
           PointVector polygon = subPolygons.at(*itr);
@@ -766,6 +772,7 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
           // break if computed path has intersections
           if (computeConvexCoverage(polygon, footprintWidth, horizontalOverwrap, partPath) == false)
           {
+            hasIntersection = true;
             break;
           }
 
@@ -783,6 +790,16 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
       }
     }
 
+    numPermutation++;
+
+    if(hasIntersection)
+    {
+      numIntersectSets++;
+      hasIntersection = false;
+      break;
+    }
+
+    // update coverage path and minimum path length
     if (minPathLength < 0 or pathLength < minPathLength)
     {
       minPathLength = pathLength;
@@ -800,6 +817,15 @@ PointVector computeMultiplePolygonCoverage(std::vector<PointVector> subPolygons,
     }
 
   } while (next_permutation(permutation.begin(), permutation.end()));
+
+  if(minPathLength<0)
+  {
+    ROS_ERROR("Unable to generate path.");
+  }
+
+  ROS_INFO("Num of permutations: %d", numPermutation);
+  ROS_INFO("Num of intersect sets: %d", numIntersectSets);
+  ROS_INFO("Num of vertices of path: %ld", path.size());
 
   return path;
 }
