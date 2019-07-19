@@ -1,9 +1,0 @@
-geometry_msgs/Point[] polygon
-geometry_msgs/Point start
-std_msgs/Float64 footprint_length
-std_msgs/Float64 footprint_width
-std_msgs/Float64 horizontal_overwrap
-std_msgs/Float64 vertical_overwrap
----
-geometry_msgs/Point[] path
-geometry_msgs/Polygon[] subpolygons

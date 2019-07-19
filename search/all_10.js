@@ -1,0 +1,10 @@
+var searchData=
+[
+  ['test',['TEST',['../test__cgutil_8cpp.html#a3d80ca900d90c35434f51286306329f0',1,'TEST(CGUtilTest, IntersectTest1):&#160;test_cgutil.cpp'],['../test__cgutil_8cpp.html#a466bdeb395a53f1cfe4450e7b9014eaf',1,'TEST(CGUtilTest, IntersectTest2):&#160;test_cgutil.cpp'],['../test__cgutil_8cpp.html#a9108fede978c27516f50d85b66edccdd',1,'TEST(CGUtilTest, InBetweenTest):&#160;test_cgutil.cpp'],['../test__cgutil_8cpp.html#ae84f1cbf8c083cc8b850e1a54f3d506b',1,'TEST(CGUtilTest, CalcDistanceTest):&#160;test_cgutil.cpp'],['../test__cgutil_8cpp.html#a5743d392382f065cbac9cad16f4e53d3',1,'TEST(CGUtilTest, CalcVertexAngleTest):&#160;test_cgutil.cpp'],['../test__cgutil_8cpp.html#a41727e040608b62aecf2e9c24725d539',1,'TEST(CGUtilTest, CalcHorizontalAngleTest):&#160;test_cgutil.cpp'],['../test__cgutil_8cpp.html#a5118c2ccdf0885b57f278b8e6d5d077d',1,'TEST(CGUtilTest, CalcsignedAreaTest):&#160;test_cgutil.cpp'],['../test__cgutil_8cpp.html#ab5f334a769ed6522dc8523148e5b28af',1,'TEST(CGUtilTest, GrahamScanTest):&#160;test_cgutil.cpp'],['../test__cgutil_8cpp.html#a409ac13056c7f1294c10fcfbd7df897f',1,'TEST(CGUtilTest, IsConvexTest1):&#160;test_cgutil.cpp'],['../test__cgutil_8cpp.html#ae2669ba09313fbcf0912a9344f5cd7cc',1,'TEST(CGUtilTest, IsConvexTest2):&#160;test_cgutil.cpp'],['../test__torres__etal__2016_8cpp.html#a783e28ba207f6758ae2005320103c4e2',1,'TEST(Torres16Test, CalcSweepDirectionTest):&#160;test_torres_etal_2016.cpp']]],
+  ['test_5fcgutil_2ecpp',['test_cgutil.cpp',['../test__cgutil_8cpp.html',1,'']]],
+  ['test_5ftorres_5fetal_5f2016_2ecpp',['test_torres_etal_2016.cpp',['../test__torres__etal__2016_8cpp.html',1,'']]],
+  ['text_5fboxes',['text_boxes',['../classspecify__rect_1_1_polygon_builder.html#a9fd3c4817fb95e2bb1015749a82d4627',1,'specify_rect::PolygonBuilder']]],
+  ['torres_5fetal_5f2016_2ecpp',['torres_etal_2016.cpp',['../torres__etal__2016_8cpp.html',1,'']]],
+  ['torres_5fetal_5f2016_2ehpp',['torres_etal_2016.hpp',['../torres__etal__2016_8hpp.html',1,'']]],
+  ['traits',['Traits',['../cgutil_8hpp.html#a2d5e465898a6048af613458eb4b53887',1,'cgutil.hpp']]]
+];

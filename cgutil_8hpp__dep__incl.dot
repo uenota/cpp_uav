@@ -1,0 +1,14 @@
+digraph "include/cgutil.hpp"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="include/cgutil.hpp",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="include/torres_etal\l_2016.hpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$torres__etal__2016_8hpp.html",tooltip="Utility for computational geometry. "];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="src/torres_etal_2016.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$torres__etal__2016_8cpp.html",tooltip="Coverage path planner based on M. Torres et al, 2016. "];
+  Node2 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="test/test_torres_etal\l_2016.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$test__torres__etal__2016_8cpp.html",tooltip="Test program for torres_etal_2016.hpp. "];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="test/test_cgutil.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$test__cgutil_8cpp.html",tooltip="Test program for cgutil.hpp. "];
+}
