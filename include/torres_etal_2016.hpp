@@ -273,6 +273,10 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
   double rotationAngle = calculateHorizontalAngle(sweepDirection.baseEdge.front(), sweepDirection.baseEdge.back());
   PointVector rotatedPolygon = rotatePoints(polygon, -rotationAngle);
 
+  ROS_INFO("Base Edge: (%f, %f), (%f, %f)", sweepDirection.baseEdge.front().x, sweepDirection.baseEdge.front().y,
+                                            sweepDirection.baseEdge.back().x,  sweepDirection.baseEdge.back().y);
+  ROS_INFO("Rotation Angle: %f deg", 180*rotationAngle / M_PI);
+
   // find x coordinate of most left and most right point
   double minX(0), maxX(0);
   for (const auto& vertex : rotatedPolygon)
@@ -298,6 +302,8 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
   rotatedDir.baseEdge.back() = dir.at(2);
 
   int stepNum = std::ceil(calculateDistance(rotatedDir.baseEdge, rotatedDir.opposedVertex) / stepWidth);
+
+  ROS_INFO("Num of steps: %d", stepNum);
 
   LineSegmentVector sweepLines;
 
@@ -348,6 +354,11 @@ bool computeConvexCoverage(const PointVector& polygon, double footprintWidth, do
   PointVector rotatedPath = reshapePath(intersections, padding);
 
   path = rotatePoints(rotatedPath, rotationAngle);
+
+  for(auto p : path)
+  {
+    ROS_INFO("  Vertex: %f, %f", p.x, p.y);
+  }
 
   if (hasIntersection(generateEdgeVector(polygon, true), generateEdgeVector(path, false)) == true)
   {
