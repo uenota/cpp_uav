@@ -130,7 +130,7 @@ class PolygonBuilder(object):
         #  - vertical_overwrap [%]: Vertical overwrap of footprint
         #  cf. torres et, al. 2016
         self.coverage_params = {"footprint_width":
-                                footprint_width,
+                                    footprint_width,
                                 "footprint_length":
                                     Float64(footprint_width.data *
                                             aspect_ratio),
@@ -495,7 +495,7 @@ class PolygonBuilder(object):
             self.coverage_params["horizontal_overwrap"].data = float(event)
         else:
             self.text_boxes["horizontal_overwrap_box"].\
-                set_val(str(self.coverage_params["horizontal_overwrap"]))
+                set_val(str(self.coverage_params["horizontal_overwrap"].data))
 
     def vertical_overwrap_update(self, event):
         """!
@@ -507,7 +507,7 @@ class PolygonBuilder(object):
             self.coverage_params["vertical_overwrap"].data = float(event)
         else:
             self.text_boxes["vertical_overwrap_box"].\
-                set_val(str(self.coverage_params["vertical_overwrap"]))
+                set_val(str(self.coverage_params["vertical_overwrap"].data))
 
 
 def init_node():
