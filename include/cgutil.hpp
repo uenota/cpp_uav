@@ -485,8 +485,6 @@ std::vector<PointVector> decomposePolygon(const PointVector& polygon)
   CGAL::optimal_convex_partition_2(cgalPolygon.vertices_begin(), cgalPolygon.vertices_end(),
                                    std::back_inserter(partialCGALPolygons), partitionTraits);
 
-  ROS_INFO("Num of Decomposed Polygons: %ld", partialCGALPolygons.size());
-
   // generate std::vector<PointVector> from polygon of CGAL
   for (const auto& partialCGALPolygon : partialCGALPolygons)
   {
