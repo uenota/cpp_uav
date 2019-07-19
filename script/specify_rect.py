@@ -186,11 +186,11 @@ class PolygonBuilder(object):
                                        initial=str(self.shooting_cond["height"])),
                            "horizontal_overwrap_box":
                                TextBox(plt.axes([0.25, 0.1, 0.1, 0.05]),
-                                       "Horizontal Overwrap [%]",
+                                       "Horizontal Overwrap [0.0 - 1.0]",
                                        initial=str(self.coverage_params["horizontal_overwrap"].data)),
                            "vertical_overwrap_box":
                                TextBox(plt.axes([0.6, 0.1, 0.1, 0.05]),
-                                       "Vertical Overwrap [%]",
+                                       "Vertical Overwrap [0.0 - 1.0]",
                                        initial=str(self.coverage_params["vertical_overwrap"].data))}
 
         # Register callback functions for textboxes
