@@ -71,6 +71,10 @@ class PolygonBuilder(object):
         #  True if polygon is illustrated on window
         self.is_polygon_drawn = False
 
+        # @var is_path_drawn
+        #  True if path is illustrated on window
+        self.is_path_drawn = False
+
         # @var server_node
         #  Instance of server
         self.server_node = None
@@ -316,6 +320,9 @@ class PolygonBuilder(object):
             rospy.logwarn("Choose start point.")
             return
 
+        if self.is_path_drawn:
+            return
+
         # assign server node if server node is None
         if not self.server_node:
             rospy.loginfo("Waiting for Server Node.")
@@ -379,8 +386,11 @@ class PolygonBuilder(object):
                 patch = Polygon(xy=arr, alpha=0.5, edgecolor="navy")
                 self.axis.add_patch(patch)
                 self.patches.append(patch)
+
             self.lines["path"].set_data(waypoint_xs, waypoint_ys)
             self.lines["path"].figure.canvas.draw()
+
+            self.is_path_drawn = True
         except rospy.ServiceException as ex:
             rospy.logerr(str(ex))
             return
@@ -396,6 +406,7 @@ class PolygonBuilder(object):
         self.points["vertices_y"] = []
         # Set flag as False
         self.is_polygon_drawn = False
+        self.is_path_drawn = False
         # Clear start point
         self.points["start"] = None
 
@@ -435,11 +446,11 @@ class PolygonBuilder(object):
         @param event Content of TextBox
         """
         # Update parameter if input is digit
-        if event.isdigit():
+        try:
             self.shooting_cond["image_resolution_h"] = int(event)
             self.update_params()
             self.update_param_texts()
-        else:
+        except TypeError:
             self.text_boxes["image_resolution_h_box"].\
                 set_val(str(self.shooting_cond["image_resolution_h"]))
 
@@ -449,11 +460,11 @@ class PolygonBuilder(object):
         @param event Content of TextBox
         """
         # Update parameter if input is digit
-        if event.isdigit():
+        try:
             self.shooting_cond["image_resolution_w"] = int(event)
             self.update_params()
             self.update_param_texts()
-        else:
+        except TypeError:
             self.text_boxes["image_resolution_w_box"].\
                 set_val(str(self.shooting_cond["image_resolution_w"]))
 
@@ -463,11 +474,11 @@ class PolygonBuilder(object):
         @param event Content of TextBox
         """
         # Update parameter if input is digit
-        if event.isdigit():
+        try:
             self.shooting_cond["angle_of_view"] = float(event)
             self.update_params()
             self.update_param_texts()
-        else:
+        except TypeError:
             self.text_boxes["angle_of_view_box"]\
                 .set_val(str(self.shooting_cond["angle_of_view"]))
 
@@ -477,11 +488,11 @@ class PolygonBuilder(object):
         @param event Content of TextBox
         """
         # Update parameter if input is digit
-        if event.isdigit():
+        try:
             self.shooting_cond["height"] = float(event)
             self.update_params()
             self.update_param_texts()
-        else:
+        except TypeError:
             self.text_boxes["height_box"].\
                 set_val(str(self.shooting_cond["height"]))
 
@@ -491,9 +502,13 @@ class PolygonBuilder(object):
         @param event Content of TextBox
         """
         # Update parameter if input is digit and valid value
-        if event.isdigit() and 0 < float(event) < 1.0:
-            self.coverage_params["horizontal_overwrap"].data = float(event)
-        else:
+        try:
+            if 0 < float(event) < 1.0:
+                self.coverage_params["horizontal_overwrap"].data = float(event)
+            else:
+                self.text_boxes["horizontal_overwrap_box"].\
+                    set_val(str(self.coverage_params["horizontal_overwrap"].data))
+        except TypeError:
             self.text_boxes["horizontal_overwrap_box"].\
                 set_val(str(self.coverage_params["horizontal_overwrap"].data))
 
@@ -503,9 +518,13 @@ class PolygonBuilder(object):
         @param event Content of TextBox
         """
         # Update parameter if input is digit and valid value
-        if event.isdigit() and 0 < float(event) < 1.0:
-            self.coverage_params["vertical_overwrap"].data = float(event)
-        else:
+        try:
+            if 0 < float(event) < 1.0:
+                self.coverage_params["vertical_overwrap"].data = float(event)
+            else:
+                self.text_boxes["vertical_overwrap_box"].\
+                    set_val(str(self.coverage_params["vertical_overwrap"].data))    
+        except TypeError:
             self.text_boxes["vertical_overwrap_box"].\
                 set_val(str(self.coverage_params["vertical_overwrap"].data))
 
